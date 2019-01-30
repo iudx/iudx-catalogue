@@ -43,99 +43,132 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
 
 		case "/cat/items": 
 		{
-			if (event.method().toString().equalsIgnoreCase("POST")) 
-			{
-			request.bodyHandler(body -> 
-			{
-				request_body = body.toJsonObject();
-			});
-			
-			DeliveryOptions action = new DeliveryOptions();
-			action.addHeader("action", "validate-item");
-			
-			vertx.eventBus().send("validator", request_body, action, validator_reply -> {
-			if (validator_reply.succeeded()) 
-			{
-				vertx.eventBus().send("database", "write-item", database_reply -> {
-					
-				if (database_reply.succeeded()) 
-					{
-						resp.setStatusCode(200).end();
-					} else if (database_reply.failed()) 
-					{
-						logger.info("Database Failed");
-						resp.setStatusCode(500).end();
-					} else
-					{
-						resp.setStatusCode(500).end();
-					}
-					});
-					} else if (validator_reply.failed()) 
-					{
-						logger.info("Validator Failed");
-						resp.setStatusCode(500).end();
-					} else 
-					{
-						logger.info("No reply");
-						resp.setStatusCode(500).end();
-					}
-				});
-			  } else 
-			  {
-				logger.info("End-Point Not Found");
-				resp.setStatusCode(404).end();  
-			  }
+			create_items(request);
 			break;
-			}
+		}
 		case "/cat/schemas": 
 		{
-			if (event.method().toString().equalsIgnoreCase("POST")) 
-			{
-			request.bodyHandler(body -> 
-			{
-				request_body = body.toJsonObject();
-			});
-
-			DeliveryOptions action = new DeliveryOptions();
-			action.addHeader("action", "validate-item");
-
-			vertx.eventBus().send("validator", request_body, action, validator_reply -> {
-			if (validator_reply.succeeded()) 
-			{
-				vertx.eventBus().send("database", "write-schema", database_reply -> {
-					
-				if (database_reply.succeeded()) 
-					{
-						resp.setStatusCode(200).end();
-					} else if (database_reply.failed()) 
-					{
-						logger.info("Validator Failed");
-						resp.setStatusCode(500).end();
-					} else
-					{
-						resp.setStatusCode(200).end();
-					}
-					});
-					} else if (validator_reply.failed()) 
-					{
-						logger.info("Validator Failed");
-						resp.setStatusCode(500).end();
-					} else 
-					{
-						logger.info("No reply");
-						resp.setStatusCode(500).end();
-					}
-				});
-			} else 
-			{
-				logger.info("End-Point Not Found");
-				resp.setStatusCode(404).end();  
-			}
-				break;
+			create_schema(request);
+			break;
 		}
 
 		default:
 			resp.setStatusCode(400).end();
 		}
 	}
+
+	private void create_items(HttpServerRequest event) {
+		// TODO Auto-generated method stub
+
+		if (event.method().toString().equalsIgnoreCase("POST")) 
+		{
+		request.bodyHandler(body -> 
+		{
+			request_body = body.toJsonObject();
+		});
+		
+		DeliveryOptions validator_action = new DeliveryOptions();
+		validator_action.addHeader("action", "validate-item");
+		
+		vertx.eventBus().send("validator", request_body, validator_action, validator_reply -> {
+		if (validator_reply.succeeded()) 
+		{
+			
+			DeliveryOptions database_action = new DeliveryOptions();
+			database_action.addHeader("action", "write-item");
+
+			vertx.eventBus().send("database", request_body, database_action, database_reply -> {
+				
+			if (database_reply.succeeded()) 
+				{
+					resp.setStatusCode(200).end();
+					return;
+				} else if (database_reply.failed()) 
+				{
+					logger.info("Database Failed");
+					resp.setStatusCode(500).end();
+					return;
+				} else
+				{
+					resp.setStatusCode(500).end();
+					return;
+				}
+				});
+				} else if (validator_reply.failed()) 
+				{
+					logger.info("Validator Failed");
+					resp.setStatusCode(500).end();
+					return;
+				} else 
+				{
+					logger.info("No reply");
+					resp.setStatusCode(500).end();
+					return;
+				}
+			});
+		  } else 
+		  {
+			logger.info("End-Point Not Found");
+			resp.setStatusCode(404).end();
+			return;
+		  }
+	}
+	
+
+	private void create_schema(HttpServerRequest event) {
+		// TODO Auto-generated method stub
+
+		if (event.method().toString().equalsIgnoreCase("POST")) 
+		{
+		request.bodyHandler(body -> 
+		{
+			request_body = body.toJsonObject();
+		});
+
+		DeliveryOptions validator_action = new DeliveryOptions();
+		validator_action.addHeader("action", "validate-schema");
+
+		vertx.eventBus().send("validator", request_body, validator_action, validator_reply -> {
+		if (validator_reply.succeeded()) 
+		{
+			DeliveryOptions database_action = new DeliveryOptions();
+			database_action.addHeader("action", "write-schema");
+
+			vertx.eventBus().send("database", request_body, database_action, database_reply -> {
+				
+			if (database_reply.succeeded()) 
+				{
+					resp.setStatusCode(200).end();
+					return;
+				} else if (database_reply.failed()) 
+				{
+					logger.info("Validator Failed");
+					resp.setStatusCode(500).end();
+					return;
+				} else
+				{
+					resp.setStatusCode(200).end();
+					return;
+				}
+				});
+				} else if (validator_reply.failed()) 
+				{
+					logger.info("Validator Failed");
+					resp.setStatusCode(500).end();
+					return;
+				} else 
+				{
+					logger.info("No reply");
+					resp.setStatusCode(500).end();
+					return;
+				}
+			});
+		} else 
+		{
+			logger.info("End-Point Not Found");
+			resp.setStatusCode(404).end();
+			return;
+		}
+	}
+
 }
