@@ -1,9 +1,11 @@
 package iudx.catalogue.apiserver;
 
+import java.util.List;
 import java.util.logging.Logger;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.MultiMap;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
@@ -51,7 +53,12 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
 			create_schema(request);
 			break;
 		}
-
+		case "/cat/search/attribute": 
+		{
+			search_attribute(request);
+			break;
+		}
+		
 		default:
 			resp.setStatusCode(400).end();
 		}
@@ -169,6 +176,56 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
 			resp.setStatusCode(404).end();
 			return;
 		}
+	}
+
+
+	private void search_attribute(HttpServerRequest event) {
+		// TODO Auto-generated method stub
+		// Example Query : curl -ik -XGET 'https://localhost:8443/cat/search/attribute?owner=rbccps&tags=(etoilet,sanitation)&attributeFilter=(id,latitude,longitude)'
+		if (event.method().toString().equalsIgnoreCase("GET")) 
+		{
+			String query =  request.query();
+			logger.info(query);
+			
+			String[] query_parameters = query.split("\\&");
+			int query_parameter_length = query_parameters.length;
+			logger.info(Integer.toString(query_parameter_length));
+			
+			request_body = new JsonObject();
+			
+			for(int i = 0; i < query_parameter_length; i++) {
+				request_body.put(query_parameters[i].split("\\=")[0], query_parameters[i].split("\\=")[1]);
+				logger.info(query_parameters[i]);
+			}
+			logger.info(request_body.toString());
+			
+			DeliveryOptions database_action = new DeliveryOptions();logger.info(query);
+			database_action.addHeader("action", "search-attribute");
+
+			vertx.eventBus().send("database", request_body, database_action, database_reply -> {
+				
+			if (database_reply.succeeded()) 
+				{	
+					logger.info(database_reply.result().body().toString());
+					resp.setStatusCode(200).end(database_reply.result().body().toString());
+					return;
+				} else if (database_reply.failed()) 
+				{
+					logger.info("Search Failed");
+					resp.setStatusCode(500).end();
+					return;
+				} else
+				{
+					resp.setStatusCode(500).end();
+					return;
+				}
+				});
+		} else 
+		{
+			logger.info("End-Point Not Found");
+			resp.setStatusCode(404).end();
+			return;
+		}	
 	}
 
 }
