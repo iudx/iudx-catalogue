@@ -90,9 +90,21 @@ public class DatabaseVerticle extends AbstractVerticle {
 				delete_schema(messageHandler);
 				break;
 			}
+			
+			case "search-attribute" : 
+			{
+				search_attribute(messageHandler);
+				break;
+			}
 		}
 		
 		return messageHandler;
+	}
+
+	private void search_attribute(Future<Void> messageHandler) {
+		// TODO Auto-generated method stub
+		// Implement the block
+		messageHandler.complete();	
 	}
 
 	private void delete_schema(Future<Void> messageHandler) {
