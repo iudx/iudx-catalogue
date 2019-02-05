@@ -18,6 +18,10 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
   HttpServerRequest request;
   private HttpServerResponse resp;
   private JsonObject request_body;
+  String path;
+  String[] path_parameters;
+  String itemID;
+  String schemaID;
   private static final Logger logger = Logger.getLogger(APIServerVerticle.class.getName());
 
   @Override
@@ -40,8 +44,22 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
 
     request = event;
     resp = request.response();
+    path = request.path();
+    logger.info(path);
 
-    switch (request.path()) {
+    if (path.contains("/cat/items/id/")) {
+      path_parameters = path.split("\\/");
+      itemID = path_parameters[4];
+      logger.info(itemID);
+      path = "/cat/items/id/";
+    } else if (path.contains("/cat/schemas/id/")) {
+      path_parameters = path.split("\\/");
+      schemaID = path_parameters[4];
+      logger.info(schemaID);
+      path = "/cat/schemas/id/";
+    }
+
+    switch (path) {
       case "/cat/items":
         {
           create_items(request);
@@ -55,6 +73,16 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
       case "/cat/search/attribute":
         {
           search_attribute(request);
+          break;
+        }
+      case "/cat/items/id/":
+        {
+          get_items(request);
+          break;
+        }
+      case "/cat/schemas/id/":
+        {
+          get_schemas(request);
           break;
         }
 
@@ -219,6 +247,76 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
                   return;
                 } else if (database_reply.failed()) {
                   logger.info("Search Failed");
+                  resp.setStatusCode(500).end();
+                  return;
+                } else {
+                  resp.setStatusCode(500).end();
+                  return;
+                }
+              });
+    } else {
+      logger.info("End-Point Not Found");
+      resp.setStatusCode(404).end();
+      return;
+    }
+  }
+
+  private void get_items(HttpServerRequest event) {
+    // TODO Auto-generated method stub
+    if (event.method().toString().equalsIgnoreCase("GET")) {
+
+      DeliveryOptions database_action = new DeliveryOptions();
+      database_action.addHeader("action", "read-item");
+      request_body = new JsonObject();
+      request_body.put("id", itemID);
+      vertx
+          .eventBus()
+          .send(
+              "database",
+              request_body,
+              database_action,
+              database_reply -> {
+                if (database_reply.succeeded()) {
+                  logger.info(database_reply.result().body().toString());
+                  resp.setStatusCode(200).end(database_reply.result().body().toString());
+                  return;
+                } else if (database_reply.failed()) {
+                  logger.info("Validator Failed");
+                  resp.setStatusCode(500).end();
+                  return;
+                } else {
+                  resp.setStatusCode(500).end();
+                  return;
+                }
+              });
+    } else {
+      logger.info("End-Point Not Found");
+      resp.setStatusCode(404).end();
+      return;
+    }
+  }
+
+  private void get_schemas(HttpServerRequest event) {
+    // TODO Auto-generated method stub
+    if (event.method().toString().equalsIgnoreCase("GET")) {
+
+      DeliveryOptions database_action = new DeliveryOptions();
+      database_action.addHeader("action", "read-schema");
+      request_body = new JsonObject();
+      request_body.put("id", schemaID);
+      vertx
+          .eventBus()
+          .send(
+              "database",
+              request_body,
+              database_action,
+              database_reply -> {
+                if (database_reply.succeeded()) {
+                  logger.info(database_reply.result().body().toString());
+                  resp.setStatusCode(200).end(database_reply.result().body().toString());
+                  return;
+                } else if (database_reply.failed()) {
+                  logger.info("Validator Failed");
                   resp.setStatusCode(500).end();
                   return;
                 } else {
