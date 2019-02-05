@@ -8,68 +8,67 @@ import io.vertx.core.json.JsonObject;
 
 public class ValidatorVerticle extends AbstractVerticle {
 
-	private final static Logger logger = Logger.getLogger(ValidatorVerticle.class.getName());
-	String action;
-	JsonObject request_body;
-	
-	@Override
-	public void start(Future<Void> startFuture) {
-		logger.info("Validator Verticle started!");
-		
-		vertx.eventBus().consumer("validator", message -> {
+  private static final Logger logger = Logger.getLogger(ValidatorVerticle.class.getName());
+  String action;
+  JsonObject request_body;
 
-			Future<Void> requestHandler = validateRequest(message);
+  @Override
+  public void start(Future<Void> startFuture) {
+    logger.info("Validator Verticle started!");
 
-			if (requestHandler.succeeded()) 
-			{
-				message.reply("success");
-			} else 
-			{
-				message.fail(0, "failure");
-			}
+    vertx
+        .eventBus()
+        .consumer(
+            "validator",
+            message -> {
+              Future<Void> requestHandler = validateRequest(message);
 
-		});
-	}
+              if (requestHandler.succeeded()) {
+                message.reply("success");
+              } else {
+                message.fail(0, "failure");
+              }
+            });
+  }
 
-	private Future<Void> validateRequest(Message<Object> message) {
-		// TODO Auto-generated method stub
-		logger.info("Validator Verticle received message.body() = " + message.headers());
+  private Future<Void> validateRequest(Message<Object> message) {
+    // TODO Auto-generated method stub
+    logger.info("Validator Verticle received message.body() = " + message.headers());
 
-		action = message.headers().get("action");
-		request_body = (JsonObject) message.body();
-		
-		Future<Void> messageHandler = Future.future();
+    action = message.headers().get("action");
+    request_body = (JsonObject) message.body();
 
-		switch (action) 
-		{
-			case "validate-item" : 
-			{
-				validate_item(messageHandler);
-				break;
-			}
-		
-			case "validate-schema" : 
-			{
-				validate_schema(messageHandler);
-				break;
-			}
-		}
-		
-		return messageHandler;
-	}
+    Future<Void> messageHandler = Future.future();
 
-	private void validate_schema(Future<Void> messageHandler) {
-		// TODO Auto-generated method stub
+    switch (action) {
+      case "validate-item":
+        {
+          validate_item(messageHandler);
+          break;
+        }
 
-		// Implement the validation item block
-		
-		messageHandler.complete();
-	}
+      case "validate-schema":
+        {
+          validate_schema(messageHandler);
+          break;
+        }
+    }
 
-	private void validate_item(Future<Void> messageHandler) {
-		// TODO Auto-generated method stub
+    return messageHandler;
+  }
 
-		// Implement the validation schema block
-		messageHandler.complete();
-	}
+  private void validate_schema(Future<Void> messageHandler) {
+    // TODO Auto-generated method stub
+
+    // Implement the validation item block
+
+    messageHandler.complete();
+  }
+
+  private void validate_item(Future<Void> messageHandler) {
+    // TODO Auto-generated method stub
+
+    // Implement the validation schema block
+    messageHandler.complete();
+  }
 }
