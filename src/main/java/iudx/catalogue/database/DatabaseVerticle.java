@@ -4,13 +4,16 @@ import java.util.logging.Logger;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.eventbus.Message;
-import io.vertx.core.json.JsonObject;
 
 public class DatabaseVerticle extends AbstractVerticle {
 
   private static final Logger logger = Logger.getLogger(DatabaseVerticle.class.getName());
   String action;
-  JsonObject request_body;
+  DatabaseInterface db;
+
+  public DatabaseVerticle(DatabaseInterface db) {
+    this.db = db;
+  }
 
   @Override
   public void start(Future<Void> startFuture) {
@@ -36,120 +39,65 @@ public class DatabaseVerticle extends AbstractVerticle {
     logger.info("Database Verticle received message.body() = " + message.body());
 
     action = (String) message.headers().get("action");
-    request_body = (JsonObject) message.body();
 
     Future<Void> messageHandler = Future.future();
 
     switch (action) {
       case "read-item":
         {
-          read_item(messageHandler);
+          db.read_item(messageHandler, message);
           break;
         }
 
       case "read-schema":
         {
-          read_schema(messageHandler);
+          db.read_schema(messageHandler, message);
           break;
         }
 
       case "write-item":
         {
-          write_item(messageHandler);
+          db.write_item(messageHandler, message);
           break;
         }
 
       case "write-schema":
         {
-          write_schema(messageHandler);
+          db.write_schema(messageHandler, message);
           break;
         }
 
       case "update-item":
         {
-          update_item(messageHandler);
+          db.update_item(messageHandler, message);
           break;
         }
 
       case "update-schema":
         {
-          update_schema(messageHandler);
+          db.update_schema(messageHandler, message);
           break;
         }
 
       case "delete-item":
         {
-          delete_item(messageHandler);
+          db.delete_item(messageHandler, message);
           break;
         }
 
       case "delete-schema":
         {
-          delete_schema(messageHandler);
+          db.delete_schema(messageHandler, message);
           break;
         }
 
       case "search-attribute":
         {
-          search_attribute(messageHandler);
+          db.search_attribute(messageHandler, message);
           break;
         }
     }
 
     return messageHandler;
-  }
-
-  private void search_attribute(Future<Void> messageHandler) {
-    // TODO Auto-generated method stub
-    // Implement the block
-    messageHandler.complete();
-  }
-
-  private void delete_schema(Future<Void> messageHandler) {
-    // TODO Auto-generated method stub
-    // Implement the block
-    messageHandler.complete();
-  }
-
-  private void delete_item(Future<Void> messageHandler) {
-    // TODO Auto-generated method stub
-    // Implement the block
-    messageHandler.complete();
-  }
-
-  private void update_schema(Future<Void> messageHandler) {
-    // TODO Auto-generated method stub
-    // Implement the block
-    messageHandler.complete();
-  }
-
-  private void update_item(Future<Void> messageHandler) {
-    // TODO Auto-generated method stub
-    // Implement the block
-    messageHandler.complete();
-  }
-
-  private void write_schema(Future<Void> messageHandler) {
-    // TODO Auto-generated method stub
-    // Implement the block
-    messageHandler.complete();
-  }
-
-  private void write_item(Future<Void> messageHandler) {
-    // TODO Auto-generated method stub
-    // Implement the block
-    messageHandler.complete();
-  }
-
-  private void read_schema(Future<Void> messageHandler) {
-    // TODO Auto-generated method stub
-    // Implement the block
-    messageHandler.complete();
-  }
-
-  private void read_item(Future<Void> messageHandler) {
-    // TODO Auto-generated method stub
-    // Implement the block
-    messageHandler.complete();
   }
 }
