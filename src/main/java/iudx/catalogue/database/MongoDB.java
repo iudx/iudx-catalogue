@@ -45,7 +45,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 
   @Override
   public void search_attribute(Future<Void> messageHandler, Message<Object> message) {
-    // TODO Auto-generated method stub
+
     JsonObject request_body = (JsonObject) message.body();
     JsonObject query = new JsonObject();
     JsonObject fields = new JsonObject();
@@ -55,15 +55,9 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     while (it.hasNext()) {
       String key = it.next().getKey();
       JsonArray values = (JsonArray) it.next().getValue();
-      if (key.equalsIgnoreCase("attributeFilter")) {
-        continue;
-      } else {
-        if (values.size() == 1) {
-          query.put(key, values.getString(0));
-        } else {
-          for (int i = 0; i < values.size(); i++) {
-            query.put(key, values.getString(i));
-          }
+      if (!key.equalsIgnoreCase("attributeFilter")) {
+        for (int i = 0; i < values.size(); i++) {
+          query.put(key, values.getString(i));
         }
       }
     }
@@ -81,7 +75,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 
   @Override
   public void read_item(Future<Void> messageHandler, Message<Object> message) {
-    // TODO Auto-generated method stub
+
     JsonObject query = new JsonObject();
     JsonObject request_body = (JsonObject) message.body();
 
@@ -111,7 +105,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 
   @Override
   public void write_item(Future<Void> messageHandler, Message<Object> message) {
-    // TODO Auto-generated method stub
+
     JsonObject request_body = (JsonObject) message.body();
     JsonObject updated_item = addNewAttributes(request_body, "1.0");
 
