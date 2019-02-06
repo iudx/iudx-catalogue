@@ -82,15 +82,14 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   @Override
   public void read_item(Future<Void> messageHandler, Message<Object> message) {
     // TODO Auto-generated method stub
-	  JsonObject query = new JsonObject();
-	  JsonObject request_body = (JsonObject) message.body();
-	  
-	  //Populate query
-	  query.put("UUID", request_body.getString("itemID"));
-	  
-	  //Call mongo find
-	  mongo_find(ITEM_COLLECTION, query, new FindOptions(), messageHandler, message);
+    JsonObject query = new JsonObject();
+    JsonObject request_body = (JsonObject) message.body();
 
+    // Populate query
+    query.put("UUID", request_body.getString("itemID"));
+
+    // Call mongo find
+    mongo_find(ITEM_COLLECTION, query, new FindOptions(), messageHandler, message);
   }
 
   @Override

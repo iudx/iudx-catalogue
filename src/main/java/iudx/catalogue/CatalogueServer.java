@@ -4,7 +4,9 @@ import java.util.logging.Logger;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import iudx.catalogue.apiserver.APIServerVerticle;
+import iudx.catalogue.database.DatabaseInterface;
 import iudx.catalogue.database.DatabaseVerticle;
+import iudx.catalogue.database.MongoDB;
 import iudx.catalogue.validator.ValidatorVerticle;
 
 public class CatalogueServer {
@@ -16,8 +18,9 @@ public class CatalogueServer {
 
     int procs = Runtime.getRuntime().availableProcessors();
     Vertx vertx = Vertx.vertx();
-
-    vertx.deployVerticle(new DatabaseVerticle());
+    
+    DatabaseInterface db = new MongoDB("items","schemas");
+    vertx.deployVerticle(new DatabaseVerticle(db));
     vertx.deployVerticle(new ValidatorVerticle());
     vertx.deployVerticle(
         APIServerVerticle.class.getName(),
