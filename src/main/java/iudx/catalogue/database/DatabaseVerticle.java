@@ -8,8 +8,8 @@ import io.vertx.core.eventbus.Message;
 public class DatabaseVerticle extends AbstractVerticle {
 
   private static final Logger logger = Logger.getLogger(DatabaseVerticle.class.getName());
-  String action;
-  DatabaseInterface db;
+  private String action;
+  private DatabaseInterface db;
 
   public DatabaseVerticle(DatabaseInterface db) {
     this.db = db;
