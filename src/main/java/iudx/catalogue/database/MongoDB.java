@@ -10,6 +10,7 @@ import io.vertx.ext.mongo.MongoClient;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
+import org.apache.commons.lang3.StringUtils;
 
 public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   private MongoClient mongo;
@@ -38,7 +39,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
             message.reply(res.result());
             messageHandler.succeeded();
           } else {
-            messageHandler.failed();
+            messageHandler.fail(res.cause());
           }
         });
   }
@@ -86,10 +87,38 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     mongo_find(ITEM_COLLECTION, query, new FindOptions(), messageHandler, message);
   }
 
+  private JsonObject encode_schema(JsonObject p) {
+    String s = p.encode();
+    String[] yolo = StringUtils.split(s, "$");
+
+    String n = StringUtils.join(yolo, "&");
+    return new JsonObject(n);
+  }
+
+  private JsonObject decode_schema(JsonObject p) {
+    String[] yolo = StringUtils.split(p.encode(), "&");
+    String n = StringUtils.join(yolo, "$");
+    return new JsonObject(n);
+  }
+
   @Override
   public void read_schema(Future<Void> messageHandler, Message<Object> message) {
-    // TODO Auto-generated method stub
+    JsonObject m = (JsonObject) message.body();
+    JsonObject query = new JsonObject();
 
+    query.put("UUID", m.getString("schema"));
+
+    mongo.findOne(
+        SCHEMA_COLLECTION,
+        query,
+        new JsonObject(),
+        res -> {
+          if (res.succeeded()) {
+            message.reply(decode_schema(res.result()));
+          } else {
+            messageHandler.fail(res.cause());
+          }
+        });
   }
 
   private JsonObject addNewAttributes(JsonObject doc, String version) {
@@ -123,8 +152,18 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 
   @Override
   public void write_schema(Future<Void> messageHandler, Message<Object> message) {
-    // TODO Auto-generated method stub
+    JsonObject request_body = (JsonObject) message.body();
 
+    mongo.insert(
+        SCHEMA_COLLECTION,
+        encode_schema(request_body),
+        res -> {
+          if (res.succeeded()) {
+            messageHandler.succeeded();
+          } else {
+            messageHandler.fail(res.cause());
+          }
+        });
   }
 
   @Override
