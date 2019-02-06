@@ -1,6 +1,7 @@
 package iudx.catalogue.apiserver;
 
 import java.util.logging.Logger;
+
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -9,6 +10,7 @@ import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.net.JksOptions;
 
@@ -210,6 +212,24 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
     }
   }
 
+  private JsonArray changeToArray(String s) {
+    JsonArray values = new JsonArray();
+    String[] arr = s.split(",");
+    for (String a : arr) {
+      if (a.charAt(0) == '(' && a.charAt(a.length() - 1) == ')') {
+        values.add(a.substring(1, a.length() - 1));
+      } else if (a.charAt(0) == '(') {
+        values.add(a.substring(1));
+      } else if (a.charAt(a.length() - 1) == ')') {
+        values.add(a.substring(0, a.length() - 1));
+      } else {
+        values.add(a);
+      }
+    }
+
+    return values;
+  }
+
   private void search_attribute(HttpServerRequest event) {
     // TODO Auto-generated method stub
     // Example Query : curl -ik -XGET
@@ -225,7 +245,9 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
       request_body = new JsonObject();
 
       for (int i = 0; i < query_parameter_length; i++) {
-        request_body.put(query_parameters[i].split("\\=")[0], query_parameters[i].split("\\=")[1]);
+        request_body.put(
+            query_parameters[i].split("\\=")[0],
+            changeToArray(query_parameters[i].split("\\=")[1]));
         logger.info(query_parameters[i]);
       }
       logger.info(request_body.toString());
