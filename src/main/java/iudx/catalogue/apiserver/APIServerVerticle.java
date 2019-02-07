@@ -186,7 +186,7 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
                   resp.setStatusCode(200).end();
                   return;
                 } else if (database_reply.failed()) {
-                  logger.info("Validator Failed");
+                  logger.info("Database Failed");
                   resp.setStatusCode(500).end();
                   return;
                 } else {
