@@ -87,18 +87,16 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     mongo_find(ITEM_COLLECTION, query, new FindOptions(), messageHandler, message);
   }
 
-  private JsonObject encode_schema(JsonObject p) {
-    String s = p.encode();
-    String[] yolo = StringUtils.split(s, "$");
-
-    String n = StringUtils.join(yolo, "&");
-    return new JsonObject(n);
+  private JsonObject encode_schema(JsonObject schema) {
+    String[] temp = StringUtils.split(schema.encode(), "$");
+    String encodedSchema = StringUtils.join(temp, "&");
+    return new JsonObject(encodedSchema);
   }
 
-  private JsonObject decode_schema(JsonObject p) {
-    String[] yolo = StringUtils.split(p.encode(), "&");
-    String n = StringUtils.join(yolo, "$");
-    return new JsonObject(n);
+  private JsonObject decode_schema(JsonObject encodedSchema) {
+    String[] temp = StringUtils.split(encodedSchema.encode(), "&");
+    String schema = StringUtils.join(temp, "$");
+    return new JsonObject(schema);
   }
 
   @Override
