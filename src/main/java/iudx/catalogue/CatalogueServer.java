@@ -7,6 +7,8 @@ import iudx.catalogue.apiserver.APIServerVerticle;
 import iudx.catalogue.database.DatabaseInterface;
 import iudx.catalogue.database.DatabaseVerticle;
 import iudx.catalogue.database.MongoDB;
+import iudx.catalogue.validator.Validator;
+import iudx.catalogue.validator.ValidatorInterface;
 import iudx.catalogue.validator.ValidatorVerticle;
 
 public class CatalogueServer {
@@ -18,10 +20,13 @@ public class CatalogueServer {
 
     int procs = Runtime.getRuntime().availableProcessors();
     Vertx vertx = Vertx.vertx();
-    
-    DatabaseInterface db = new MongoDB("items","schemas");
+
+    DatabaseInterface db = new MongoDB("items", "schemas");
     vertx.deployVerticle(new DatabaseVerticle(db));
-    vertx.deployVerticle(new ValidatorVerticle());
+
+    ValidatorInterface v = new Validator();
+    vertx.deployVerticle(new ValidatorVerticle(v));
+
     vertx.deployVerticle(
         APIServerVerticle.class.getName(),
         new DeploymentOptions().setWorker(true).setInstances(procs * 2),

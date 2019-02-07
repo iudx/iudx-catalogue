@@ -99,7 +99,12 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
     if (event.method().toString().equalsIgnoreCase("POST")) {
       request.bodyHandler(
           body -> {
-            request_body = body.toJsonObject();
+            try {
+              request_body = body.toJsonObject();
+            } catch (Exception e) {
+              resp.setStatusCode(400).end("Invalid item: Not a Json Object");
+              return;
+            }
           });
 
       DeliveryOptions validator_action = new DeliveryOptions();
@@ -159,49 +164,33 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
     if (event.method().toString().equalsIgnoreCase("POST")) {
       request.bodyHandler(
           body -> {
-            request_body = body.toJsonObject();
+            try {
+              request_body = body.toJsonObject();
+            } catch (Exception e) {
+              resp.setStatusCode(400).end("Invalid schema: Not a Json Object");
+              return;
+            }
           });
 
-      DeliveryOptions validator_action = new DeliveryOptions();
-      validator_action.addHeader("action", "validate-schema");
+      DeliveryOptions database_action = new DeliveryOptions();
+      database_action.addHeader("action", "write-schema");
 
       vertx
           .eventBus()
           .send(
-              "validator",
+              "database",
               request_body,
-              validator_action,
-              validator_reply -> {
-                if (validator_reply.succeeded()) {
-                  DeliveryOptions database_action = new DeliveryOptions();
-                  database_action.addHeader("action", "write-schema");
-
-                  vertx
-                      .eventBus()
-                      .send(
-                          "database",
-                          request_body,
-                          database_action,
-                          database_reply -> {
-                            if (database_reply.succeeded()) {
-                              resp.setStatusCode(200).end();
-                              return;
-                            } else if (database_reply.failed()) {
-                              logger.info("Validator Failed");
-                              resp.setStatusCode(500).end();
-                              return;
-                            } else {
-                              resp.setStatusCode(200).end();
-                              return;
-                            }
-                          });
-                } else if (validator_reply.failed()) {
+              database_action,
+              database_reply -> {
+                if (database_reply.succeeded()) {
+                  resp.setStatusCode(200).end();
+                  return;
+                } else if (database_reply.failed()) {
                   logger.info("Validator Failed");
                   resp.setStatusCode(500).end();
                   return;
                 } else {
-                  logger.info("No reply");
-                  resp.setStatusCode(500).end();
+                  resp.setStatusCode(200).end();
                   return;
                 }
               });
