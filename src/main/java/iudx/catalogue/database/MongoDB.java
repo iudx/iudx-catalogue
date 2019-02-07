@@ -10,6 +10,7 @@ import io.vertx.ext.mongo.MongoClient;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
+import org.apache.commons.lang3.StringUtils;
 
 public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   private MongoClient mongo;
@@ -38,14 +39,14 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
             message.reply(res.result());
             messageHandler.succeeded();
           } else {
-            messageHandler.failed();
+            messageHandler.fail(res.cause());
           }
         });
   }
 
   @Override
   public void search_attribute(Future<Void> messageHandler, Message<Object> message) {
-    // TODO Auto-generated method stub
+
     JsonObject request_body = (JsonObject) message.body();
     JsonObject query = new JsonObject();
     JsonObject fields = new JsonObject();
@@ -55,15 +56,9 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     while (it.hasNext()) {
       String key = it.next().getKey();
       JsonArray values = (JsonArray) it.next().getValue();
-      if (key.equalsIgnoreCase("attributeFilter")) {
-        continue;
-      } else {
-        if (values.size() == 1) {
-          query.put(key, values.getString(0));
-        } else {
-          for (int i = 0; i < values.size(); i++) {
-            query.put(key, values.getString(i));
-          }
+      if (!key.equalsIgnoreCase("attributeFilter")) {
+        for (int i = 0; i < values.size(); i++) {
+          query.put(key, values.getString(i));
         }
       }
     }
@@ -81,7 +76,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 
   @Override
   public void read_item(Future<Void> messageHandler, Message<Object> message) {
-    // TODO Auto-generated method stub
+
     JsonObject query = new JsonObject();
     JsonObject request_body = (JsonObject) message.body();
 
@@ -92,10 +87,36 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     mongo_find(ITEM_COLLECTION, query, new FindOptions(), messageHandler, message);
   }
 
+  private JsonObject encode_schema(JsonObject schema) {
+    String[] temp = StringUtils.split(schema.encode(), "$");
+    String encodedSchema = StringUtils.join(temp, "&");
+    return new JsonObject(encodedSchema);
+  }
+
+  private JsonObject decode_schema(JsonObject encodedSchema) {
+    String[] temp = StringUtils.split(encodedSchema.encode(), "&");
+    String schema = StringUtils.join(temp, "$");
+    return new JsonObject(schema);
+  }
+
   @Override
   public void read_schema(Future<Void> messageHandler, Message<Object> message) {
-    // TODO Auto-generated method stub
+    JsonObject m = (JsonObject) message.body();
+    JsonObject query = new JsonObject();
 
+    query.put("UUID", m.getString("schema"));
+
+    mongo.findOne(
+        SCHEMA_COLLECTION,
+        query,
+        new JsonObject(),
+        res -> {
+          if (res.succeeded()) {
+            message.reply(decode_schema(res.result()));
+          } else {
+            messageHandler.fail(res.cause());
+          }
+        });
   }
 
   private JsonObject addNewAttributes(JsonObject doc, String version) {
@@ -111,7 +132,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 
   @Override
   public void write_item(Future<Void> messageHandler, Message<Object> message) {
-    // TODO Auto-generated method stub
+
     JsonObject request_body = (JsonObject) message.body();
     JsonObject updated_item = addNewAttributes(request_body, "1.0");
 
@@ -129,8 +150,18 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 
   @Override
   public void write_schema(Future<Void> messageHandler, Message<Object> message) {
-    // TODO Auto-generated method stub
+    JsonObject request_body = (JsonObject) message.body();
 
+    mongo.insert(
+        SCHEMA_COLLECTION,
+        encode_schema(request_body),
+        res -> {
+          if (res.succeeded()) {
+            messageHandler.succeeded();
+          } else {
+            messageHandler.fail(res.cause());
+          }
+        });
   }
 
   @Override
