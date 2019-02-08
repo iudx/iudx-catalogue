@@ -2,9 +2,10 @@ package iudx.catalogue.database;
 
 import io.vertx.core.Future;
 import io.vertx.core.eventbus.Message;
-import io.vertx.core.json.JsonObject;
 
 public interface DatabaseInterface {
+
+  public void init_db();
 
   public void search_attribute(Future<Void> messageHandler, Message<Object> message);
 

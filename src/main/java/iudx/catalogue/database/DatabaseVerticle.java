@@ -11,13 +11,18 @@ public class DatabaseVerticle extends AbstractVerticle {
   private String action;
   private DatabaseInterface db;
 
-  public DatabaseVerticle(DatabaseInterface db) {
-    this.db = db;
+  public DatabaseVerticle(String which_database) {
+    
+    if (which_database == "mongo") {
+      this.db = new MongoDB("items", "schemas");
+    }
   }
 
   @Override
   public void start(Future<Void> startFuture) {
-
+    
+    db.init_db();
+    
     logger.info("Database Verticle started!");
     vertx
         .eventBus()
