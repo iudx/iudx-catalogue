@@ -18,8 +18,8 @@ public class CatalogueServer {
     int procs = Runtime.getRuntime().availableProcessors();
     Vertx vertx = Vertx.vertx();
 
-    String which_database = "mongo";
-    vertx.deployVerticle(new DatabaseVerticle(which_database));
+    String database = "mongo";
+    vertx.deployVerticle(new DatabaseVerticle(vertx, database));
 
     ValidatorInterface v = new Validator();
     vertx.deployVerticle(new ValidatorVerticle(v));
