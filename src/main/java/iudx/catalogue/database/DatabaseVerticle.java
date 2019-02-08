@@ -3,26 +3,34 @@ package iudx.catalogue.database;
 import java.util.logging.Logger;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
+import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.Message;
+import io.vertx.core.json.JsonObject;
 
 public class DatabaseVerticle extends AbstractVerticle {
 
   private static final Logger logger = Logger.getLogger(DatabaseVerticle.class.getName());
   private String action;
   private DatabaseInterface db;
+  private static final String database_uri = "mongodb://localhost:27017";
+  private static final String database_name = "catalogue";
 
-  public DatabaseVerticle(String which_database) {
-    
+  public DatabaseVerticle(Vertx vertx, String which_database) {
+
     if (which_database == "mongo") {
-      this.db = new MongoDB("items", "schemas");
+
+      db = new MongoDB("items", "schemas");
+
+      JsonObject mongoconfig =
+          new JsonObject().put("connection_string", database_uri).put("db_name", database_name);
+
+      db.init_db(vertx, mongoconfig);
     }
   }
 
   @Override
   public void start(Future<Void> startFuture) {
-    
-    db.init_db();
-    
+
     logger.info("Database Verticle started!");
     vertx
         .eventBus()

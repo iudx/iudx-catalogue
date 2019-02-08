@@ -1,6 +1,7 @@
 package iudx.catalogue.database;
 
 import io.vertx.core.Future;
+import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -24,9 +25,9 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     SCHEMA_COLLECTION = schema_database;
   }
 
-  public void init_db() {
+  public void init_db(Vertx vertx, JsonObject mongoconfig) {
 
-    mongo = MongoClient.createShared(vertx, config());
+    mongo = MongoClient.createShared(vertx, mongoconfig);
   }
 
   private void mongo_find(
