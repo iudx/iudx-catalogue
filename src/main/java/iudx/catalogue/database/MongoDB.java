@@ -13,13 +13,20 @@ import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
 
 public class MongoDB extends AbstractVerticle implements DatabaseInterface {
+
   private MongoClient mongo;
+
   private String ITEM_COLLECTION, SCHEMA_COLLECTION;
 
   public MongoDB(String item_database, String schema_database) {
-    mongo = MongoClient.createShared(vertx, config());
+
     ITEM_COLLECTION = item_database;
     SCHEMA_COLLECTION = schema_database;
+  }
+
+  public void init_db() {
+
+    mongo = MongoClient.createShared(vertx, config());
   }
 
   private void mongo_find(
@@ -88,12 +95,14 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   }
 
   private JsonObject encode_schema(JsonObject schema) {
+
     String[] temp = StringUtils.split(schema.encode(), "$");
     String encodedSchema = StringUtils.join(temp, "&");
     return new JsonObject(encodedSchema);
   }
 
   private JsonObject decode_schema(JsonObject encodedSchema) {
+
     String[] temp = StringUtils.split(encodedSchema.encode(), "&");
     String schema = StringUtils.join(temp, "$");
     return new JsonObject(schema);
@@ -101,6 +110,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 
   @Override
   public void read_schema(Future<Void> messageHandler, Message<Object> message) {
+
     JsonObject m = (JsonObject) message.body();
     JsonObject query = new JsonObject();
 
@@ -120,6 +130,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   }
 
   private JsonObject addNewAttributes(JsonObject doc, String version) {
+
     JsonObject updated = doc.copy();
     updated.put("Created", new java.util.Date());
     updated.put("Last modified on", new java.util.Date());
@@ -150,6 +161,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 
   @Override
   public void write_schema(Future<Void> messageHandler, Message<Object> message) {
+
     JsonObject request_body = (JsonObject) message.body();
 
     mongo.insert(
