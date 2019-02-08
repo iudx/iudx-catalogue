@@ -133,8 +133,8 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   private JsonObject addNewAttributes(JsonObject doc, String version) {
 
     JsonObject updated = doc.copy();
-    updated.put("Created", new java.util.Date());
-    updated.put("Last modified on", new java.util.Date());
+    updated.put("Created", new java.util.Date().toString());
+    updated.put("Last modified on", new java.util.Date().toString());
     updated.put("Status", "Live");
     updated.put("Version", version);
     updated.put("UUID", UUID.randomUUID().toString());
