@@ -101,56 +101,57 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
           body -> {
             try {
               request_body = body.toJsonObject();
+
+              DeliveryOptions validator_action = new DeliveryOptions();
+              validator_action.addHeader("action", "validate-item");
+
+              vertx
+                  .eventBus()
+                  .send(
+                      "validator",
+                      request_body,
+                      validator_action,
+                      validator_reply -> {
+                        if (validator_reply.succeeded()) {
+
+                          DeliveryOptions database_action = new DeliveryOptions();
+                          database_action.addHeader("action", "write-item");
+
+                          vertx
+                              .eventBus()
+                              .send(
+                                  "database",
+                                  request_body,
+                                  database_action,
+                                  database_reply -> {
+                                    if (database_reply.succeeded()) {
+                                      resp.setStatusCode(200).end();
+                                      return;
+                                    } else if (database_reply.failed()) {
+                                      logger.info("Database Failed");
+                                      resp.setStatusCode(500).end();
+                                      return;
+                                    } else {
+                                      resp.setStatusCode(500).end();
+                                      return;
+                                    }
+                                  });
+                        } else if (validator_reply.failed()) {
+                          logger.info("Validator Failed");
+                          resp.setStatusCode(500).end();
+                          return;
+                        } else {
+                          logger.info("No reply");
+                          resp.setStatusCode(500).end();
+                          return;
+                        }
+                      });
+
             } catch (Exception e) {
               resp.setStatusCode(400).end("Invalid item: Not a Json Object");
               return;
             }
           });
-
-      DeliveryOptions validator_action = new DeliveryOptions();
-      validator_action.addHeader("action", "validate-item");
-
-      vertx
-          .eventBus()
-          .send(
-              "validator",
-              request_body,
-              validator_action,
-              validator_reply -> {
-                if (validator_reply.succeeded()) {
-
-                  DeliveryOptions database_action = new DeliveryOptions();
-                  database_action.addHeader("action", "write-item");
-
-                  vertx
-                      .eventBus()
-                      .send(
-                          "database",
-                          request_body,
-                          database_action,
-                          database_reply -> {
-                            if (database_reply.succeeded()) {
-                              resp.setStatusCode(200).end();
-                              return;
-                            } else if (database_reply.failed()) {
-                              logger.info("Database Failed");
-                              resp.setStatusCode(500).end();
-                              return;
-                            } else {
-                              resp.setStatusCode(500).end();
-                              return;
-                            }
-                          });
-                } else if (validator_reply.failed()) {
-                  logger.info("Validator Failed");
-                  resp.setStatusCode(500).end();
-                  return;
-                } else {
-                  logger.info("No reply");
-                  resp.setStatusCode(500).end();
-                  return;
-                }
-              });
     } else {
       logger.info("End-Point Not Found");
       resp.setStatusCode(404).end();
