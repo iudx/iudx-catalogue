@@ -1,6 +1,5 @@
 package iudx.catalogue.database;
 
-import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
@@ -31,11 +30,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   }
 
   private void mongo_find(
-      String collection,
-      JsonObject query,
-      FindOptions options,
-      Future<Void> messageHandler,
-      Message<Object> message) {
+      String collection, JsonObject query, FindOptions options, Message<Object> message) {
 
     mongo.findWithOptions(
         collection,
@@ -45,15 +40,14 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
           if (res.succeeded()) {
             // Send back the response
             message.reply(res.result());
-            messageHandler.succeeded();
           } else {
-            messageHandler.fail(res.cause());
+            message.fail(0, "failure");
           }
         });
   }
 
   @Override
-  public void search_attribute(Future<Void> messageHandler, Message<Object> message) {
+  public void search_attribute(Message<Object> message) {
 
     JsonObject request_body = (JsonObject) message.body();
     JsonObject query = new JsonObject();
@@ -79,11 +73,11 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 
     // Call mongo find
     FindOptions options = new FindOptions().setFields(fields);
-    mongo_find(ITEM_COLLECTION, query, options, messageHandler, message);
+    mongo_find(ITEM_COLLECTION, query, options, message);
   }
 
   @Override
-  public void read_item(Future<Void> messageHandler, Message<Object> message) {
+  public void read_item(Message<Object> message) {
 
     JsonObject query = new JsonObject();
     JsonObject request_body = (JsonObject) message.body();
@@ -92,7 +86,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     query.put("UUID", request_body.getString("itemID"));
 
     // Call mongo find
-    mongo_find(ITEM_COLLECTION, query, new FindOptions(), messageHandler, message);
+    mongo_find(ITEM_COLLECTION, query, new FindOptions(), message);
   }
 
   private JsonObject encode_schema(JsonObject schema) {
@@ -110,7 +104,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   }
 
   @Override
-  public void read_schema(Future<Void> messageHandler, Message<Object> message) {
+  public void read_schema(Message<Object> message) {
 
     JsonObject m = (JsonObject) message.body();
     JsonObject query = new JsonObject();
@@ -125,7 +119,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
           if (res.succeeded()) {
             message.reply(decode_schema(res.result()));
           } else {
-            messageHandler.fail(res.cause());
+            message.fail(0, "failure");
           }
         });
   }
@@ -133,8 +127,8 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   private JsonObject addNewAttributes(JsonObject doc, String version) {
 
     JsonObject updated = doc.copy();
-    updated.put("Created", new java.util.Date());
-    updated.put("Last modified on", new java.util.Date());
+    updated.put("Created", new java.util.Date().toString());
+    updated.put("Last modified on", new java.util.Date().toString());
     updated.put("Status", "Live");
     updated.put("Version", version);
     updated.put("UUID", UUID.randomUUID().toString());
@@ -143,7 +137,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   }
 
   @Override
-  public void write_item(Future<Void> messageHandler, Message<Object> message) {
+  public void write_item(Message<Object> message) {
 
     JsonObject request_body = (JsonObject) message.body();
     JsonObject updated_item = addNewAttributes(request_body, "1.0");
@@ -153,15 +147,15 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
         updated_item,
         res -> {
           if (res.succeeded()) {
-            messageHandler.succeeded();
+            message.reply("success");
           } else {
-            messageHandler.fail(res.cause());
+            message.fail(0, "failure");
           }
         });
   }
 
   @Override
-  public void write_schema(Future<Void> messageHandler, Message<Object> message) {
+  public void write_schema(Message<Object> message) {
 
     JsonObject request_body = (JsonObject) message.body();
 
@@ -170,33 +164,33 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
         encode_schema(request_body),
         res -> {
           if (res.succeeded()) {
-            messageHandler.succeeded();
+            message.reply("success");
           } else {
-            messageHandler.fail(res.cause());
+            message.fail(0, "failure");
           }
         });
   }
 
   @Override
-  public void update_item(Future<Void> messageHandler, Message<Object> message) {
+  public void update_item(Message<Object> message) {
     // TODO Auto-generated method stub
 
   }
 
   @Override
-  public void update_schema(Future<Void> messageHandler, Message<Object> message) {
+  public void update_schema(Message<Object> message) {
     // TODO Auto-generated method stub
 
   }
 
   @Override
-  public void delete_item(Future<Void> messageHandler, Message<Object> message) {
+  public void delete_item(Message<Object> message) {
     // TODO Auto-generated method stub
 
   }
 
   @Override
-  public void delete_schema(Future<Void> messageHandler, Message<Object> message) {
+  public void delete_schema(Message<Object> message) {
     // TODO Auto-generated method stub
 
   }

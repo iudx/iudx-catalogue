@@ -37,80 +37,70 @@ public class DatabaseVerticle extends AbstractVerticle {
         .consumer(
             "database",
             message -> {
-              Future<Void> requestHandler = validateRequest(message);
-
-              if (requestHandler.succeeded()) {
-                message.reply("success");
-              } else {
-                message.fail(0, "failure");
-              }
+              validateRequest(message);
             });
   }
 
-  private Future<Void> validateRequest(Message<Object> message) {
+  private void validateRequest(Message<Object> message) {
     // TODO Auto-generated method stub
     logger.info("Database Verticle received message.body() = " + message.body());
 
     action = (String) message.headers().get("action");
 
-    Future<Void> messageHandler = Future.future();
-
     switch (action) {
       case "read-item":
         {
-          db.read_item(messageHandler, message);
+          db.read_item(message);
           break;
         }
 
       case "read-schema":
         {
-          db.read_schema(messageHandler, message);
+          db.read_schema(message);
           break;
         }
 
       case "write-item":
         {
-          db.write_item(messageHandler, message);
+          db.write_item(message);
           break;
         }
 
       case "write-schema":
         {
-          db.write_schema(messageHandler, message);
+          db.write_schema(message);
           break;
         }
 
       case "update-item":
         {
-          db.update_item(messageHandler, message);
+          db.update_item(message);
           break;
         }
 
       case "update-schema":
         {
-          db.update_schema(messageHandler, message);
+          db.update_schema(message);
           break;
         }
 
       case "delete-item":
         {
-          db.delete_item(messageHandler, message);
+          db.delete_item(message);
           break;
         }
 
       case "delete-schema":
         {
-          db.delete_schema(messageHandler, message);
+          db.delete_schema(message);
           break;
         }
 
       case "search-attribute":
         {
-          db.search_attribute(messageHandler, message);
+          db.search_attribute(message);
           break;
         }
     }
-
-    return messageHandler;
   }
 }
