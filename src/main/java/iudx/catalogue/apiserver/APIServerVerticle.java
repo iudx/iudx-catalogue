@@ -167,34 +167,34 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
           body -> {
             try {
               request_body = body.toJsonObject();
+              DeliveryOptions database_action = new DeliveryOptions();
+              database_action.addHeader("action", "write-schema");
+
+              vertx
+                  .eventBus()
+                  .send(
+                      "database",
+                      request_body,
+                      database_action,
+                      database_reply -> {
+                        if (database_reply.succeeded()) {
+                          resp.setStatusCode(200).end();
+                          return;
+                        } else if (database_reply.failed()) {
+                          logger.info("Database Failed");
+                          resp.setStatusCode(500).end();
+                          return;
+                        } else {
+                          resp.setStatusCode(200).end();
+                          return;
+                        }
+                      });
             } catch (Exception e) {
               resp.setStatusCode(400).end("Invalid schema: Not a Json Object");
               return;
             }
           });
 
-      DeliveryOptions database_action = new DeliveryOptions();
-      database_action.addHeader("action", "write-schema");
-
-      vertx
-          .eventBus()
-          .send(
-              "database",
-              request_body,
-              database_action,
-              database_reply -> {
-                if (database_reply.succeeded()) {
-                  resp.setStatusCode(200).end();
-                  return;
-                } else if (database_reply.failed()) {
-                  logger.info("Database Failed");
-                  resp.setStatusCode(500).end();
-                  return;
-                } else {
-                  resp.setStatusCode(200).end();
-                  return;
-                }
-              });
     } else {
       logger.info("End-Point Not Found");
       resp.setStatusCode(404).end();
