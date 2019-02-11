@@ -7,9 +7,13 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.ext.mongo.FindOptions;
 import io.vertx.ext.mongo.MongoClient;
+import iudx.catalogue.apiserver.APIServerVerticle;
+
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Logger;
+
 import org.apache.commons.lang3.StringUtils;
 
 public class MongoDB extends AbstractVerticle implements DatabaseInterface {
@@ -39,7 +43,11 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
         res -> {
           if (res.succeeded()) {
             // Send back the response
-            message.reply(res.result());
+        	  JsonArray rep = new JsonArray();
+        	  for(JsonObject j:res.result()) {
+        		  rep.add(j);
+        	  }
+            message.reply(rep);
           } else {
             message.fail(0, "failure");
           }
@@ -52,12 +60,13 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     JsonObject request_body = (JsonObject) message.body();
     JsonObject query = new JsonObject();
     JsonObject fields = new JsonObject();
+    
 
     // Populate query
     Iterator<Map.Entry<String, Object>> it = request_body.iterator();
     while (it.hasNext()) {
       String key = it.next().getKey();
-      JsonArray values = (JsonArray) it.next().getValue();
+      JsonArray values = request_body.getJsonArray(key);
       if (!key.equalsIgnoreCase("attributeFilter")) {
         for (int i = 0; i < values.size(); i++) {
           query.put(key, values.getString(i));
