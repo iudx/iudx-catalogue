@@ -26,47 +26,39 @@ public class ValidatorVerticle extends AbstractVerticle {
         .consumer(
             "validator",
             message -> {
-              Future<Void> requestHandler = validateRequest(message);
-
-              if (requestHandler.succeeded()) {
-                message.reply("success");
-              } else {
-                message.fail(0, "failure");
-              }
+              validateRequest(message);
             });
   }
 
-  private Future<Void> validateRequest(Message<Object> message) {
-    // TODO Auto-generated method stub
+  private void validateRequest(Message<Object> message) {
+
     logger.info("Validator Verticle received message.body() = " + message.headers());
 
     action = message.headers().get("action");
 
-    Future<Void> messageHandler = Future.future();
-
     switch (action) {
       case "validate-item":
         {
-          validate_item(messageHandler, message);
+          validate_item(message);
           break;
         }
     }
-
-    return messageHandler;
   }
 
-  private void validate_item(Future<Void> messageHandler, Message<Object> message) {
-    // TODO Auto-generated method stub
+  private void validate_item(Message<Object> message) {
     // Implement the validation schema block
 
     JsonObject item = (JsonObject) message.body();
 
     // Get schema from database and validate
     String schemaID = item.getString("refCatalogueSchema");
+
     DeliveryOptions database_action = new DeliveryOptions();
     database_action.addHeader("action", "read-schema");
+
     JsonObject request_body = new JsonObject();
     request_body.put("id", schemaID);
+
     vertx
         .eventBus()
         .send(
@@ -77,12 +69,16 @@ public class ValidatorVerticle extends AbstractVerticle {
               if (database_reply.succeeded()) {
                 logger.info(database_reply.result().body().toString());
                 JsonObject schema = (JsonObject) database_reply.result().body();
-                isValid.validate_item(messageHandler, item, schema);
-
+                try {
+                  isValid.validate_item(item, schema);
+                } catch (Exception e) {
+                  message.fail(0, "fail");
+                }
+                message.reply("success");
               } else if (database_reply.failed()) {
-                messageHandler.fail(database_reply.cause());
+                message.fail(0, database_reply.cause().toString());
               } else {
-                messageHandler.failed();
+                message.fail(0, "fail");
               }
             });
   }
