@@ -3,7 +3,6 @@ package iudx.catalogue.database;
 import java.util.logging.Logger;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
-import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
 
@@ -12,19 +11,14 @@ public class DatabaseVerticle extends AbstractVerticle {
   private static final Logger logger = Logger.getLogger(DatabaseVerticle.class.getName());
   private String action;
   private DatabaseInterface db;
-  private static final String database_uri = "mongodb://localhost:27017";
+  private String database_uri;
   private static final String database_name = "catalogue";
+  private JsonObject mongoconfig;
 
-  public DatabaseVerticle(Vertx vertx, String which_database) {
+  public DatabaseVerticle(String which_database) {
 
     if (which_database == "mongo") {
-
       db = new MongoDB("items", "schemas");
-
-      JsonObject mongoconfig =
-          new JsonObject().put("connection_string", database_uri).put("db_name", database_name);
-
-      db.init_db(vertx, mongoconfig);
     }
   }
 
@@ -39,6 +33,17 @@ public class DatabaseVerticle extends AbstractVerticle {
             message -> {
               validateRequest(message);
             });
+
+    database_uri =
+        "mongodb://"
+            + config().getString("mongo_host", "localhost")
+            + ":"
+            + config().getInteger("mongo_port", 27017).toString();
+
+    this.mongoconfig =
+        new JsonObject().put("connection_string", database_uri).put("db_name", database_name);
+
+    db.init_db(vertx, mongoconfig);
   }
 
   private void validateRequest(Message<Object> message) {
