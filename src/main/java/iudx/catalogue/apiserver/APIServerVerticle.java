@@ -207,13 +207,21 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
     String[] arr = s.split(",");
     for (String a : arr) {
       if (a.charAt(0) == '(' && a.charAt(a.length() - 1) == ')') {
-        values.add(a.substring(1, a.length() - 1));
+        if (a.length() > 2) {
+          values.add(a.substring(1, a.length() - 1));
+        }
       } else if (a.charAt(0) == '(') {
-        values.add(a.substring(1));
+        if (a.length() > 1) {
+          values.add(a.substring(1));
+        }
       } else if (a.charAt(a.length() - 1) == ')') {
-        values.add(a.substring(0, a.length() - 1));
+        if (a.length() > 1) {
+          values.add(a.substring(0, a.length() - 1));
+        }
       } else {
-        values.add(a);
+        if (a.length() > 0) {
+          values.add(a);
+        }
       }
     }
 
