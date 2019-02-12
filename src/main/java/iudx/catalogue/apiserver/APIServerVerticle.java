@@ -207,13 +207,21 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
     String[] arr = s.split(",");
     for (String a : arr) {
       if (a.charAt(0) == '(' && a.charAt(a.length() - 1) == ')') {
-        values.add(a.substring(1, a.length() - 1));
+        if (a.length() > 2) {
+          values.add(a.substring(1, a.length() - 1));
+        }
       } else if (a.charAt(0) == '(') {
-        values.add(a.substring(1));
+        if (a.length() > 1) {
+          values.add(a.substring(1));
+        }
       } else if (a.charAt(a.length() - 1) == ')') {
-        values.add(a.substring(0, a.length() - 1));
+        if (a.length() > 1) {
+          values.add(a.substring(0, a.length() - 1));
+        }
       } else {
-        values.add(a);
+        if (a.length() > 0) {
+          values.add(a);
+        }
       }
     }
 
@@ -255,7 +263,7 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
               database_reply -> {
                 if (database_reply.succeeded()) {
                   logger.info(database_reply.result().body().toString());
-                  resp.setStatusCode(200).end(database_reply.result().body().toString());
+                  resp.setStatusCode(200).end(((JsonArray) database_reply.result().body()).encodePrettily());
                   return;
                 } else if (database_reply.failed()) {
                   logger.info("Search Failed");
@@ -290,7 +298,7 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
               database_reply -> {
                 if (database_reply.succeeded()) {
                   logger.info(database_reply.result().body().toString());
-                  resp.setStatusCode(200).end(database_reply.result().body().toString());
+                  resp.setStatusCode(200).end(((JsonArray) database_reply.result().body()).encodePrettily());
                   return;
                 } else if (database_reply.failed()) {
                   logger.info("Validator Failed");
@@ -325,7 +333,8 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
               database_reply -> {
                 if (database_reply.succeeded()) {
                   logger.info(database_reply.result().body().toString());
-                  resp.setStatusCode(200).end(database_reply.result().body().toString());
+                  resp.setStatusCode(200)
+                      .end(((JsonArray) database_reply.result().body()).encodePrettily());
                   return;
                 } else if (database_reply.failed()) {
                   logger.info("Validator Failed");

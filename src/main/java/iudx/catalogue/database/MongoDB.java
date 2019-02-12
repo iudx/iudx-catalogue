@@ -43,10 +43,10 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
         res -> {
           if (res.succeeded()) {
             // Send back the response
-        	  JsonArray rep = new JsonArray();
-        	  for(JsonObject j:res.result()) {
-        		  rep.add(j);
-        	  }
+            JsonArray rep = new JsonArray();
+            for (JsonObject j : res.result()) {
+              rep.add(j);
+            }
             message.reply(rep);
           } else {
             message.fail(0, "failure");
@@ -60,7 +60,6 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     JsonObject request_body = (JsonObject) message.body();
     JsonObject query = new JsonObject();
     JsonObject fields = new JsonObject();
-    
 
     // Populate query
     Iterator<Map.Entry<String, Object>> it = request_body.iterator();
@@ -74,10 +73,15 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
       }
     }
 
+    // Do not output the _id field of mongo
+    fields.put("_id", 0);
+
     // Populate fields
-    JsonArray filter = request_body.getJsonArray("attributeFilter");
-    for (int i = 0; i < filter.size(); i++) {
-      fields.put(filter.getString(i), 1);
+    if (request_body.containsKey("attributeFilter")) {
+      JsonArray filter = request_body.getJsonArray("attributeFilter");
+      for (int i = 0; i < filter.size(); i++) {
+        fields.put(filter.getString(i), 1);
+      }
     }
 
     // Call mongo find
