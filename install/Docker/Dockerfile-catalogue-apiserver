@@ -1,0 +1,12 @@
+FROM openjdk:11.0.1-jre-slim
+
+RUN apt-get update		&& \
+    apt-get -y upgrade && \ 
+    apt-get install net-tools && \ 
+    apt-get install bash-completion
+
+COPY start.sh /home
+COPY vertx-test-0.0.1-SNAPSHOT-jar-with-dependencies.jar /home
+COPY my-keystore.jks /home
+
+CMD tail -f /dev/null 

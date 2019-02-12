@@ -1,0 +1,28 @@
+version: "3"
+
+networks:
+  iudx-net:
+    driver: bridge
+
+services:
+
+   mongodb:
+    image: vasanthrajaraman/catalogue-database-mongodb
+    container_name: catalogue-database-mongodb
+    hostname: catalogue-database-mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+      - "28017:28017"
+    networks:
+      - iudx-net
+ 
+   vertx:
+    image: vasanthrajaraman/catalogue-apiserver
+    container_name: catalogue-apiserver
+    hostname: catalogue-apiserver
+    restart: always
+    ports:
+      - "8444:8443"
+    networks:
+      - iudx-net
