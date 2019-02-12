@@ -29,7 +29,7 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
   @Override
   public void start(Future<Void> startFuture) {
 
-    int port = 8443;
+    int port = config().getInteger("http.port", 8443);
     server =
         vertx.createHttpServer(
             new HttpServerOptions()
