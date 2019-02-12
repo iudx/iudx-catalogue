@@ -235,20 +235,22 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
     if (event.method().toString().equalsIgnoreCase("GET")) {
       String query = request.query();
       logger.info(query);
-
-      String[] query_parameters = query.split("\\&");
-      int query_parameter_length = query_parameters.length;
-      logger.info(Integer.toString(query_parameter_length));
-
       request_body = new JsonObject();
 
-      for (int i = 0; i < query_parameter_length; i++) {
-        request_body.put(
-            query_parameters[i].split("\\=")[0],
-            changeToArray(query_parameters[i].split("\\=")[1]));
-        logger.info(query_parameters[i]);
+      if (!query.equals("") && query != null) {
+        query = String.join(" ", query.split("\\%20"));
+        String[] query_parameters = query.split("\\&");
+        int query_parameter_length = query_parameters.length;
+        logger.info(Integer.toString(query_parameter_length));
+
+        for (int i = 0; i < query_parameter_length; i++) {
+          request_body.put(
+              query_parameters[i].split("\\=")[0],
+              changeToArray(query_parameters[i].split("\\=")[1]));
+          logger.info(query_parameters[i]);
+        }
+        logger.info(request_body.toString());
       }
-      logger.info(request_body.toString());
 
       DeliveryOptions database_action = new DeliveryOptions();
       logger.info(query);
@@ -263,7 +265,8 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
               database_reply -> {
                 if (database_reply.succeeded()) {
                   logger.info(database_reply.result().body().toString());
-                  resp.setStatusCode(200).end(((JsonArray) database_reply.result().body()).encodePrettily());
+                  resp.setStatusCode(200)
+                      .end(((JsonArray) database_reply.result().body()).encodePrettily());
                   return;
                 } else if (database_reply.failed()) {
                   logger.info("Search Failed");
@@ -298,7 +301,8 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
               database_reply -> {
                 if (database_reply.succeeded()) {
                   logger.info(database_reply.result().body().toString());
-                  resp.setStatusCode(200).end(((JsonArray) database_reply.result().body()).encodePrettily());
+                  resp.setStatusCode(200)
+                      .end(((JsonArray) database_reply.result().body()).encodePrettily());
                   return;
                 } else if (database_reply.failed()) {
                   logger.info("Validator Failed");
