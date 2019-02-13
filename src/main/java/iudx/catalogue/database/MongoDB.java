@@ -103,7 +103,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     JsonObject request_body = (JsonObject) message.body();
 
     // Populate query
-    query.put("UUID", request_body.getString("itemID"));
+    query.put("UUID", request_body.getString("id"));
 
     // Call mongo find
     mongo_find(ITEM_COLLECTION, query, new FindOptions(), message);
@@ -129,7 +129,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     JsonObject m = (JsonObject) message.body();
     JsonObject query = new JsonObject();
 
-    query.put("UUID", m.getString("schema"));
+    query.put("UUID", m.getString("id"));
 
     mongo.findOne(
         SCHEMA_COLLECTION,
@@ -216,12 +216,42 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   @Override
   public void delete_item(Message<Object> message) {
     // TODO Auto-generated method stub
+    JsonObject query = new JsonObject();
+    JsonObject request_body = (JsonObject) message.body();
 
+    // Populate query
+    query.put("UUID", request_body.getString("id"));
+
+    mongo.removeDocument(
+        ITEM_COLLECTION,
+        query,
+        res -> {
+          if (res.succeeded()) {
+            message.reply("Success");
+          } else {
+            message.fail(0, "Failure");
+          }
+        });
   }
 
   @Override
   public void delete_schema(Message<Object> message) {
     // TODO Auto-generated method stub
+    JsonObject query = new JsonObject();
+    JsonObject request_body = (JsonObject) message.body();
 
+    // Populate query
+    query.put("UUID", request_body.getString("id"));
+
+    mongo.removeDocument(
+        SCHEMA_COLLECTION,
+        query,
+        res -> {
+          if (res.succeeded()) {
+            message.reply("Success");
+          } else {
+            message.fail(0, "Failure");
+          }
+        });
   }
 }
