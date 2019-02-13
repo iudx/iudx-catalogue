@@ -103,7 +103,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     JsonObject request_body = (JsonObject) message.body();
 
     // Populate query
-    query.put("UUID", request_body.getString("itemID"));
+    query.put("UUID", request_body.getString("id"));
 
     // Call mongo find
     mongo_find(ITEM_COLLECTION, query, new FindOptions(), message);
@@ -129,7 +129,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     JsonObject m = (JsonObject) message.body();
     JsonObject query = new JsonObject();
 
-    query.put("UUID", m.getString("schema"));
+    query.put("UUID", m.getString("id"));
 
     mongo.findOne(
         SCHEMA_COLLECTION,
