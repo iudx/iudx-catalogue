@@ -216,12 +216,42 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   @Override
   public void delete_item(Message<Object> message) {
     // TODO Auto-generated method stub
+    JsonObject query = new JsonObject();
+    JsonObject request_body = (JsonObject) message.body();
 
+    // Populate query
+    query.put("UUID", request_body.getString("id"));
+
+    mongo.removeDocument(
+        ITEM_COLLECTION,
+        query,
+        res -> {
+          if (res.succeeded()) {
+            message.reply("Success");
+          } else {
+            message.fail(0, "Failure");
+          }
+        });
   }
 
   @Override
   public void delete_schema(Message<Object> message) {
     // TODO Auto-generated method stub
+    JsonObject query = new JsonObject();
+    JsonObject request_body = (JsonObject) message.body();
 
+    // Populate query
+    query.put("UUID", request_body.getString("id"));
+
+    mongo.removeDocument(
+        SCHEMA_COLLECTION,
+        query,
+        res -> {
+          if (res.succeeded()) {
+            message.reply("Success");
+          } else {
+            message.fail(0, "Failure");
+          }
+        });
   }
 }
