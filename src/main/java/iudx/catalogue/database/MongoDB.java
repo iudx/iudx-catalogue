@@ -67,14 +67,21 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
       String key = it.next().getKey();
       JsonArray values = request_body.getJsonArray(key);
       if (!key.equalsIgnoreCase("attributeFilter")) {
-        for (int i = 0; i < values.size(); i++) {
-          query.put(key, values.getString(i));
+        if (key.equalsIgnoreCase("tags")) {
+          for (int i = 0; i < values.size(); i++) {
+            query.put("_tags", values.getString(i).toLowerCase());
+          }
+        } else {
+          for (int i = 0; i < values.size(); i++) {
+            query.put(key, values.getString(i));
+          }
         }
       }
     }
 
-    // Do not output the _id field of mongo
+    // Do not output the _id and _tags field of mongo
     fields.put("_id", 0);
+    fields.put("_tags", 0);
 
     // Populate fields
     if (request_body.containsKey("attributeFilter")) {
@@ -145,6 +152,16 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     updated.put("Status", "Live");
     updated.put("Version", version);
     updated.put("UUID", UUID.randomUUID().toString());
+
+    if (updated.containsKey("tags")) {
+      JsonArray tagsInLowerCase = new JsonArray();
+      JsonArray tags = updated.getJsonArray("tags");
+
+      for (Object i : tags) {
+        tagsInLowerCase.add(((String) i).toLowerCase());
+      }
+      updated.put("_tags", tagsInLowerCase);
+    }
 
     return updated;
   }
