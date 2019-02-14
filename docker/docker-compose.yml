@@ -4,6 +4,10 @@ networks:
   iudx-net:
     driver: bridge
 
+volumes:
+    mongodb:
+    mongodb-data:
+
 services:
 
    mongodb:
@@ -16,13 +20,23 @@ services:
       - "28017:28017"
     networks:
       - iudx-net
- 
+    volumes:
+      - mongodb:/var/lib/mongodb/
+      - mongodb-data:/data/db/ 
+      - ../setup/mongodb:/scripts/  
+
    vertx:
-    image: vasanthrajaraman/catalogue-apiserver
+    image: ideam/vertx
     container_name: catalogue-apiserver
     hostname: catalogue-apiserver
     restart: always
     ports:
-      - "8444:8443"
+      - "8443:8443"
     networks:
       - iudx-net
+    cap_add:
+      - ALL
+    volumes:
+      - ../../iudx-catalogue:/iudx-catalogue/
+      - ../setup/apiserver:/scripts/
+

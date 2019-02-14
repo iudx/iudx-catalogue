@@ -1,5 +1,5 @@
 {
-    "http.port" : 8444,
-    "mongo_host" : "localhost",
+    "http.port" : 8443,
+    "mongo_host" : "catalogue-database-mongodb",
     "mongo_port" : 27017
 }
