@@ -1,0 +1,41 @@
+#!bin/bash
+
+echo "Stopping Containers"
+docker-compose down -v
+
+echo "Starting Containers"
+docker-compose up -d
+
+until nc -z localhost 27017
+echo "Checking MondoDB status"
+
+do
+    sleep 1
+    echo "Waiting to boot..."
+done
+
+echo "MongoDB is up at PORT 27017"
+
+echo "Configuring Catalogue"
+sleep 5
+
+until nc -z localhost 27017
+do
+    sleep 1
+    echo "Waiting to boot..."
+done
+
+docker exec catalogue-database-mongodb ./scripts/mongodb_setup.sh
+
+echo "Catalogue Setup - Created Database (catalogue)"
+
+echo "Catalogue Setup - Created Collections (items and schemas)"
+
+echo "Catalogue Setup Completed"
+
+echo "Configuring Catalogue API Server"
+
+docker exec catalogue-apiserver ./scripts/apiserver_install.sh
+echo "Started Catalogue API Server"
+
+
