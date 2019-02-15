@@ -35,18 +35,27 @@ public class ValidatorVerticle extends AbstractVerticle {
     logger.info("Validator Verticle received message.body() = " + message.headers());
 
     action = message.headers().get("action");
+    boolean skip_validation = false;
+    if (message.headers().contains("skip_validation")) {
+      skip_validation = Boolean.parseBoolean(message.headers().get("skip_validation"));
+      logger.info("Skip validation found with value " + Boolean.toString(skip_validation));
+    }
 
     switch (action) {
       case "validate-item":
         {
-          validate_item(message);
-          break;
+          if (skip_validation) {
+            message.reply("success");
+
+          } else {
+            validate_item(message);
+            break;
+          }
         }
     }
   }
 
   private void validate_item(Message<Object> message) {
-    // Implement the validation schema block
 
     JsonObject item = (JsonObject) message.body();
 
