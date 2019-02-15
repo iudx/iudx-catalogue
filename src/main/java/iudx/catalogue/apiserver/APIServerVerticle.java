@@ -1,7 +1,10 @@
 package iudx.catalogue.apiserver;
 
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.logging.Logger;
-
+import org.json.JSONObject;
+import org.json.JSONTokener;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -47,54 +50,116 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
     request = event;
     resp = request.response();
     path = request.path();
-    logger.info(path);
 
-    if (path.contains("/cat/items/id/")) {
-      path_parameters = path.split("\\/");
-      itemID = path_parameters[4];
-      logger.info(itemID);
-      path = "/cat/items/id/";
-    } else if (path.contains("/cat/schemas/id/")) {
-      path_parameters = path.split("\\/");
-      schemaID = path_parameters[4];
-      logger.info(schemaID);
-      path = "/cat/schemas/id/";
-    }
+    boolean allowed_request = authenticate_request(event, path, "user.list");
 
-    switch (path) {
-      case "/cat/items":
-        {
-          create_items(request);
-          break;
-        }
-      case "/cat/schemas":
-        {
-          create_schema(request);
-          break;
-        }
-      case "/cat/search/attribute":
-        {
-          search_attribute(request);
-          break;
-        }
-      case "/cat/items/id/":
-        {
-          get_items(request);
-          break;
-        }
-      case "/cat/schemas/id/":
-        {
-          get_schemas(request);
-          break;
-        }
+    if (allowed_request == true) {
+      logger.info(path);
 
-      default:
-        resp.setStatusCode(400).end();
+      if (path.contains("/cat/items/id/")) {
+        path_parameters = path.split("\\/");
+        itemID = path_parameters[4];
+        logger.info(itemID);
+        path = "/cat/items/id/";
+      } else if (path.contains("/cat/schemas/id/")) {
+        path_parameters = path.split("\\/");
+        schemaID = path_parameters[4];
+        logger.info(schemaID);
+        path = "/cat/schemas/id/";
+      }
+
+      switch (path) {
+        case "/cat/items":
+          {
+            create_items(request);
+            break;
+          }
+        case "/cat/schemas":
+          {
+            create_schema(request);
+            break;
+          }
+        case "/cat/search/attribute":
+          {
+            search_attribute(request);
+            break;
+          }
+        case "/cat/items/id/":
+          {
+            get_items(request);
+            break;
+          }
+        case "/cat/schemas/id/":
+          {
+            get_schemas(request);
+            break;
+          }
+
+        default:
+          resp.setStatusCode(400).end();
+      }
     }
   }
 
+  private boolean authenticate_request(HttpServerRequest event,String path, String file_path) {
+    boolean allowed = false;
+    String userId = request.getHeader("userId");
+    String password = request.getHeader("password");
+
+    try (InputStream inputStream = new FileInputStream(file_path)) {
+      JSONObject users = new JSONObject(new JSONTokener(inputStream));
+      JSONObject user;
+      if (users.has(userId)) {
+         user = users.getJSONObject(userId);
+        if (password == user.getString("password")) {
+          allowed = true;
+        } else {
+          resp.setStatusCode(400).end("Your password is invalid");
+        }
+        
+        if(allowed == true) {
+          switch (path) {
+            case "/cat/items":
+            case "/cat/schemas":
+            {
+              if(! user.getBoolean("write_permission")) {
+                allowed = false;
+                resp.setStatusCode(400).end("You do not have write access to the server");
+              }
+              break;
+                
+            }
+
+            case "/cat/search/attribute":
+            case "/cat/items/id/":
+            case "/cat/schemas/id/":
+            case "/cat/search":
+            {
+              if(! user.getBoolean("read_permission")) {
+                allowed = false;
+                resp.setStatusCode(400).end("You do not have read access to the server");
+              }
+              break;
+            }
+            default:
+              resp.setStatusCode(400).end("Invalid path");
+          }
+
+      } else {
+        resp.setStatusCode(400).end("User " + userId + " is not registered");
+      }
+      
+
+      }
+
+    } catch (Exception e) {
+      System.out.println(e);
+    }
+    return allowed;
+  }
+
+
   private void create_items(HttpServerRequest event) {
-    // TODO Auto-generated method stub
 
     if (event.method().toString().equalsIgnoreCase("POST")) {
       request.bodyHandler(
@@ -160,7 +225,6 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
   }
 
   private void create_schema(HttpServerRequest event) {
-    // TODO Auto-generated method stub
 
     if (event.method().toString().equalsIgnoreCase("POST")) {
       request.bodyHandler(
@@ -203,6 +267,7 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
   }
 
   private JsonArray changeToArray(String s) {
+
     JsonArray values = new JsonArray();
     String[] arr = s.split(",");
     for (String a : arr) {
@@ -229,7 +294,7 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
   }
 
   private void search_attribute(HttpServerRequest event) {
-    // TODO Auto-generated method stub
+
     // Example Query : curl -ik -XGET
     // 'https://localhost:8443/cat/search/attribute?owner=rbccps&tags=(etoilet,sanitation)&attributeFilter=(id,latitude,longitude)'
     if (event.method().toString().equalsIgnoreCase("GET")) {
@@ -285,7 +350,7 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
   }
 
   private void get_items(HttpServerRequest event) {
-    // TODO Auto-generated method stub
+
     if (event.method().toString().equalsIgnoreCase("GET")) {
 
       DeliveryOptions database_action = new DeliveryOptions();
@@ -321,7 +386,7 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
   }
 
   private void get_schemas(HttpServerRequest event) {
-    // TODO Auto-generated method stub
+
     if (event.method().toString().equalsIgnoreCase("GET")) {
 
       DeliveryOptions database_action = new DeliveryOptions();
