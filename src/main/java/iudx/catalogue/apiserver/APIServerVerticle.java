@@ -94,6 +94,11 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
             get_schemas(request);
             break;
           }
+        case "/cat/search":
+          {
+            get_all(request);
+            break;
+          }
 
         default:
           resp.setStatusCode(400).end();
@@ -101,7 +106,7 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
     }
   }
 
-  private boolean authenticate_request(HttpServerRequest event,String path, String file_path) {
+  private boolean authenticate_request(HttpServerRequest event, String path, String file_path) {
     boolean allowed = false;
     String userId = request.getHeader("userId");
     String password = request.getHeader("password");
@@ -110,46 +115,42 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
       JSONObject users = new JSONObject(new JSONTokener(inputStream));
       JSONObject user;
       if (users.has(userId)) {
-         user = users.getJSONObject(userId);
+        user = users.getJSONObject(userId);
         if (password == user.getString("password")) {
           allowed = true;
         } else {
           resp.setStatusCode(400).end("Your password is invalid");
         }
-        
-        if(allowed == true) {
+
+        if (allowed == true) {
           switch (path) {
             case "/cat/items":
             case "/cat/schemas":
-            {
-              if(! user.getBoolean("write_permission")) {
-                allowed = false;
-                resp.setStatusCode(400).end("You do not have write access to the server");
+              {
+                if (!user.getBoolean("write_permission")) {
+                  allowed = false;
+                  resp.setStatusCode(400).end("You do not have write access to the server");
+                }
+                break;
               }
-              break;
-                
-            }
-
             case "/cat/search/attribute":
             case "/cat/items/id/":
             case "/cat/schemas/id/":
             case "/cat/search":
-            {
-              if(! user.getBoolean("read_permission")) {
-                allowed = false;
-                resp.setStatusCode(400).end("You do not have read access to the server");
+              {
+                if (!user.getBoolean("read_permission")) {
+                  allowed = false;
+                  resp.setStatusCode(400).end("You do not have read access to the server");
+                }
+                break;
               }
-              break;
-            }
             default:
               resp.setStatusCode(400).end("Invalid path");
           }
 
-      } else {
-        resp.setStatusCode(400).end("User " + userId + " is not registered");
-      }
-      
-
+        } else {
+          resp.setStatusCode(400).end("User " + userId + " is not registered");
+        }
       }
 
     } catch (Exception e) {
@@ -158,6 +159,41 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
     return allowed;
   }
 
+  private void get_all(HttpServerRequest event) {
+
+    if (event.method().toString().equalsIgnoreCase("GET")) {
+      request_body = new JsonObject();
+
+      DeliveryOptions database_action = new DeliveryOptions();
+      database_action.addHeader("action", "search-attribute");
+
+      vertx
+          .eventBus()
+          .send(
+              "database",
+              request_body,
+              database_action,
+              database_reply -> {
+                if (database_reply.succeeded()) {
+                  logger.info(database_reply.result().body().toString());
+                  resp.setStatusCode(200)
+                      .end(((JsonArray) database_reply.result().body()).encodePrettily());
+                  return;
+                } else if (database_reply.failed()) {
+                  logger.info("Search Failed");
+                  resp.setStatusCode(500).end();
+                  return;
+                } else {
+                  resp.setStatusCode(500).end();
+                  return;
+                }
+              });
+    } else {
+      logger.info("End-Point Not Found");
+      resp.setStatusCode(404).end();
+      return;
+    }
+  }
 
   private void create_items(HttpServerRequest event) {
 
