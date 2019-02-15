@@ -46,7 +46,17 @@ public class ValidatorVerticle extends AbstractVerticle {
   }
 
   private void validate_item(Message<Object> message) {
-    // Implement the validation schema block
+
+    boolean skip_validation = false;
+    if (message.headers().contains("skip_validation")) {
+      skip_validation = Boolean.parseBoolean(message.headers().get("skip_validation"));
+      logger.info("Skip validation found with value " + Boolean.toString(skip_validation));
+    }
+
+    if (skip_validation) {
+      message.reply("success");
+      return;
+    }
 
     JsonObject item = (JsonObject) message.body();
 

@@ -202,9 +202,13 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
           body -> {
             try {
               request_body = body.toJsonObject();
+              String skip_validation = event.getHeader("skip_validation");
 
               DeliveryOptions validator_action = new DeliveryOptions();
               validator_action.addHeader("action", "validate-item");
+              if (skip_validation != null) {
+                validator_action.addHeader("skip_validation", skip_validation);
+              }
 
               vertx
                   .eventBus()
