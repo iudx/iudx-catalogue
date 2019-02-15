@@ -1,5 +1,22 @@
 {
-	"vasanth": "v@rbccps",
-	"arun": "a@rbccps",
-	"shyamal": "s@rbccps"
+	"vasanth": {
+        "password": "vasanth@rbccps",
+        "write_permission": true,
+        "read_permission": true
+    },
+	"arun": {
+        "password": "arun@rbccps",
+        "write_permission": true,
+        "read_permission": true
+    },
+	"shyamal": {
+        "password": "shyamal@rbccps",
+        "write_permission": true,
+        "read_permission": true
+    },
+    "abhay":{
+        "password": "abhay@rbccps",
+        "write_permission": false,
+        "read_permission": true
+    }
 }
