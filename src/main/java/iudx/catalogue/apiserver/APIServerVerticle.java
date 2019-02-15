@@ -107,55 +107,63 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
   }
 
   private boolean authenticate_request(HttpServerRequest event, String path, String file_path) {
+
     boolean allowed = false;
     String userId = request.getHeader("userId");
     String password = request.getHeader("password");
 
-    try (InputStream inputStream = new FileInputStream(file_path)) {
-      JSONObject users = new JSONObject(new JSONTokener(inputStream));
-      JSONObject user;
-      if (users.has(userId)) {
-        user = users.getJSONObject(userId);
-        if (password == user.getString("password")) {
-          allowed = true;
-        } else {
-          resp.setStatusCode(400).end("Your password is invalid");
-        }
-
-        if (allowed == true) {
-          switch (path) {
-            case "/cat/items":
-            case "/cat/schemas":
-              {
-                if (!user.getBoolean("write_permission")) {
-                  allowed = false;
-                  resp.setStatusCode(400).end("You do not have write access to the server");
-                }
-                break;
-              }
-            case "/cat/search/attribute":
-            case "/cat/items/id/":
-            case "/cat/schemas/id/":
-            case "/cat/search":
-              {
-                if (!user.getBoolean("read_permission")) {
-                  allowed = false;
-                  resp.setStatusCode(400).end("You do not have read access to the server");
-                }
-                break;
-              }
-            default:
-              resp.setStatusCode(400).end("Invalid path");
+    if (userId != null && password != null) {
+      try (InputStream inputStream = new FileInputStream(file_path)) {
+        JSONObject users = new JSONObject(new JSONTokener(inputStream));
+        JSONObject user;
+        if (users.has(userId)) {
+          user = users.getJSONObject(userId);
+          if (password.equals(user.getString("password"))) {
+            allowed = true;
+          } else {
+            resp.setStatusCode(400).end("Your password is invalid");
           }
 
+          if (allowed == true) {
+            switch (path) {
+              case "/cat/items":
+              case "/cat/schemas":
+                {
+                  if (!user.getBoolean("write_permission")) {
+                    allowed = false;
+                    resp.setStatusCode(400).end("You do not have write access to the server");
+                  }
+                  break;
+                }
+
+              case "/cat/search/attribute":
+              case "/cat/items/id/":
+              case "/cat/schemas/id/":
+              case "/cat/search":
+                {
+                  if (!user.getBoolean("read_permission")) {
+                    allowed = false;
+                    resp.setStatusCode(400).end("You do not have read access to the server");
+                  }
+                  break;
+                }
+              default:
+                resp.setStatusCode(400).end("Invalid path");
+            }
+          }
         } else {
           resp.setStatusCode(400).end("User " + userId + " is not registered");
         }
+
+      } catch (Exception e) {
+        System.out.println(e);
       }
 
-    } catch (Exception e) {
-      System.out.println(e);
+    } else {
+      resp.setStatusCode(400).end("Add userId and password in the header of your request");
     }
+
+    logger.info("Authentication ended with flag : " + allowed);
     return allowed;
   }
 
