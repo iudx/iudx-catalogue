@@ -45,6 +45,9 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
             // Send back the response
             JsonArray rep = new JsonArray();
             for (JsonObject j : res.result()) {
+              if (j.containsKey("_tags")) {
+                j.remove("_tags");
+              }
               rep.add(j);
             }
             message.reply(rep);
@@ -81,7 +84,6 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 
     // Do not output the _id and _tags field of mongo
     fields.put("_id", 0);
-    fields.put("_tags", 0);
 
     // Populate fields
     if (request_body.containsKey("attributeFilter")) {
