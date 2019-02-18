@@ -1,2 +1,23 @@
 # iudx-catalogue
 An Open Source implementation of India Urban Data Exchange (IUDX) Catalogue Service and Search APIs using Vert.x, an event driven and non-blocking high performance reactive framework, for identifying assets and data resources in Smart Cities.
+
+Quickstart
+========== 
+
+#. Clone the repository::
+
+    git clone https://github.com/rbccps-iisc/iudx-catalogue.git
+    cd iudx-catalogue
+        
+
+#. If the host OS is not Ubuntu then install the following dependencies manually
+
+	- docker
+	- docker-compose
+    
+#. Start the installation::
+
+    cd docker
+    sh install
+    
+Catalogue will be up in https://localhost:8443/cat
