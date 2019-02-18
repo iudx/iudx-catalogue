@@ -51,9 +51,7 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
     resp = request.response();
     path = request.path();
 
-    boolean allowed_request = authenticate_request(event, path, "user.list");
-
-    if (allowed_request == true) {
+    if (authenticate_request(event, path, "user.list")) {
       logger.info(path);
 
       if (path.contains("/cat/items/id/")) {
