@@ -7,12 +7,10 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.ext.mongo.FindOptions;
 import io.vertx.ext.mongo.MongoClient;
-import iudx.catalogue.apiserver.APIServerVerticle;
 
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
-import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -179,7 +177,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
         updated_item,
         res -> {
           if (res.succeeded()) {
-            message.reply("success");
+            message.reply(updated_item.getString("UUID"));
           } else {
             message.fail(0, "failure");
           }
