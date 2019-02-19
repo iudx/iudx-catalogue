@@ -56,20 +56,20 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
       return;
     }
 
+    if (path.contains("/cat/items/id/")) {
+      path_parameters = path.split("\\/");
+      itemID = path_parameters[4];
+      logger.info(itemID);
+      path = "/cat/items/id/";
+    } else if (path.contains("/cat/schemas/id/")) {
+      path_parameters = path.split("\\/");
+      schemaID = path_parameters[4];
+      logger.info(schemaID);
+      path = "/cat/schemas/id/";
+    }
+
     if (authenticate_request(event, path, "user.list")) {
       logger.info(path);
-
-      if (path.contains("/cat/items/id/")) {
-        path_parameters = path.split("\\/");
-        itemID = path_parameters[4];
-        logger.info(itemID);
-        path = "/cat/items/id/";
-      } else if (path.contains("/cat/schemas/id/")) {
-        path_parameters = path.split("\\/");
-        schemaID = path_parameters[4];
-        logger.info(schemaID);
-        path = "/cat/schemas/id/";
-      }
 
       switch (path) {
         case "/cat/items":
