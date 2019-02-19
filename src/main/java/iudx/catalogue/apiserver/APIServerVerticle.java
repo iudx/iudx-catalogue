@@ -104,7 +104,7 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
           }
 
         default:
-          resp.setStatusCode(400).end();
+          resp.setStatusCode(404).end();
       }
     }
   }
@@ -134,7 +134,7 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
                 {
                   if (!user.getBoolean("write_permission")) {
                     allowed = false;
-                    resp.setStatusCode(400).end("You do not have write access to the server");
+                    resp.setStatusCode(401).end("You do not have write access to the server");
                   }
                   break;
                 }
@@ -146,12 +146,12 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
                 {
                   if (!user.getBoolean("read_permission")) {
                     allowed = false;
-                    resp.setStatusCode(400).end("You do not have read access to the server");
+                    resp.setStatusCode(401).end("You do not have read access to the server");
                   }
                   break;
                 }
               default:
-                resp.setStatusCode(400).end("Invalid path");
+                resp.setStatusCode(404).end("Invalid path");
             }
           }
         } else {
@@ -300,7 +300,7 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
                           resp.setStatusCode(500).end();
                           return;
                         } else {
-                          resp.setStatusCode(200).end();
+                          resp.setStatusCode(500).end();
                           return;
                         }
                       });
