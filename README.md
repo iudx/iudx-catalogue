@@ -8,9 +8,9 @@ Quickstart
 
     git clone https://github.com/rbccps-iisc/iudx-catalogue.git
     cd iudx-catalogue
-        
+      
 
-#. If the host OS is not Ubuntu then install the following dependencies manually
+#. Please install the following dependencies manually, skip if already installed
 
 	- docker
 	- docker-compose
@@ -20,4 +20,11 @@ Quickstart
     cd docker
     sh install
     
-Catalogue will be up in https://localhost:8443/cat
+Catalogue will be up in https://localhost:8443/
+
+
+#. Re-install::
+
+    cd docker
+    sh re-install apiserver (To re-install apiserver)
+    sh re-install mongodb (To re-install mongodb)
