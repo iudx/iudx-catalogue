@@ -1,0 +1,55 @@
+#!bin/bash
+
+echo "$@"
+
+if [ "$@" = "apiserver" ]; then
+	echo "Re-installing API Server"
+
+	echo "Stopping API Server Container"
+	docker stop catalogue-apiserver
+
+	echo "Deleting API Server Container"
+	docker rm -f catalogue-apiserver
+
+	echo "Starting Containers"
+	docker-compose up -d vertx
+
+	echo "Configuring Catalogue API Server"
+
+	docker exec catalogue-apiserver ./scripts/apiserver_install.sh
+	echo "Started Catalogue API Server"
+
+elif [ "$@" = "mongodb" ]; then
+	echo "Re-installing MongoDB Server"
+
+	echo "Stopping MongoDB Server Container"
+	docker stop catalogue-database-mongodb
+
+	echo "Deleting MongoDB Server Container"
+	docker rm -f catalogue-database-mongodb
+	
+	echo "Starting MongoDB Containers"
+	docker-compose up -d mongodb
+
+	until nc -z localhost 27017
+	
+	echo "Checking MondoDB status"
+
+	do
+	    sleep 1
+	    echo "Waiting to boot..."
+	done
+
+	echo "MongoDB is up at PORT 27017"
+
+	sleep 5
+
+	until nc -z localhost 27017
+	do
+	    sleep 1
+	    echo "Waiting to boot..."
+	done
+
+else
+	echo "Invalid argument passed."
+fi
