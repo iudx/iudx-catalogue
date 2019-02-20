@@ -68,20 +68,32 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
       path = "/cat/schemas/id/";
     }
 
-    if (authenticate_request(event, path, "user.list")) {
-      logger.info(path);
+    if (!event.method().toString().equalsIgnoreCase("GET")) {
+      if (authenticate_request(event, path, "user.list")) {
+        logger.info(path);
 
+        switch (path) {
+          case "/cat/items":
+            {
+              create_items(request);
+              break;
+            }
+          case "/cat/schemas":
+            {
+              create_schema(request);
+              break;
+            }
+          case "/cat/items/id/":
+            {
+              delete_items(request);
+              break;
+            }
+          default:
+            resp.setStatusCode(404).end();
+        }
+      }
+    } else {
       switch (path) {
-        case "/cat/items":
-          {
-            create_items(request);
-            break;
-          }
-        case "/cat/schemas":
-          {
-            create_schema(request);
-            break;
-          }
         case "/cat/search/attribute":
           {
             search_attribute(request);
@@ -89,11 +101,7 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
           }
         case "/cat/items/id/":
           {
-            if (event.method().toString().equalsIgnoreCase("GET")) {
-              get_items(request);
-            } else if (event.method().toString().equalsIgnoreCase("DELETE")) {
-              delete_items(request);
-            }
+            get_items(request);
             break;
           }
         case "/cat/schemas/id/":
@@ -106,7 +114,6 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
             get_all(request);
             break;
           }
-
         default:
           resp.setStatusCode(404).end();
       }
@@ -135,6 +142,7 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
             switch (path) {
               case "/cat/items":
               case "/cat/schemas":
+              case "/cat/items/id/":
                 {
                   if (!user.getBoolean("write_permission")) {
                     allowed = false;
@@ -142,20 +150,10 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
                   }
                   break;
                 }
-
-              case "/cat/search/attribute":
-              case "/cat/items/id/":
-              case "/cat/schemas/id/":
-              case "/cat/search":
-                {
-                  if (!user.getBoolean("read_permission")) {
-                    allowed = false;
-                    resp.setStatusCode(401).end("You do not have read access to the server");
-                  }
-                  break;
-                }
               default:
+                allowed = false;
                 resp.setStatusCode(404).end("Invalid path");
+                break;
             }
           }
         } else {
