@@ -242,7 +242,7 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
                                   database_reply -> {
                                     if (database_reply.succeeded()) {
                                       String UUID = database_reply.result().body().toString();
-                                      resp.setStatusCode(200).end(UUID);
+                                      resp.setStatusCode(201).end(UUID);
                                       return;
                                     } else if (database_reply.failed()) {
                                       logger.info("Database Failed");
@@ -294,7 +294,7 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
                       database_action,
                       database_reply -> {
                         if (database_reply.succeeded()) {
-                          resp.setStatusCode(200).end();
+                          resp.setStatusCode(201).end();
                           return;
                         } else if (database_reply.failed()) {
                           logger.info("Database Failed");
