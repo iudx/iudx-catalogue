@@ -89,7 +89,11 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
           }
         case "/cat/items/id/":
           {
-            get_items(request);
+            if (event.method().toString().equalsIgnoreCase("GET")) {
+              get_items(request);
+            } else if (event.method().toString().equalsIgnoreCase("DELETE")) {
+              delete_items(request);
+            }
             break;
           }
         case "/cat/schemas/id/":
@@ -422,7 +426,7 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
                       .end(((JsonArray) database_reply.result().body()).encodePrettily());
                   return;
                 } else if (database_reply.failed()) {
-                  logger.info("Validator Failed");
+                  logger.info("Database Failed");
                   resp.setStatusCode(500).end();
                   return;
                 } else {
@@ -459,6 +463,41 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
                   return;
                 } else if (database_reply.failed()) {
                   logger.info("Validator Failed");
+                  resp.setStatusCode(500).end();
+                  return;
+                } else {
+                  resp.setStatusCode(500).end();
+                  return;
+                }
+              });
+    } else {
+      logger.info("End-Point Not Found");
+      resp.setStatusCode(404).end();
+      return;
+    }
+  }
+
+  private void delete_items(HttpServerRequest event) {
+
+    if (event.method().toString().equalsIgnoreCase("DELETE")) {
+
+      DeliveryOptions database_action = new DeliveryOptions();
+      database_action.addHeader("action", "delete-item");
+      request_body = new JsonObject();
+      request_body.put("id", itemID);
+      vertx
+          .eventBus()
+          .send(
+              "database",
+              request_body,
+              database_action,
+              database_reply -> {
+                if (database_reply.succeeded()) {
+                  logger.info(database_reply.result().body().toString());
+                  resp.setStatusCode(204).end();
+                  return;
+                } else if (database_reply.failed()) {
+                  logger.info("Database Failed");
                   resp.setStatusCode(500).end();
                   return;
                 } else {
