@@ -85,7 +85,6 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
       }
     }
 
-    // Do not output the _id and _tags field of mongo
 
     // Populate fields
     if (request_body.containsKey("attributeFilter")) {
