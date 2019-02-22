@@ -17,7 +17,9 @@
   <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet">
   <!-- Icons -->
   <link href="assets/vendor/nucleo/css/nucleo.css" rel="stylesheet">
-  <link href="assets/vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+  <!-- <link href="assets/vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet"> -->
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+
   <!-- Argon CSS -->
   <link type="text/css" href="assets/css/argon.css?v=1.0.1" rel="stylesheet">
   <!-- Docs CSS -->
@@ -50,21 +52,21 @@
                 </button>
               </div>
             </div>
-          </div><!-- 
-          <ul class="navbar-nav navbar-nav-hover align-items-lg-center">
+          </div> 
+          <!-- <ul class="navbar-nav navbar-nav-hover align-items-lg-center">
             <li class="nav-item dropdown">
               <a href="#" class="nav-link" data-toggle="dropdown" href="#" role="button">
                 <i class="ni ni-ui-04 d-lg-none"></i>
-                <span class="nav-link-inner--text">Components</span>
-              </a> -->
-              <!-- <div class="dropdown-menu dropdown-menu-xl">
+                <span class="nav-link-inner--text">Explore</span>
+              </a> 
+               <div class="dropdown-menu dropdown-menu-xl">
                 <div class="dropdown-menu-inner">
                   <a href="" class="media d-flex align-items-center">
                     <div class="icon icon-shape bg-gradient-primary rounded-circle text-white">
                       <i class="ni ni-spaceship"></i>
                     </div>
                     <div class="media-body ml-3">
-                      <h6 class="heading text-primary mb-md-1">Getting started</h6>
+                      <h6 class="heading text-primary mb-md-1">Search Catalogue</h6>
                       <p class="description d-none d-md-inline-block mb-0">Learn how to use Argon compiling Scss, change brand colors and more.</p>
                     </div>
                   </a>
@@ -73,7 +75,7 @@
                       <i class="ni ni-palette"></i>
                     </div>
                     <div class="media-body ml-3">
-                      <h6 class="heading text-primary mb-md-1">Foundation</h6>
+                      <h6 class="heading text-primary mb-md-1">Documentation</h6>
                       <p class="description d-none d-md-inline-block mb-0">Learn more about colors, typography, icons and the grid system we used for Argon.</p>
                     </div>
                   </a>
@@ -82,14 +84,14 @@
                       <i class="ni ni-ui-04"></i>
                     </div>
                     <div class="media-body ml-3">
-                      <h5 class="heading text-warning mb-md-1">Components</h5>
+                      <h6 class="heading text-warning mb-md-1">Source Code</h6>
                       <p class="description d-none d-md-inline-block mb-0">Browse our 50 beautiful handcrafted components offered in the Free version.</p>
                     </div>
                   </a>
                 </div>
               </div> 
-            </li>-->
-            <!-- <li class="nav-item dropdown">
+            </li>
+            <li class="nav-item dropdown">
               <a href="#" class="nav-link" data-toggle="dropdown" href="#" role="button">
                 <i class="ni ni-collection d-lg-none"></i>
                 <span class="nav-link-inner--text">Examples</span>
@@ -100,9 +102,9 @@
                 <a href="../examples/login.html" class="dropdown-item">Login</a>
                 <a href="../examples/register.html" class="dropdown-item">Register</a>
               </div>
-            </li> -->
-          <!-- </ul> -->
-          <ul class="navbar-nav align-items-lg-center ml-lg-auto">
+            </li>
+          </ul>  -->
+          <ul class="navbar-nav navbar-nav-hover align-items-lg-center ml-lg-auto">
             <!-- <li class="nav-item">
               <a class="nav-link nav-link-icon" href="#" target="_blank" data-toggle="tooltip" title="Like us on Facebook">
                 <i class="fa fa-facebook-square"></i>
@@ -122,8 +124,20 @@
               </a>
             </li> -->
             <li class="nav-item">
-              <a class="nav-link nav-link-icon" href="#" target="_blank" data-toggle="tooltip" title="Star us on Github">
-                <i class="fa fa-github"></i>
+              <a class="nav-link nav-link-icon" href="/cat/search" target="_blank" data-toggle="tooltip" title="Search Catalogue">
+                <i class="fas fa-search"></i>
+                <span class="nav-link-inner--text d-lg-none">Search</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link nav-link-icon" href="#" target="_blank" data-toggle="tooltip" title="Documentation">
+                <i class="far fa-file-alt"></i>
+                <span class="nav-link-inner--text d-lg-none">Documentation</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link nav-link-icon" href="https://github.com/rbccps-iisc/iudx-catalogue" target="_blank" data-toggle="tooltip" title="Source Code">
+                <i class="fab fa-github"></i>
                 <span class="nav-link-inner--text d-lg-none">Github</span>
               </a>
             </li>
@@ -167,8 +181,8 @@
                   <!-- <a href="#" class="btn btn-info btn-icon mb-3 mb-sm-0">
                     <span class="btn-inner--icon"><i class="fa fa-code"></i></span>
                     <span class="btn-inner--text">Components</span>
-                  </a> -->
-                  <!-- <a href="#" class="btn btn-white btn-icon mb-3 mb-sm-0">
+                  </a>
+                  <a href="#" class="btn btn-white btn-icon mb-3 mb-sm-0">
                     <span class="btn-inner--icon"><i class="ni ni-cloud-download-95"></i></span>
                     <span class="btn-inner--text">Download HTML</span>
                   </a> -->
@@ -195,14 +209,14 @@
                 <div class="card card-lift--hover shadow border-0">
                   <div class="card-body py-5">
                     <div class="icon icon-shape icon-shape-primary rounded-circle mb-4">
-                      <i class="ni ni-check-bold"></i>
+                      <i class="fas fa-info"></i>
                     </div>
                     <h6 class="text-primary text-uppercase">“Meta-data” about “data”</h6>
                     <p class="description mt-3">Provides Richer interpretation of data</p>
                     <div>
-                      <span class="badge badge-pill badge-primary">design</span>
-                      <span class="badge badge-pill badge-primary">system</span>
-                      <span class="badge badge-pill badge-primary">creative</span>
+                      <span class="badge badge-pill badge-primary">Meta-Data</span>
+                      <span class="badge badge-pill badge-primary">Rich</span>
+                      <span class="badge badge-pill badge-primary">Interpretation</span>
                     </div>
                     <a href="#" class="btn btn-primary mt-4">Learn more</a>
                   </div>
@@ -212,14 +226,14 @@
                 <div class="card card-lift--hover shadow border-0">
                   <div class="card-body py-5">
                     <div class="icon icon-shape icon-shape-success rounded-circle mb-4">
-                      <i class="ni ni-istanbul"></i>
+                      <i class="fas fa-list"></i>
                     </div>
                     <h6 class="text-success text-uppercase">List of items</h6>
                     <p class="description mt-3">Storing meta-information about resources</p>
                     <div>
-                      <span class="badge badge-pill badge-success">business</span>
-                      <span class="badge badge-pill badge-success">vision</span>
-                      <span class="badge badge-pill badge-success">success</span>
+                      <span class="badge badge-pill badge-success">Meta-Info</span>
+                      <span class="badge badge-pill badge-success">Resources</span>
+                      <span class="badge badge-pill badge-success">Store</span>
                     </div>
                     <a href="#" class="btn btn-success mt-4">Learn more</a>
                   </div>
@@ -232,11 +246,11 @@
                       <i class="ni ni-planet"></i>
                     </div>
                     <h6 class="text-warning text-uppercase">Services</h6>
-                    <p class="description mt-3">Search/ADD/MODIFY</p>
+                    <p class="description mt-3">Search/Add/Update Catlaogue content</p>
                     <div>
-                      <span class="badge badge-pill badge-warning">marketing</span>
-                      <span class="badge badge-pill badge-warning">product</span>
-                      <span class="badge badge-pill badge-warning">launch</span>
+                      <span class="badge badge-pill badge-warning">Search</span>
+                      <span class="badge badge-pill badge-warning">Add</span>
+                      <span class="badge badge-pill badge-warning">Update</span>
                     </div>
                     <a href="#" class="btn btn-warning mt-4">Learn more</a>
                   </div>
@@ -256,48 +270,91 @@
           <div class="col-md-6 order-md-1">
             <div class="pr-md-5">
               <div class="icon icon-lg icon-shape icon-shape-success shadow rounded-circle mb-5">
-                <i class="ni ni-settings-gear-65"></i>
+                <i class="fas fa-asterisk"></i>
               </div>
-              <h3>Awesome features</h3>
-              <p>The kit comes with three pre-built pages to help you get started faster. You can change the text and images and you're good to go.</p>
-              <ul class="list-unstyled mt-5">
+              <h3>Catalogue Details</h3>
+              <!-- <p>The kit comes with three pre-built pages to help you get started faster. You can change the text and images and you're good to go.</p> -->
+              <ul class="mt-5">
+              <!-- <ul class="list-unstyled mt-5"> -->
                 <li class="py-2">
                   <div class="d-flex align-items-center">
-                    <div>
+                    <!-- <div>
                       <div class="badge badge-circle badge-success mr-3">
                         <i class="ni ni-settings-gear-65"></i>
                       </div>
-                    </div>
+                    </div> -->
                     <div>
-                      <h6 class="mb-0">Carefully crafted components</h6>
+                      <h6 class="mb-0">A catalogue item is a JSON object</h6>
                     </div>
                   </div>
                 </li>
                 <li class="py-2">
                   <div class="d-flex align-items-center">
-                    <div>
+                    <!-- <div>
                       <div class="badge badge-circle badge-success mr-3">
                         <i class="ni ni-html5"></i>
                       </div>
-                    </div>
+                    </div> -->
                     <div>
-                      <h6 class="mb-0">Amazing page examples</h6>
+                      <h6 class="mb-0">Each item is described by a schema which is specified using JSON-schema</h6>
+                      <ul>
+                        <li>Used to perform type-checking for every item inserted in catalogue</li>
+                        <li>Schemas are extendible</li>
+                        <li>Schemas are also stored in catalogue
+                          <ul>
+                            <li>Searchable</li>  
+                          </ul>
+                        </li>
+                      </ul>
                     </div>
                   </div>
                 </li>
                 <li class="py-2">
                   <div class="d-flex align-items-center">
-                    <div>
+                    <!-- <div>
                       <div class="badge badge-circle badge-success mr-3">
                         <i class="ni ni-satisfied"></i>
                       </div>
-                    </div>
+                    </div> -->
                     <div>
-                      <h6 class="mb-0">Super friendly support team</h6>
+                      <h6 class="mb-0">Every item schema extends a schema from a set of  “base-schemas”</h6>
+                      <ul>
+                        <li>Way to mandate a few required information fields for each item</li>
+                        <li>A catalogue item provider can extend a base schema to provide additional fields</li>
+                      </ul>
                     </div>
                   </div>
                 </li>
               </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  <!--  <section class="section bg-secondary">
+      <div class="container">
+        <div class="row row-grid align-items-center">
+          <div class="col-md-6">
+            <div class="card bg-default shadow border-0">
+              <img src="assets/img/flow_diagram/discover_data.png" class="card-img-top">
+              <blockquote class="card-blockquote">
+                <svg preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 583 95" class="svg-bg">
+                  <polygon points="0,52 583,95 0,95" class="fill-default" />
+                  <polygon points="0,42 583,95 683,0 0,95" opacity=".2" class="fill-default" />
+                </svg>
+                <h4 class="display-3 font-weight-bold text-white">Design System</h4>
+                <p class="lead text-italic text-white">Create and manage metadata of resources</p>
+              </blockquote>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="pl-md-5">
+              <div class="icon icon-lg icon-shape icon-shape-warning shadow rounded-circle mb-5">
+                <i class="ni ni-settings"></i>
+              </div>
+              <h3>Create and manage metadata of resources</h3>
+              <p class="lead">In this use case, a Consumer is using the search APIs of the Catalogue Service to find interested entities. Once the entities are identified, a Consumer using Consumer App can request for consent and access their data. </p>
+              <a href="#" class="font-weight-bold text-warning mt-5">A beautiful UI Kit for impactful websites</a>
             </div>
           </div>
         </div>
@@ -308,14 +365,14 @@
         <div class="row row-grid align-items-center">
           <div class="col-md-6">
             <div class="card bg-default shadow border-0">
-              <img src="assets/img/theme/img-1-1200x1000.jpg" class="card-img-top">
+              <img src="assets/img/flow_diagram/d.png" class="card-img-top">
               <blockquote class="card-blockquote">
                 <svg preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 583 95" class="svg-bg">
                   <polygon points="0,52 583,95 0,95" class="fill-default" />
                   <polygon points="0,42 583,95 683,0 0,95" opacity=".2" class="fill-default" />
                 </svg>
                 <h4 class="display-3 font-weight-bold text-white">Design System</h4>
-                <p class="lead text-italic text-white">The Arctic Ocean freezes every winter and much of the sea-ice then thaws every summer, and that process will continue whatever happens.</p>
+                <p class="lead text-italic text-white">Discover Data</p>
               </blockquote>
             </div>
           </div>
@@ -324,17 +381,15 @@
               <div class="icon icon-lg icon-shape icon-shape-warning shadow rounded-circle mb-5">
                 <i class="ni ni-settings"></i>
               </div>
-              <h3>Our customers</h3>
-              <p class="lead">Don't let your uses guess by attaching tooltips and popoves to any element. Just make sure you enable them first via JavaScript.</p>
-              <p>The kit comes with three pre-built pages to help you get started faster. You can change the text and images and you're good to go.</p>
-              <p>The kit comes with three pre-built pages to help you get started faster. You can change the text and images and you're good to go.</p>
+              <h3>Discover Data</h3>
+              <p class="lead">In this use case, a Consumer is using the search APIs of the Catalogue Service to find interested entities. Once the entities are identified, a Consumer using Consumer App can request for consent and access their data.  </p>
               <a href="#" class="font-weight-bold text-warning mt-5">A beautiful UI Kit for impactful websites</a>
             </div>
           </div>
         </div>
       </div>
     </section>
-    <section class="section pb-0 bg-gradient-warning">
+ -->    <!--<section class="section pb-0 bg-gradient-warning">
       <div class="container">
         <div class="row row-grid align-items-center">
           <div class="col-md-6 order-lg-2 ml-lg-auto">
@@ -390,7 +445,7 @@
         </div>
       </div>
       <!-- SVG separator -->
-      <div class="separator separator-bottom separator-skew zindex-100">
+      <!-- <div class="separator separator-bottom separator-skew zindex-100">
         <svg x="0" y="0" viewBox="0 0 2560 100" preserveAspectRatio="none" version="1.1" xmlns="http://www.w3.org/2000/svg">
           <polygon class="fill-white" points="2560 0 2560 100 0 100"></polygon>
         </svg>
@@ -495,8 +550,8 @@
           </div>
         </div>
       </div>
-    </section>
-    <section class="section section-lg pt-0">
+    </section> -->
+    <!-- <section class="section section-lg pt-0">
       <div class="container">
         <div class="card bg-gradient-warning shadow-lg border-0">
           <div class="p-5">
@@ -512,8 +567,8 @@
           </div>
         </div>
       </div>
-    </section>
-    <section class="section section-lg bg-gradient-default">
+    </section> -->
+ <!--    <section class="section section-lg bg-gradient-default">
       <div class="container pt-lg pb-300">
         <div class="row text-center justify-content-center">
           <div class="col-lg-10">
@@ -546,13 +601,13 @@
         </div>
       </div>
       <!-- SVG separator -->
-      <div class="separator separator-bottom separator-skew zindex-100">
+      <!-- <div class="separator separator-bottom separator-skew zindex-100">
         <svg x="0" y="0" viewBox="0 0 2560 100" preserveAspectRatio="none" version="1.1" xmlns="http://www.w3.org/2000/svg">
           <polygon class="fill-white" points="2560 0 2560 100 0 100"></polygon>
         </svg>
       </div>
-    </section>
-    <section class="section section-lg pt-lg-0 section-contact-us">
+    </section> -->
+<!--     <section class="section section-lg pt-lg-0 section-contact-us">
       <div class="container">
         <div class="row justify-content-center mt--300">
           <div class="col-lg-8">
@@ -587,8 +642,8 @@
           </div>
         </div>
       </div>
-    </section>
-    <section class="section section-lg">
+    </section> -->
+   <!--  <section class="section section-lg">
       <div class="container">
         <div class="row row-grid justify-content-center">
           <div class="col-lg-8 text-center">
@@ -637,7 +692,7 @@
           </div>
         </div>
       </div>
-    </section>
+    </section> -->
   </main>
   <footer class="footer has-cards">
     <!-- <div class="container container-lg">
@@ -659,13 +714,13 @@
       </div>
     </div> -->
     <div class="container">
-      <div class="row row-grid align-items-center my-md">
-        <div class="col-lg-6">
+      <!-- <div class="row row-grid align-items-center my-md"> -->
+       <!--  <div class="col-lg-6">
           <h3 class="text-primary font-weight-light mb-2">Thank you for supporting us!</h3>
           <h4 class="mb-0 font-weight-light">Let's get in touch on any of these platforms.</h4>
-        </div>
-        <div class="col-lg-6 text-lg-center btn-wrapper">
-          <a target="_blank" href="#" class="btn btn-neutral btn-icon-only btn-twitter btn-round btn-lg" data-toggle="tooltip" data-original-title="Follow us">
+        </div> -->
+        <!-- <div class="col-lg-6 text-lg-center btn-wrapper"> -->
+          <!-- <a target="_blank" href="#" class="btn btn-neutral btn-icon-only btn-twitter btn-round btn-lg" data-toggle="tooltip" data-original-title="Follow us">
             <i class="fa fa-twitter"></i>
           </a>
           <a target="_blank" href="#" class="btn btn-neutral btn-icon-only btn-facebook btn-round btn-lg" data-toggle="tooltip" data-original-title="Like us">
@@ -673,12 +728,12 @@
           </a>
           <a target="_blank" href="#" class="btn btn-neutral btn-icon-only btn-dribbble btn-lg btn-round" data-toggle="tooltip" data-original-title="Follow us">
             <i class="fa fa-dribbble"></i>
+          </a> -->
+          <!-- <a target="_blank" href="#" class="btn btn-neutral btn-icon-only btn-github btn-round btn-lg" data-toggle="tooltip" data-original-title="Star on Github">
+            <i class="fab fa-github"></i>
           </a>
-          <a target="_blank" href="#" class="btn btn-neutral btn-icon-only btn-github btn-round btn-lg" data-toggle="tooltip" data-original-title="Star on Github">
-            <i class="fa fa-github"></i>
-          </a>
-        </div>
-      </div>
+        </div> -->
+      <!-- </div> -->
       <hr>
       <div class="row align-items-center justify-content-md-between">
         <div class="col-md-6">
