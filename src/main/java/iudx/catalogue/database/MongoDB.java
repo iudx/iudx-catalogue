@@ -34,6 +34,11 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   private void mongo_find(
       String collection, JsonObject query, FindOptions options, Message<Object> message) {
 
+    JsonObject fields = options.getFields();
+    fields.put("_id", 0);
+    
+    options.setFields(fields);
+
     mongo.findWithOptions(
         collection,
         query,
@@ -80,8 +85,6 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
       }
     }
 
-    // Do not output the _id and _tags field of mongo
-    fields.put("_id", 0);
 
     // Populate fields
     if (request_body.containsKey("attributeFilter")) {
