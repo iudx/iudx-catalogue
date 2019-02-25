@@ -14,7 +14,11 @@ public class DatabaseVerticle extends AbstractVerticle {
   private String database_uri;
   private static final String database_name = "catalogue";
   private JsonObject mongoconfig;
-
+  /**
+   * Constructor for DatabaseVerticle
+   *
+   * @param which_database The name of the database
+   */
   public DatabaseVerticle(String which_database) {
 
     if (which_database == "mongo") {
@@ -46,6 +50,11 @@ public class DatabaseVerticle extends AbstractVerticle {
     db.init_db(vertx, mongoconfig);
   }
 
+  /**
+   * Calls the database method depending on the action sent by APIServerVerticle
+   *
+   * @param message Contains the action that has to be performed and the required parameters.
+   */
   private void validateRequest(Message<Object> message) {
     // TODO Auto-generated method stub
     logger.info("Database Verticle received message.body() = " + message.body());

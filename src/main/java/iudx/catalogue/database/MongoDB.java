@@ -19,7 +19,12 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   private MongoClient mongo;
 
   private String ITEM_COLLECTION, SCHEMA_COLLECTION;
-
+  /**
+   * Constructor for MongoDB
+   *
+   * @param item_database Name of the Item Collection
+   * @param schema_database Name of the Schema Collection
+   */
   public MongoDB(String item_database, String schema_database) {
 
     ITEM_COLLECTION = item_database;
@@ -30,13 +35,20 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 
     mongo = MongoClient.createShared(vertx, mongoconfig);
   }
-
+  /**
+   * Searches the Mongo DB
+   *
+   * @param collection Name of the collection
+   * @param query Query to the MongoDB
+   * @param options Options specify the fields that will (not) be displayed
+   * @param message The message to which the result will be replied to
+   */
   private void mongo_find(
       String collection, JsonObject query, FindOptions options, Message<Object> message) {
 
     JsonObject fields = options.getFields();
     fields.put("_id", 0);
-    
+
     options.setFields(fields);
 
     mongo.findWithOptions(
@@ -85,7 +97,6 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
       }
     }
 
-
     // Populate fields
     if (request_body.containsKey("attributeFilter")) {
       JsonArray filter = request_body.getJsonArray("attributeFilter");
@@ -111,14 +122,25 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     // Call mongo find
     mongo_find(ITEM_COLLECTION, query, new FindOptions(), message);
   }
-
+  /**
+   * Replaces the '$' in the fields of schema with '&'
+   *
+   * @param schema The schema whose fields have to be changed
+   * @return The schema whose fields have '&' for '$'
+   */
   private JsonObject encode_schema(JsonObject schema) {
 
     String[] temp = StringUtils.split(schema.encode(), "$");
     String encodedSchema = StringUtils.join(temp, "&");
     return new JsonObject(encodedSchema);
   }
-
+  /**
+   * Replaces the '&' in the fields of encoded schema with '$'
+   *
+   * @param encodedSchema The encoded schema whose state has to be reverted
+   * @return The original schema, obtained by replacing the '&' in the fields of encoded schema by
+   *     '$'
+   */
   private JsonObject decode_schema(JsonObject encodedSchema) {
 
     String[] temp = StringUtils.split(encodedSchema.encode(), "&");
@@ -146,7 +168,13 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
           }
         });
   }
-
+  /**
+   * Adds the fields UUID, Version, Status, Created, Last modified on to the given JsonObject
+   *
+   * @param doc The document that is being inserted into the database
+   * @param version The version of the document
+   * @return The JsonObject with additional fields
+   */
   private JsonObject addNewAttributes(JsonObject doc, String version) {
 
     JsonObject updated = doc.copy();
