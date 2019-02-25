@@ -18,7 +18,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.net.JksOptions;
 import java.util.Base64;
 
-
 public class APIServerVerticle extends AbstractVerticle implements Handler<HttpServerRequest> {
 
   HttpServer server;
@@ -139,7 +138,7 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
         userId = credentials[0];
         // when the header is: "user:"
         password = credentials.length > 1 ? credentials[1] : null;
-        
+
         if (!"Basic".equals(scheme)) {
           resp.setStatusCode(401).end("Use Basic HTTP authorization");
         } else {
@@ -250,12 +249,18 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
           body -> {
             try {
               request_body = body.toJsonObject();
-              String skip_validation = event.getHeader("skip_validation");
+              String skip_validation = event.getHeader("skip_validation").toLowerCase();
 
               DeliveryOptions validator_action = new DeliveryOptions();
               validator_action.addHeader("action", "validate-item");
               if (skip_validation != null) {
-                validator_action.addHeader("skip_validation", skip_validation);
+                if (!skip_validation.equals("true") && !skip_validation.equals("false")) {
+                  logger.info("skip_validation not a boolean");
+                  resp.setStatusCode(400).end("Invalid value: skip_validation is not a boolean");
+                  return;
+                } else {
+                  validator_action.addHeader("skip_validation", skip_validation);
+                }
               }
 
               vertx
