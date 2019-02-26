@@ -44,7 +44,10 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
 
     logger.info("API Server Verticle started!");
   }
-
+  /**
+   * Authenticates the user and calls the method depending on the URL to which the request is sent to.
+   * @param event The server request
+   */
   @Override
   public void handle(HttpServerRequest event) {
 
@@ -120,7 +123,14 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
       }
     }
   }
-
+  /**
+   * Checks if the user has necessary permission to write or delete from the database
+   *
+   * @param event The server request
+   * @param path The URL to which the request is sent
+   * @param file_path The path of the file which contains the list of users and their permissions
+   * @return
+   */
   private boolean authenticate_request(HttpServerRequest event, String path, String file_path) {
 
     boolean allowed = false;
@@ -205,7 +215,11 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
     logger.info("Authentication ended with flag : " + allowed);
     return allowed;
   }
-
+  /**
+   * Sends a request to the database to display all items
+   *
+   * @param event The server request
+   */
   private void get_all(HttpServerRequest event) {
 
     if (event.method().toString().equalsIgnoreCase("GET")) {
@@ -241,7 +255,13 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
       return;
     }
   }
-
+  /**
+   * Sends a request to ValidatorVerticle to validate the item and DatabaseVerticle to insert it in
+   * the database. Displays the UUID of the inserted item.
+   *
+   * @param event The server request which contains the item to be inserted in the database and the
+   *     skip_validation header.
+   */
   private void create_items(HttpServerRequest event) {
 
     if (event.method().toString().equalsIgnoreCase("POST")) {
@@ -317,7 +337,11 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
       return;
     }
   }
-
+  /**
+   * Inserts the given schema into the database.
+   *
+   * @param event The server request which contains the schema to be inserted.
+   */
   private void create_schema(HttpServerRequest event) {
 
     if (event.method().toString().equalsIgnoreCase("POST")) {
@@ -359,7 +383,12 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
       return;
     }
   }
-
+  /**
+   * Converts the lost of values in string to JsoArray
+   *
+   * @param s List of values in string form
+   * @return The JsonArray which contains values.
+   */
   private JsonArray changeToArray(String s) {
 
     JsonArray values = new JsonArray();
@@ -386,7 +415,12 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
 
     return values;
   }
-
+  /**
+   * Searches the database based on the given query and displays only those fields present in
+   * attributeFilter.
+   *
+   * @param event The server request which contains the query and attributeFilter
+   */
   private void search_attribute(HttpServerRequest event) {
 
     // Example Query : curl -ik -XGET
@@ -443,6 +477,11 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
     }
   }
 
+  /**
+   * Retrieves an item from the database
+   *
+   * @param event The server request which contains the UUID of the item
+   */
   private void get_items(HttpServerRequest event) {
 
     if (event.method().toString().equalsIgnoreCase("GET")) {
@@ -479,6 +518,11 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
     }
   }
 
+  /**
+   * Retrieves a schema from the database
+   *
+   * @param event The server request which contains the UUID of the schema.
+   */
   private void get_schemas(HttpServerRequest event) {
 
     if (event.method().toString().equalsIgnoreCase("GET")) {
@@ -514,7 +558,11 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
       return;
     }
   }
-
+  /**
+   * Deletes the item from the database
+   *
+   * @param event The server request which contains the UUID of the item.
+   */
   private void delete_items(HttpServerRequest event) {
 
     if (event.method().toString().equalsIgnoreCase("DELETE")) {
