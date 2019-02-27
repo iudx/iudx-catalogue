@@ -86,8 +86,14 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
       JsonArray values = request_body.getJsonArray(key);
       if (!key.equalsIgnoreCase("attributeFilter")) {
         if (key.equalsIgnoreCase("tags")) {
-          for (int i = 0; i < values.size(); i++) {
-            query.put("_tags", values.getString(i).toLowerCase());
+          if (values.size() == 1) {
+            query.put("_tags", values.getString(0).toLowerCase());
+          } else {
+            JsonArray tag_values = new JsonArray();
+            for (int i = 0; i < values.size(); i++) {
+              tag_values.add(values.getString(i).toLowerCase());
+            }
+            query.put("_tags", new JsonObject().put("$in", tag_values));
           }
         } else {
           for (int i = 0; i < values.size(); i++) {
