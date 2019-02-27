@@ -7,14 +7,21 @@ import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
 
+/**
+ * A verticle which will handle the request to validate the item before adding to the database.
+ * Whenever we get an API request to add an item in the catalogue, we will validate the item against
+ * a schema. This Schema will be specified in the item. This verticle will be listing to the
+ * eventbus for validation request.
+ */
 public class ValidatorVerticle extends AbstractVerticle {
 
   private static final Logger logger = Logger.getLogger(ValidatorVerticle.class.getName());
   private String action;
   private ValidatorInterface isValid;
 
-  public ValidatorVerticle(ValidatorInterface v) {
-    isValid = v;
+  /** @param validator - Implementation of ValidatorInterface we want to use to validate */
+  public ValidatorVerticle(ValidatorInterface validator) {
+    isValid = validator;
   }
 
   @Override
@@ -30,6 +37,11 @@ public class ValidatorVerticle extends AbstractVerticle {
             });
   }
 
+  /**
+   * Handler to handle any request directed to this verticle
+   *
+   * @param message - request that came on the eventbus
+   */
   private void validateRequest(Message<Object> message) {
 
     logger.info("Validator Verticle received message.body() = " + message.headers());
@@ -44,7 +56,13 @@ public class ValidatorVerticle extends AbstractVerticle {
         }
     }
   }
-
+  /**
+   * Validates the item received in the message body. The schema that is used to validate this item
+   * is strored in the refCatalogueSchema field of the item. Uses the instance of ValidatorInterface
+   * assigned on the construction to validate the item.
+   *
+   * @param message - request that came on the eventbus
+   */
   private void validate_item(Message<Object> message) {
 
     boolean skip_validation = false;

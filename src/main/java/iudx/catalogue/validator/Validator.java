@@ -6,11 +6,13 @@ import org.json.JSONObject;
 
 import io.vertx.core.json.JsonObject;
 
+/** Using JSONSchema for validation */
 public class Validator implements ValidatorInterface {
 
+  /** Validation is implemented using JSONSchema */
   @Override
   public void validate_item(JsonObject item, JsonObject schema) throws Exception {
-    // TODO Auto-generated method stub
+
     JSONObject p = new JSONObject(item.getMap());
     JSONObject s = new JSONObject(schema.getMap());
 
