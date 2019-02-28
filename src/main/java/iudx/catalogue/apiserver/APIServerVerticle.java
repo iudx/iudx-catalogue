@@ -45,7 +45,9 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
     logger.info("API Server Verticle started!");
   }
   /**
-   * Authenticates the user and calls the method depending on the URL to which the request is sent to.
+   * Authenticates the user and calls the method depending on the URL to which the request is sent
+   * to.
+   *
    * @param event The server request
    */
   @Override
@@ -168,6 +170,7 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
                   switch (path) {
                     case "/cat/items":
                     case "/cat/schemas":
+                    case "/cat/items/id/":
                       {
                         if (!user.getBoolean("write_permission")) {
                           allowed = false;
@@ -175,20 +178,10 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
                         }
                         break;
                       }
-
-                    case "/cat/search/attribute":
-                    case "/cat/items/id/":
-                    case "/cat/schemas/id/":
-                    case "/cat/search":
-                      {
-                        if (!user.getBoolean("read_permission")) {
-                          allowed = false;
-                          resp.setStatusCode(401).end("You do not have read access to the server");
-                        }
-                        break;
-                      }
                     default:
+                      allowed = false;
                       resp.setStatusCode(404).end("Invalid path");
+                      break;
                   }
                 }
               } else {
@@ -197,7 +190,7 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
 
             } catch (Exception e) {
               resp.setStatusCode(500).end();
-              System.out.println(e);
+              logger.info(e.toString());
             }
 
           } else {
