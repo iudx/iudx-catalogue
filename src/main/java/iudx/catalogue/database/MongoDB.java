@@ -123,7 +123,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     JsonObject request_body = (JsonObject) message.body();
 
     // Populate query
-    query.put("UUID", request_body.getString("id"));
+    query.put("id", request_body.getString("id"));
 
     // Call mongo find
     mongo_find(ITEM_COLLECTION, query, new FindOptions(), message);
@@ -160,7 +160,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     JsonObject m = (JsonObject) message.body();
     JsonObject query = new JsonObject();
 
-    query.put("UUID", m.getString("id"));
+    query.put("id", m.getString("id"));
 
     mongo.findOne(
         SCHEMA_COLLECTION,
@@ -175,7 +175,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
         });
   }
   /**
-   * Adds the fields UUID, Version, Status, Created, Last modified on to the given JsonObject
+   * Adds the fields id, Version, Status, Created, Last modified on to the given JsonObject
    *
    * @param doc The document that is being inserted into the database
    * @param version The version of the document
@@ -188,8 +188,10 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     updated.put("Last modified on", new java.util.Date().toString());
     updated.put("Status", "Live");
     updated.put("Version", version);
-    updated.put("UUID", UUID.randomUUID().toString());
+    updated.put("id", UUID.randomUUID().toString());
+    updated.put("Provider", "iudx-provider");
 
+    
     if (updated.containsKey("tags")) {
       JsonArray tagsInLowerCase = new JsonArray();
       JsonArray tags = updated.getJsonArray("tags");
@@ -214,7 +216,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
         updated_item,
         res -> {
           if (res.succeeded()) {
-            message.reply(updated_item.getString("UUID"));
+            message.reply(updated_item.getString("id"));
           } else {
             message.fail(0, "failure");
           }
@@ -257,7 +259,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     JsonObject request_body = (JsonObject) message.body();
 
     // Populate query
-    query.put("UUID", request_body.getString("id"));
+    query.put("id", request_body.getString("id"));
 
     mongo.removeDocument(
         ITEM_COLLECTION,
@@ -278,7 +280,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     JsonObject request_body = (JsonObject) message.body();
 
     // Populate query
-    query.put("UUID", request_body.getString("id"));
+    query.put("id", request_body.getString("id"));
 
     mongo.removeDocument(
         SCHEMA_COLLECTION,
