@@ -257,7 +257,7 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
   }
   /**
    * Sends a request to ValidatorVerticle to validate the item and DatabaseVerticle to insert it in
-   * the database. Displays the UUID of the inserted item.
+   * the database. Displays the id of the inserted item.
    *
    * @param event The server request which contains the item to be inserted in the database and the
    *     skip_validation header.
@@ -303,8 +303,8 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
                                   database_action,
                                   database_reply -> {
                                     if (database_reply.succeeded()) {
-                                      String UUID = database_reply.result().body().toString();
-                                      resp.setStatusCode(201).end(UUID);
+                                      String id = database_reply.result().body().toString();
+                                      resp.setStatusCode(201).end(id);
                                       return;
                                     } else if (database_reply.failed()) {
                                       logger.info("Database Failed");
@@ -480,7 +480,7 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
   /**
    * Retrieves an item from the database
    *
-   * @param event The server request which contains the UUID of the item
+   * @param event The server request which contains the id of the item
    */
   private void get_items(HttpServerRequest event) {
 
@@ -521,7 +521,7 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
   /**
    * Retrieves a schema from the database
    *
-   * @param event The server request which contains the UUID of the schema.
+   * @param event The server request which contains the id of the schema.
    */
   private void get_schemas(HttpServerRequest event) {
 
@@ -561,7 +561,7 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
   /**
    * Deletes the item from the database
    *
-   * @param event The server request which contains the UUID of the item.
+   * @param event The server request which contains the id of the item.
    */
   private void delete_items(HttpServerRequest event) {
 
