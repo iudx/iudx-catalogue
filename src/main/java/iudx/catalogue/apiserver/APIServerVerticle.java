@@ -7,7 +7,6 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
@@ -16,13 +15,17 @@ import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.net.JksOptions;
+import io.vertx.ext.web.Router;
+import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.handler.BodyHandler;
+
 import java.util.Base64;
 
-public class APIServerVerticle extends AbstractVerticle implements Handler<HttpServerRequest> {
+public class APIServerVerticle extends AbstractVerticle{
 
   HttpServer server;
   HttpServerRequest request;
-  private HttpServerResponse resp;
+  HttpServerResponse response;
   private JsonObject request_body;
   String path;
   String[] path_parameters;
@@ -34,97 +37,42 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
   public void start(Future<Void> startFuture) {
 
     int port = config().getInteger("http.port", 8443);
+    
+    Router router = Router.router(vertx);
+    router.route().handler(BodyHandler.create());
+
+    router
+        .route("/")
+        .handler(
+            routingContext -> {
+            	response = routingContext.response();
+            	response.sendFile("ui/landing/landing.html");
+            });
+
+    router.get("/cat/search").handler(this::get_all);
+    router.get("/cat/search/attribute").handler(this::search_attribute);
+    router.get("/cat/items/id/:itemID").handler(this::get_items);
+    router.get("/cat/schemas/id/:schemaID").handler(this::get_schemas);
+    
+    router.post("/cat/items").handler(this::create_items);
+    router.post("/cat/schemas").handler(this::create_schema);
+    
+    router.delete("/cat/items/id/:itemID").handler(this::delete_items);
+
+    logger.info("IUDX Catalogue Routes Defined !");
+    
     server =
         vertx.createHttpServer(
             new HttpServerOptions()
                 .setSsl(true)
                 .setKeyStoreOptions(
                     new JksOptions().setPath("my-keystore.jks").setPassword("password")));
-    server.requestHandler(APIServerVerticle.this).listen(port);
+    
+    server.requestHandler(router::accept).listen(port);
 
     logger.info("API Server Verticle started!");
   }
-  /**
-   * Authenticates the user and calls the method depending on the URL to which the request is sent
-   * to.
-   *
-   * @param event The server request
-   */
-  @Override
-  public void handle(HttpServerRequest event) {
 
-    request = event;
-    resp = request.response();
-    path = request.path();
-
-    if (request.path().equals("/")) {
-      resp.sendFile("ui/landing/landing.html");
-      return;
-    }
-
-    if (path.contains("/cat/items/id/")) {
-      path_parameters = path.split("\\/");
-      itemID = path_parameters[4];
-      logger.info(itemID);
-      path = "/cat/items/id/";
-    } else if (path.contains("/cat/schemas/id/")) {
-      path_parameters = path.split("\\/");
-      schemaID = path_parameters[4];
-      logger.info(schemaID);
-      path = "/cat/schemas/id/";
-    }
-
-    if (!event.method().toString().equalsIgnoreCase("GET")) {
-      if (authenticate_request(event, path, "user.list")) {
-        logger.info(path);
-
-        switch (path) {
-          case "/cat/items":
-            {
-              create_items(request);
-              break;
-            }
-          case "/cat/schemas":
-            {
-              create_schema(request);
-              break;
-            }
-          case "/cat/items/id/":
-            {
-              delete_items(request);
-              break;
-            }
-          default:
-            resp.setStatusCode(404).end();
-        }
-      }
-    } else {
-      switch (path) {
-        case "/cat/search/attribute":
-          {
-            search_attribute(request);
-            break;
-          }
-        case "/cat/items/id/":
-          {
-            get_items(request);
-            break;
-          }
-        case "/cat/schemas/id/":
-          {
-            get_schemas(request);
-            break;
-          }
-        case "/cat/search":
-          {
-            get_all(request);
-            break;
-          }
-        default:
-          resp.setStatusCode(404).end();
-      }
-    }
-  }
   /**
    * Checks if the user has necessary permission to write or delete from the database
    *
@@ -133,7 +81,7 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
    * @param file_path The path of the file which contains the list of users and their permissions
    * @return
    */
-  private boolean authenticate_request(HttpServerRequest event, String path, String file_path) {
+  private boolean authenticate_request(HttpServerRequest request, HttpServerResponse response, String path, String file_path) {
 
     boolean allowed = false;
     String authorization = request.getHeader("authorization");
@@ -152,7 +100,7 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
         password = credentials.length > 1 ? credentials[1] : null;
 
         if (!"Basic".equals(scheme)) {
-          resp.setStatusCode(401).end("Use Basic HTTP authorization");
+        	response.setStatusCode(401).end("Use Basic HTTP authorization");
         } else {
           if (userId != null && password != null) {
             try (InputStream inputStream = new FileInputStream(file_path)) {
@@ -163,46 +111,34 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
                 if (password.equals(user.getString("password"))) {
                   allowed = true;
                 } else {
-                  resp.setStatusCode(400).end("Your password is invalid");
+                	response.setStatusCode(400).end("Your password is invalid");
                 }
 
                 if (allowed == true) {
-                  switch (path) {
-                    case "/cat/items":
-                    case "/cat/schemas":
-                    case "/cat/items/id/":
-                      {
                         if (!user.getBoolean("write_permission")) {
                           allowed = false;
-                          resp.setStatusCode(401).end("You do not have write access to the server");
+                          response.setStatusCode(401).end("You do not have write access to the server");
                         }
-                        break;
-                      }
-                    default:
-                      allowed = false;
-                      resp.setStatusCode(404).end("Invalid path");
-                      break;
-                  }
                 }
               } else {
-                resp.setStatusCode(400).end("User " + userId + " is not registered");
+            	  response.setStatusCode(400).end("User " + userId + " is not registered");
               }
 
             } catch (Exception e) {
-              resp.setStatusCode(500).end();
+            	response.setStatusCode(500).end();
               logger.info(e.toString());
             }
 
           } else {
-            resp.setStatusCode(400).end("Add userId and password in the header of your request");
+        	  response.setStatusCode(400).end("Add userId and password in the header of your request");
           }
         }
       } catch (Exception e) {
-        resp.setStatusCode(401).end("Use Basic HTTP authorization");
+    	  response.setStatusCode(401).end("Use Basic HTTP authorization");
       }
 
     } else {
-      resp.setStatusCode(401).end("Use Basic HTTP authorization");
+    	response.setStatusCode(401).end("Use Basic HTTP authorization");
     }
 
     logger.info("Authentication ended with flag : " + allowed);
@@ -213,9 +149,9 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
    *
    * @param event The server request
    */
-  private void get_all(HttpServerRequest event) {
+  private void get_all(RoutingContext routingContext) {
+	  HttpServerResponse response = routingContext.response();
 
-    if (event.method().toString().equalsIgnoreCase("GET")) {
       request_body = new JsonObject();
 
       DeliveryOptions database_action = new DeliveryOptions();
@@ -230,23 +166,18 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
               database_reply -> {
                 if (database_reply.succeeded()) {
                   logger.info(database_reply.result().body().toString());
-                  resp.setStatusCode(200)
+                  response.setStatusCode(200)
                       .end(((JsonArray) database_reply.result().body()).encodePrettily());
                   return;
                 } else if (database_reply.failed()) {
                   logger.info("Search Failed");
-                  resp.setStatusCode(500).end();
+                  response.setStatusCode(500).end();
                   return;
                 } else {
-                  resp.setStatusCode(500).end();
+                	response.setStatusCode(500).end();
                   return;
                 }
               });
-    } else {
-      logger.info("End-Point Not Found");
-      resp.setStatusCode(404).end();
-      return;
-    }
   }
   /**
    * Sends a request to ValidatorVerticle to validate the item and DatabaseVerticle to insert it in
@@ -255,21 +186,23 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
    * @param event The server request which contains the item to be inserted in the database and the
    *     skip_validation header.
    */
-  private void create_items(HttpServerRequest event) {
+  private void create_items(RoutingContext routingContext) {
+   HttpServerRequest request = routingContext.request();
+   HttpServerResponse response = routingContext.response();
+   path = request.path();
+   String skip_validation = request.getHeader("skip_validation").toLowerCase();
 
-    if (event.method().toString().equalsIgnoreCase("POST")) {
-      request.bodyHandler(
-          body -> {
+   if (authenticate_request(request, response, path, "user.list")) {
+	      logger.info(path);
+
             try {
-              request_body = body.toJsonObject();
-              String skip_validation = event.getHeader("skip_validation").toLowerCase();
-
+              request_body = routingContext.getBodyAsJson();
               DeliveryOptions validator_action = new DeliveryOptions();
               validator_action.addHeader("action", "validate-item");
               if (skip_validation != null) {
                 if (!skip_validation.equals("true") && !skip_validation.equals("false")) {
                   logger.info("skip_validation not a boolean");
-                  resp.setStatusCode(400).end("Invalid value: skip_validation is not a boolean");
+                  response.setStatusCode(400).end("Invalid value: skip_validation is not a boolean");
                   return;
                 } else {
                   validator_action.addHeader("skip_validation", skip_validation);
@@ -297,47 +230,53 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
                                   database_reply -> {
                                     if (database_reply.succeeded()) {
                                       String id = database_reply.result().body().toString();
-                                      resp.setStatusCode(201).end(id);
+                                      response.setStatusCode(201).end(id);
                                       return;
                                     } else if (database_reply.failed()) {
                                       logger.info("Database Failed");
-                                      resp.setStatusCode(500).end();
+                                      response.setStatusCode(500).end();
                                       return;
                                     } else {
-                                      resp.setStatusCode(500).end();
+                                    	response.setStatusCode(500).end();
                                       return;
                                     }
                                   });
                         } else if (validator_reply.failed()) {
                           logger.info("Validator Failed");
-                          resp.setStatusCode(500).end();
+                          response.setStatusCode(500).end();
                           return;
                         } else {
                           logger.info("No reply");
-                          resp.setStatusCode(500).end();
+                          response.setStatusCode(500).end();
                           return;
                         }
                       });
 
             } catch (Exception e) {
-              resp.setStatusCode(400).end("Invalid item: Not a Json Object");
+            	response.setStatusCode(400).end("Invalid item: Not a Json Object");
               return;
             }
-          });
-    } else {
-      logger.info("End-Point Not Found");
-      resp.setStatusCode(404).end();
-      return;
-    }
+   } else {
+	      logger.info("Unauthorised");
+	      response.setStatusCode(401).end();
+	      return;
+   }
   }
   /**
    * Inserts the given schema into the database.
    *
    * @param event The server request which contains the schema to be inserted.
    */
-  private void create_schema(HttpServerRequest event) {
+  private void create_schema(RoutingContext routingContext) {
 
-    if (event.method().toString().equalsIgnoreCase("POST")) {
+   HttpServerRequest request = routingContext.request();
+   HttpServerResponse response = routingContext.response();
+   path = request.path();
+
+   if (authenticate_request(request, response, path, "user.list")) {
+	      logger.info(path);
+
+	  
       request.bodyHandler(
           body -> {
             try {
@@ -353,29 +292,28 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
                       database_action,
                       database_reply -> {
                         if (database_reply.succeeded()) {
-                          resp.setStatusCode(201).end();
+                        	response.setStatusCode(201).end();
                           return;
                         } else if (database_reply.failed()) {
                           logger.info("Database Failed");
-                          resp.setStatusCode(500).end();
+                          response.setStatusCode(500).end();
                           return;
                         } else {
-                          resp.setStatusCode(500).end();
+                        	response.setStatusCode(500).end();
                           return;
                         }
                       });
             } catch (Exception e) {
-              resp.setStatusCode(400).end("Invalid schema: Not a Json Object");
+            	response.setStatusCode(400).end("Invalid schema: Not a Json Object");
               return;
             }
           });
-
-    } else {
-      logger.info("End-Point Not Found");
-      resp.setStatusCode(404).end();
+  } else {
+      logger.info("Unauthorised");
+      response.setStatusCode(401).end();
       return;
-    }
   }
+ }
   /**
    * Converts the lost of values in string to JsoArray
    *
@@ -414,12 +352,17 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
    *
    * @param event The server request which contains the query and attributeFilter
    */
-  private void search_attribute(HttpServerRequest event) {
+  private void search_attribute(RoutingContext routingContext) {
+	  
+
+   HttpServerRequest request = routingContext.request();
+   HttpServerResponse response = routingContext.response();
+
 
     // Example Query : curl -ik -XGET
     // 'https://localhost:8443/cat/search/attribute?owner=rbccps&tags=(etoilet,sanitation)&attributeFilter=(id,latitude,longitude)'
-    if (event.method().toString().equalsIgnoreCase("GET")) {
-      String query = request.query();
+
+   	  String query = request.query();
       logger.info(query);
       request_body = new JsonObject();
 
@@ -451,23 +394,18 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
               database_reply -> {
                 if (database_reply.succeeded()) {
                   logger.info(database_reply.result().body().toString());
-                  resp.setStatusCode(200)
+                  response.setStatusCode(200)
                       .end(((JsonArray) database_reply.result().body()).encodePrettily());
                   return;
                 } else if (database_reply.failed()) {
                   logger.info("Search Failed");
-                  resp.setStatusCode(500).end();
+                  response.setStatusCode(500).end();
                   return;
                 } else {
-                  resp.setStatusCode(500).end();
+                	response.setStatusCode(500).end();
                   return;
                 }
               });
-    } else {
-      logger.info("End-Point Not Found");
-      resp.setStatusCode(404).end();
-      return;
-    }
   }
 
   /**
@@ -475,9 +413,14 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
    *
    * @param event The server request which contains the id of the item
    */
-  private void get_items(HttpServerRequest event) {
+  private void get_items(RoutingContext routingContext) {
 
-    if (event.method().toString().equalsIgnoreCase("GET")) {
+   HttpServerRequest request = routingContext.request();
+   HttpServerResponse response = routingContext.response();
+
+   Future<String> decode_request = decode_request(request, response);
+
+   if (decode_request.result().equalsIgnoreCase("valid")) {
 
       DeliveryOptions database_action = new DeliveryOptions();
       database_action.addHeader("action", "read-item");
@@ -492,22 +435,22 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
               database_reply -> {
                 if (database_reply.succeeded()) {
                   logger.info(database_reply.result().body().toString());
-                  resp.setStatusCode(200)
+                  response.setStatusCode(200)
                       .end(((JsonArray) database_reply.result().body()).encodePrettily());
                   return;
                 } else if (database_reply.failed()) {
                   logger.info("Database Failed");
-                  resp.setStatusCode(500).end();
+                  response.setStatusCode(500).end();
                   return;
                 } else {
-                  resp.setStatusCode(500).end();
+                	response.setStatusCode(500).end();
                   return;
                 }
               });
-    } else {
-      logger.info("End-Point Not Found");
-      resp.setStatusCode(404).end();
-      return;
+   } else {
+	      logger.info("Invalid Parameters");
+	      response.setStatusCode(400).end("Invalid request parameters");
+	      return;
     }
   }
 
@@ -516,9 +459,14 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
    *
    * @param event The server request which contains the id of the schema.
    */
-  private void get_schemas(HttpServerRequest event) {
+  private void get_schemas(RoutingContext routingContext) {
 
-    if (event.method().toString().equalsIgnoreCase("GET")) {
+   HttpServerRequest request = routingContext.request();
+   HttpServerResponse response = routingContext.response();
+
+   Future<String> decode_request = decode_request(request, response);
+
+   if (decode_request.result().equalsIgnoreCase("valid")) {
 
       DeliveryOptions database_action = new DeliveryOptions();
       database_action.addHeader("action", "read-schema");
@@ -533,22 +481,22 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
               database_reply -> {
                 if (database_reply.succeeded()) {
                   logger.info(database_reply.result().body().toString());
-                  resp.setStatusCode(200)
+                  response.setStatusCode(200)
                       .end(((JsonArray) database_reply.result().body()).encodePrettily());
                   return;
                 } else if (database_reply.failed()) {
                   logger.info("Validator Failed");
-                  resp.setStatusCode(500).end();
+                  response.setStatusCode(500).end();
                   return;
                 } else {
-                  resp.setStatusCode(500).end();
-                  return;
+                	response.setStatusCode(500).end();
+                	return;
                 }
               });
     } else {
-      logger.info("End-Point Not Found");
-      resp.setStatusCode(404).end();
-      return;
+        logger.info("Invalid Parameters");
+        response.setStatusCode(400).end("Invalid request parameters");
+        return;
     }
   }
   /**
@@ -556,9 +504,14 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
    *
    * @param event The server request which contains the id of the item.
    */
-  private void delete_items(HttpServerRequest event) {
+  private void delete_items(RoutingContext routingContext) {
 
-    if (event.method().toString().equalsIgnoreCase("DELETE")) {
+   HttpServerRequest request = routingContext.request();
+   HttpServerResponse response = routingContext.response();
+   path = request.path();
+
+   if (authenticate_request(request, response, path, "user.list")) {
+	      logger.info(path);
 
       DeliveryOptions database_action = new DeliveryOptions();
       database_action.addHeader("action", "delete-item");
@@ -573,21 +526,57 @@ public class APIServerVerticle extends AbstractVerticle implements Handler<HttpS
               database_reply -> {
                 if (database_reply.succeeded()) {
                   logger.info(database_reply.result().body().toString());
-                  resp.setStatusCode(204).end();
+                  response.setStatusCode(204).end();
                   return;
                 } else if (database_reply.failed()) {
                   logger.info("Database Failed");
-                  resp.setStatusCode(500).end();
+                  response.setStatusCode(500).end();
                   return;
                 } else {
-                  resp.setStatusCode(500).end();
-                  return;
+                	response.setStatusCode(500).end();
+                	return;
                 }
               });
     } else {
-      logger.info("End-Point Not Found");
-      resp.setStatusCode(404).end();
-      return;
+        logger.info("Unauthorised");
+        response.setStatusCode(401).end();
+        return;
     }
+  }
+
+  private Future<String> decode_request(HttpServerRequest request, HttpServerResponse response) {
+
+    Future<String> decode_request = Future.future();
+
+    try {
+
+      if (request.absoluteURI().contains("items")) {
+        itemID = request.getParam("itemID");
+        logger.info(itemID);
+
+        if ((itemID == null)) {
+          response.setStatusCode(400).end("Invalid Request");
+          decode_request.complete("invalid-request");
+        } else {
+          decode_request.complete("valid");
+        }
+      } else if (request.absoluteURI().contains("schemas")) {
+        schemaID = request.getParam("schemaID");
+        logger.info(schemaID);
+
+        if ((schemaID == null)) {
+          response.setStatusCode(400).end("Invalid Request");
+          decode_request.complete("invalid-request");
+        } else {
+          decode_request.complete("valid");
+        }
+      }
+
+    } catch (Exception e) {
+      response.setStatusCode(400).end("Invalid Request");
+      decode_request.complete("invalid-request");
+    }
+
+    return decode_request;
   }
 }
