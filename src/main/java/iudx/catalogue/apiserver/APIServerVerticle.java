@@ -23,7 +23,6 @@ import java.util.Base64;
 
 public class APIServerVerticle extends AbstractVerticle{
 
-  private HttpServer server;
   private HttpServerResponse response;
   private JsonObject request_body;
   private String path;
@@ -34,6 +33,7 @@ public class APIServerVerticle extends AbstractVerticle{
   @Override
   public void start(Future<Void> startFuture) {
 
+	HttpServer server;
     int port = config().getInteger("http.port", 8443);
     
     Router router = Router.router(vertx);
@@ -112,11 +112,9 @@ public class APIServerVerticle extends AbstractVerticle{
                 	response.setStatusCode(400).end("Your password is invalid");
                 }
 
-                if (allowed == true) {
-                        if (!user.getBoolean("write_permission")) {
+                if (allowed && !user.getBoolean("write_permission")) {
                           allowed = false;
                           response.setStatusCode(401).end("You do not have write access to the server");
-                        }
                 }
               } else {
             	  response.setStatusCode(400).end("User " + userId + " is not registered");

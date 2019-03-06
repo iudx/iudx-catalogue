@@ -11,7 +11,7 @@ public class DatabaseVerticle extends AbstractVerticle {
   private static final Logger logger = Logger.getLogger(DatabaseVerticle.class.getName());
   private DatabaseInterface db;
   private static final String database_name = "catalogue";
-  private JsonObject mongoconfig;
+  
   /**
    * Constructor for DatabaseVerticle
    *
@@ -19,14 +19,14 @@ public class DatabaseVerticle extends AbstractVerticle {
    */
   public DatabaseVerticle(String which_database) {
 
-    if (which_database == "mongo") {
+    if ("mongo".equals(which_database)) {
       db = new MongoDB("items", "schemas");
     }
   }
 
   @Override
   public void start(Future<Void> startFuture) {
-	
+	JsonObject mongoconfig;
 	String database_uri;
 
     logger.info("Database Verticle started!");
@@ -44,7 +44,7 @@ public class DatabaseVerticle extends AbstractVerticle {
             + ":"
             + config().getInteger("mongo_port", 27017).toString();
 
-    this.mongoconfig =
+    mongoconfig =
         new JsonObject().put("connection_string", database_uri).put("db_name", database_name);
 
     db.initDB(vertx, mongoconfig);
@@ -115,6 +115,10 @@ public class DatabaseVerticle extends AbstractVerticle {
           db.searchAttribute(message);
           break;
         }
+      default : 
+      {
+    	  break;
+      }
     }
   }
 }
