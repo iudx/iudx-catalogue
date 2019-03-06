@@ -16,7 +16,6 @@ import io.vertx.core.json.JsonObject;
 public class ValidatorVerticle extends AbstractVerticle {
 
   private static final Logger logger = Logger.getLogger(ValidatorVerticle.class.getName());
-  private String action;
   private ValidatorInterface isValid;
 
   /** @param validator - Implementation of ValidatorInterface we want to use to validate */
@@ -44,6 +43,7 @@ public class ValidatorVerticle extends AbstractVerticle {
    */
   private void validateRequest(Message<Object> message) {
 
+    String action;
     logger.info("Validator Verticle received message.body() = " + message.headers());
 
     action = message.headers().get("action");

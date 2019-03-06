@@ -8,7 +8,6 @@ Quickstart
 
     git clone https://github.com/rbccps-iisc/iudx-catalogue.git
     cd iudx-catalogue
-      
 
 #. Please install the following dependencies manually, skip if already installed
 
@@ -20,8 +19,7 @@ Quickstart
     cd docker
     sh install
     
-Catalogue will be up in https://localhost:8443/
-
+Catalogue will be up in <https://localhost:8443/>
 
 #. Re-install::
 

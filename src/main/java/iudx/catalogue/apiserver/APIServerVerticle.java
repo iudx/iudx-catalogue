@@ -79,7 +79,7 @@ public class APIServerVerticle extends AbstractVerticle{
    * @param file_path The path of the file which contains the list of users and their permissions
    * @return
    */
-  private boolean authenticateRequest(HttpServerRequest request, HttpServerResponse response, String path, String file_path) {
+  private boolean authenticateRequest(HttpServerRequest request, HttpServerResponse response, String file_path) {
 
     boolean allowed = false;
     String authorization = request.getHeader("authorization");
@@ -190,7 +190,7 @@ public class APIServerVerticle extends AbstractVerticle{
    path = request.path();
    String skip_validation = request.getHeader("skip_validation").toLowerCase();
 
-   if (authenticateRequest(request, response, path, "user.list")) {
+   if (authenticateRequest(request, response, "user.list")) {
 	      logger.info(path);
 
             try {
@@ -198,7 +198,7 @@ public class APIServerVerticle extends AbstractVerticle{
               DeliveryOptions validator_action = new DeliveryOptions();
               validator_action.addHeader("action", "validate-item");
               if (skip_validation != null) {
-                if (!skip_validation.equals("true") && !skip_validation.equals("false")) {
+                if (!("true".equals(skip_validation)) && !("false".equals(skip_validation))) {
                   logger.info("skip_validation not a boolean");
                   response.setStatusCode(400).end("Invalid value: skip_validation is not a boolean");
                   return;
@@ -271,7 +271,7 @@ public class APIServerVerticle extends AbstractVerticle{
    HttpServerResponse response = routingContext.response();
    path = request.path();
 
-   if (authenticateRequest(request, response, path, "user.list")) {
+   if (authenticateRequest(request, response, "user.list")) {
 	      logger.info(path);
 
 	  
@@ -508,7 +508,7 @@ public class APIServerVerticle extends AbstractVerticle{
    HttpServerResponse response = routingContext.response();
    path = request.path();
 
-   if (authenticateRequest(request, response, path, "user.list")) {
+   if (authenticateRequest(request, response, "user.list")) {
 	      logger.info(path);
 
       DeliveryOptions database_action = new DeliveryOptions();
