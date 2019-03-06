@@ -54,6 +54,11 @@ public class ValidatorVerticle extends AbstractVerticle {
           validateItem(message);
           break;
         }
+      
+      default :
+        {
+        	break;
+        }
     }
   }
   /**
