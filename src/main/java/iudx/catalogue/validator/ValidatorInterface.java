@@ -11,5 +11,5 @@ public interface ValidatorInterface {
    * @param schema - the schema against which the validation will be done
    * @throws Exception - when validation fails
    */
-  public void validate_item(JsonObject item, JsonObject schema) throws Exception;
+  public void validateItem(JsonObject item, JsonObject schema) throws Exception;
 }

@@ -11,7 +11,7 @@ public class Validator implements ValidatorInterface {
 
   /** Validation is implemented using JSONSchema */
   @Override
-  public void validate_item(JsonObject item, JsonObject schema) throws Exception {
+  public void validateItem(JsonObject item, JsonObject schema) throws Exception {
 
     JSONObject p = new JSONObject(item.getMap());
     JSONObject s = new JSONObject(schema.getMap());

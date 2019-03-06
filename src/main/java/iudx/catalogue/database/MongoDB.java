@@ -31,7 +31,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     SCHEMA_COLLECTION = schema_database;
   }
 
-  public void init_db(Vertx vertx, JsonObject mongoconfig) {
+  public void initDB(Vertx vertx, JsonObject mongoconfig) {
 
     mongo = MongoClient.createShared(vertx, mongoconfig);
   }
@@ -43,7 +43,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
    * @param options Options specify the fields that will (not) be displayed
    * @param message The message to which the result will be replied to
    */
-  private void mongo_find(
+  private void mongoFind(
       String collection, JsonObject query, FindOptions options, Message<Object> message) {
 
     JsonObject fields = options.getFields();
@@ -73,7 +73,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   }
 
   @Override
-  public void search_attribute(Message<Object> message) {
+  public void searchAttribute(Message<Object> message) {
 
     JsonObject request_body = (JsonObject) message.body();
     JsonObject query = new JsonObject();
@@ -113,11 +113,11 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 
     // Call mongo find
     FindOptions options = new FindOptions().setFields(fields);
-    mongo_find(ITEM_COLLECTION, query, options, message);
+    mongoFind(ITEM_COLLECTION, query, options, message);
   }
 
   @Override
-  public void read_item(Message<Object> message) {
+  public void readItem(Message<Object> message) {
 
     JsonObject query = new JsonObject();
     JsonObject request_body = (JsonObject) message.body();
@@ -126,7 +126,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     query.put("id", request_body.getString("id"));
 
     // Call mongo find
-    mongo_find(ITEM_COLLECTION, query, new FindOptions(), message);
+    mongoFind(ITEM_COLLECTION, query, new FindOptions(), message);
   }
   /**
    * Replaces the '$' in the fields of schema with '&'
@@ -134,7 +134,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
    * @param schema The schema whose fields have to be changed
    * @return The schema whose fields have '&' for '$'
    */
-  private JsonObject encode_schema(JsonObject schema) {
+  private JsonObject encodeSchema(JsonObject schema) {
 
     String[] temp = StringUtils.split(schema.encode(), "$");
     String encodedSchema = StringUtils.join(temp, "&");
@@ -147,7 +147,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
    * @return The original schema, obtained by replacing the '&' in the fields of encoded schema by
    *     '$'
    */
-  private JsonObject decode_schema(JsonObject encodedSchema) {
+  private JsonObject decodeSchema(JsonObject encodedSchema) {
 
     String[] temp = StringUtils.split(encodedSchema.encode(), "&");
     String schema = StringUtils.join(temp, "$");
@@ -155,7 +155,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   }
 
   @Override
-  public void read_schema(Message<Object> message) {
+  public void readSchema(Message<Object> message) {
 
     JsonObject m = (JsonObject) message.body();
     JsonObject query = new JsonObject();
@@ -168,7 +168,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
         new JsonObject(),
         res -> {
           if (res.succeeded()) {
-            message.reply(decode_schema(res.result()));
+            message.reply(decodeSchema(res.result()));
           } else {
             message.fail(0, "failure");
           }
@@ -206,7 +206,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   }
 
   @Override
-  public void write_item(Message<Object> message) {
+  public void writeItem(Message<Object> message) {
 
     JsonObject request_body = (JsonObject) message.body();
     JsonObject updated_item = addNewAttributes(request_body, "1.0");
@@ -224,13 +224,13 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   }
 
   @Override
-  public void write_schema(Message<Object> message) {
+  public void writeSchema(Message<Object> message) {
 
     JsonObject request_body = (JsonObject) message.body();
 
     mongo.insert(
         SCHEMA_COLLECTION,
-        encode_schema(request_body),
+        encodeSchema(request_body),
         res -> {
           if (res.succeeded()) {
             message.reply("success");
@@ -241,19 +241,19 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   }
 
   @Override
-  public void update_item(Message<Object> message) {
+  public void updateItem(Message<Object> message) {
     // TODO Auto-generated method stub
 
   }
 
   @Override
-  public void update_schema(Message<Object> message) {
+  public void updateSchema(Message<Object> message) {
     // TODO Auto-generated method stub
 
   }
 
   @Override
-  public void delete_item(Message<Object> message) {
+  public void deleteItem(Message<Object> message) {
     // TODO Auto-generated method stub
     JsonObject query = new JsonObject();
     JsonObject request_body = (JsonObject) message.body();
@@ -274,7 +274,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   }
 
   @Override
-  public void delete_schema(Message<Object> message) {
+  public void deleteSchema(Message<Object> message) {
     // TODO Auto-generated method stub
     JsonObject query = new JsonObject();
     JsonObject request_body = (JsonObject) message.body();

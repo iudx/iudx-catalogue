@@ -9,7 +9,6 @@ import io.vertx.core.json.JsonObject;
 public class DatabaseVerticle extends AbstractVerticle {
 
   private static final Logger logger = Logger.getLogger(DatabaseVerticle.class.getName());
-  private String action;
   private DatabaseInterface db;
   private String database_uri;
   private static final String database_name = "catalogue";
@@ -47,7 +46,7 @@ public class DatabaseVerticle extends AbstractVerticle {
     this.mongoconfig =
         new JsonObject().put("connection_string", database_uri).put("db_name", database_name);
 
-    db.init_db(vertx, mongoconfig);
+    db.initDB(vertx, mongoconfig);
   }
 
   /**
@@ -59,60 +58,60 @@ public class DatabaseVerticle extends AbstractVerticle {
     // TODO Auto-generated method stub
     logger.info("Database Verticle received message.body() = " + message.body());
 
-    action = (String) message.headers().get("action");
+    String action = (String) message.headers().get("action");
 
     switch (action) {
       case "read-item":
         {
-          db.read_item(message);
+          db.readItem(message);
           break;
         }
 
       case "read-schema":
         {
-          db.read_schema(message);
+          db.readSchema(message);
           break;
         }
 
       case "write-item":
         {
-          db.write_item(message);
+          db.writeItem(message);
           break;
         }
 
       case "write-schema":
         {
-          db.write_schema(message);
+          db.writeSchema(message);
           break;
         }
 
       case "update-item":
         {
-          db.update_item(message);
+          db.updateItem(message);
           break;
         }
 
       case "update-schema":
         {
-          db.update_schema(message);
+          db.updateSchema(message);
           break;
         }
 
       case "delete-item":
         {
-          db.delete_item(message);
+          db.deleteItem(message);
           break;
         }
 
       case "delete-schema":
         {
-          db.delete_schema(message);
+          db.deleteSchema(message);
           break;
         }
 
       case "search-attribute":
         {
-          db.search_attribute(message);
+          db.searchAttribute(message);
           break;
         }
     }

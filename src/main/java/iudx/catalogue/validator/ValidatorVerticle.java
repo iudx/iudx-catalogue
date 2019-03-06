@@ -51,7 +51,7 @@ public class ValidatorVerticle extends AbstractVerticle {
     switch (action) {
       case "validate-item":
         {
-          validate_item(message);
+          validateItem(message);
           break;
         }
     }
@@ -63,7 +63,7 @@ public class ValidatorVerticle extends AbstractVerticle {
    *
    * @param message - request that came on the eventbus
    */
-  private void validate_item(Message<Object> message) {
+  private void validateItem(Message<Object> message) {
 
     boolean skip_validation = false;
     if (message.headers().contains("skip_validation")) {
@@ -98,7 +98,7 @@ public class ValidatorVerticle extends AbstractVerticle {
                 logger.info(database_reply.result().body().toString());
                 JsonObject schema = (JsonObject) database_reply.result().body();
                 try {
-                  isValid.validate_item(item, schema);
+                  isValid.validateItem(item, schema);
                 } catch (Exception e) {
                   message.fail(0, "fail");
                 }
