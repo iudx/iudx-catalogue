@@ -23,7 +23,7 @@ public class CatalogueServer {
     int procs = Runtime.getRuntime().availableProcessors();
     Vertx vertx = Vertx.vertx();
 
-    DeploymentOptions options = get_config_options("app_conf.json");
+    DeploymentOptions options = getConfigOptions("app_conf.json");
     String database = "mongo";
     vertx.deployVerticle(new DatabaseVerticle(database), options);
 
@@ -42,7 +42,7 @@ public class CatalogueServer {
         });
   }
 
-  private static DeploymentOptions get_config_options(String filepath) {
+  private static DeploymentOptions getConfigOptions(String filepath) {
     
     DeploymentOptions options = null;
     

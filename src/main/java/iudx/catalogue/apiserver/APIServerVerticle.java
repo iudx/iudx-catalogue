@@ -23,14 +23,12 @@ import java.util.Base64;
 
 public class APIServerVerticle extends AbstractVerticle{
 
-  HttpServer server;
-  HttpServerRequest request;
-  HttpServerResponse response;
+  private HttpServer server;
+  private HttpServerResponse response;
   private JsonObject request_body;
-  String path;
-  String[] path_parameters;
-  String itemID;
-  String schemaID;
+  private String path;
+  private String itemID;
+  private String schemaID;
   private static final Logger logger = Logger.getLogger(APIServerVerticle.class.getName());
 
   @Override
@@ -49,15 +47,15 @@ public class APIServerVerticle extends AbstractVerticle{
             	response.sendFile("ui/landing/landing.html");
             });
 
-    router.get("/cat/search").handler(this::get_all);
-    router.get("/cat/search/attribute").handler(this::search_attribute);
-    router.get("/cat/items/id/:itemID").handler(this::get_items);
-    router.get("/cat/schemas/id/:schemaID").handler(this::get_schemas);
+    router.get("/cat/search").handler(this::getAll);
+    router.get("/cat/search/attribute").handler(this::searchAttribute);
+    router.get("/cat/items/id/:itemID").handler(this::getItems);
+    router.get("/cat/schemas/id/:schemaID").handler(this::getSchemas);
     
-    router.post("/cat/items").handler(this::create_items);
-    router.post("/cat/schemas").handler(this::create_schema);
+    router.post("/cat/items").handler(this::createItems);
+    router.post("/cat/schemas").handler(this::createSchema);
     
-    router.delete("/cat/items/id/:itemID").handler(this::delete_items);
+    router.delete("/cat/items/id/:itemID").handler(this::deleteItems);
 
     logger.info("IUDX Catalogue Routes Defined !");
     
@@ -81,7 +79,7 @@ public class APIServerVerticle extends AbstractVerticle{
    * @param file_path The path of the file which contains the list of users and their permissions
    * @return
    */
-  private boolean authenticate_request(HttpServerRequest request, HttpServerResponse response, String path, String file_path) {
+  private boolean authenticateRequest(HttpServerRequest request, HttpServerResponse response, String path, String file_path) {
 
     boolean allowed = false;
     String authorization = request.getHeader("authorization");
@@ -149,7 +147,7 @@ public class APIServerVerticle extends AbstractVerticle{
    *
    * @param event The server request
    */
-  private void get_all(RoutingContext routingContext) {
+  private void getAll(RoutingContext routingContext) {
 	  HttpServerResponse response = routingContext.response();
 
       request_body = new JsonObject();
@@ -186,13 +184,13 @@ public class APIServerVerticle extends AbstractVerticle{
    * @param event The server request which contains the item to be inserted in the database and the
    *     skip_validation header.
    */
-  private void create_items(RoutingContext routingContext) {
+  private void createItems(RoutingContext routingContext) {
    HttpServerRequest request = routingContext.request();
    HttpServerResponse response = routingContext.response();
    path = request.path();
    String skip_validation = request.getHeader("skip_validation").toLowerCase();
 
-   if (authenticate_request(request, response, path, "user.list")) {
+   if (authenticateRequest(request, response, path, "user.list")) {
 	      logger.info(path);
 
             try {
@@ -267,13 +265,13 @@ public class APIServerVerticle extends AbstractVerticle{
    *
    * @param event The server request which contains the schema to be inserted.
    */
-  private void create_schema(RoutingContext routingContext) {
+  private void createSchema(RoutingContext routingContext) {
 
    HttpServerRequest request = routingContext.request();
    HttpServerResponse response = routingContext.response();
    path = request.path();
 
-   if (authenticate_request(request, response, path, "user.list")) {
+   if (authenticateRequest(request, response, path, "user.list")) {
 	      logger.info(path);
 
 	  
@@ -352,7 +350,7 @@ public class APIServerVerticle extends AbstractVerticle{
    *
    * @param event The server request which contains the query and attributeFilter
    */
-  private void search_attribute(RoutingContext routingContext) {
+  private void searchAttribute(RoutingContext routingContext) {
 	  
 
    HttpServerRequest request = routingContext.request();
@@ -413,12 +411,12 @@ public class APIServerVerticle extends AbstractVerticle{
    *
    * @param event The server request which contains the id of the item
    */
-  private void get_items(RoutingContext routingContext) {
+  private void getItems(RoutingContext routingContext) {
 
    HttpServerRequest request = routingContext.request();
    HttpServerResponse response = routingContext.response();
 
-   Future<String> decode_request = decode_request(request, response);
+   Future<String> decode_request = decodeRequest(request, response);
 
    if (decode_request.result().equalsIgnoreCase("valid")) {
 
@@ -459,12 +457,12 @@ public class APIServerVerticle extends AbstractVerticle{
    *
    * @param event The server request which contains the id of the schema.
    */
-  private void get_schemas(RoutingContext routingContext) {
+  private void getSchemas(RoutingContext routingContext) {
 
    HttpServerRequest request = routingContext.request();
    HttpServerResponse response = routingContext.response();
 
-   Future<String> decode_request = decode_request(request, response);
+   Future<String> decode_request = decodeRequest(request, response);
 
    if (decode_request.result().equalsIgnoreCase("valid")) {
 
@@ -504,13 +502,13 @@ public class APIServerVerticle extends AbstractVerticle{
    *
    * @param event The server request which contains the id of the item.
    */
-  private void delete_items(RoutingContext routingContext) {
+  private void deleteItems(RoutingContext routingContext) {
 
    HttpServerRequest request = routingContext.request();
    HttpServerResponse response = routingContext.response();
    path = request.path();
 
-   if (authenticate_request(request, response, path, "user.list")) {
+   if (authenticateRequest(request, response, path, "user.list")) {
 	      logger.info(path);
 
       DeliveryOptions database_action = new DeliveryOptions();
@@ -544,7 +542,7 @@ public class APIServerVerticle extends AbstractVerticle{
     }
   }
 
-  private Future<String> decode_request(HttpServerRequest request, HttpServerResponse response) {
+  private Future<String> decodeRequest(HttpServerRequest request, HttpServerResponse response) {
 
     Future<String> decode_request = Future.future();
 
