@@ -10,7 +10,6 @@ public class DatabaseVerticle extends AbstractVerticle {
 
   private static final Logger logger = Logger.getLogger(DatabaseVerticle.class.getName());
   private DatabaseInterface db;
-  private String database_uri;
   private static final String database_name = "catalogue";
   private JsonObject mongoconfig;
   /**
@@ -27,6 +26,8 @@ public class DatabaseVerticle extends AbstractVerticle {
 
   @Override
   public void start(Future<Void> startFuture) {
+	
+	String database_uri;
 
     logger.info("Database Verticle started!");
     vertx
