@@ -1,0 +1,10 @@
+sudo: required
+
+dist: xenial
+
+before_install:
+  - ./docker/requirements.sh
+  - cd docker
+
+install:
+  - sh install
