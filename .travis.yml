@@ -13,4 +13,4 @@ before_script:
   - sleep 10
 
 script: 
-  - ./docker/test_deploy.sh
+  - ./docker/travis_deploy.sh
