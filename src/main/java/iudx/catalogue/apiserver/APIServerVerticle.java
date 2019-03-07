@@ -7,6 +7,7 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
+import io.vertx.core.MultiMap;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
@@ -146,34 +147,11 @@ public class APIServerVerticle extends AbstractVerticle{
    * @param event The server request
    */
   private void getAll(RoutingContext routingContext) {
-	  HttpServerResponse response = routingContext.response();
-
-      request_body = new JsonObject();
-
-      DeliveryOptions database_action = new DeliveryOptions();
-      database_action.addHeader("action", "search-attribute");
-
-      vertx
-          .eventBus()
-          .send(
-              "database",
-              request_body,
-              database_action,
-              database_reply -> {
-                if (database_reply.succeeded()) {
-                  logger.info(database_reply.result().body().toString());
-                  response.setStatusCode(200)
-                      .end(((JsonArray) database_reply.result().body()).encodePrettily());
-                  return;
-                } else if (database_reply.failed()) {
-                  logger.info("Search Failed");
-                  response.setStatusCode(500).end();
-                  return;
-                } else {
-                	response.setStatusCode(500).end();
-                  return;
-                }
-              });
+    HttpServerResponse response = routingContext.response();
+    request_body = new JsonObject();
+    DeliveryOptions database_action = new DeliveryOptions();
+    database_action.addHeader("action", "search-attribute");
+    databaseHandler(database_action, response, request_body);
   }
   /**
    * Sends a request to ValidatorVerticle to validate the item and DatabaseVerticle to insert it in
@@ -217,27 +195,9 @@ public class APIServerVerticle extends AbstractVerticle{
                           DeliveryOptions database_action = new DeliveryOptions();
                           database_action.addHeader("action", "write-item");
 
-                          vertx
-                              .eventBus()
-                              .send(
-                                  "database",
-                                  request_body,
-                                  database_action,
-                                  database_reply -> {
-                                    if (database_reply.succeeded()) {
-                                      String id = database_reply.result().body().toString();
-                                      response.setStatusCode(201).end(id);
-                                      return;
-                                    } else if (database_reply.failed()) {
-                                      logger.info("Database Failed");
-                                      response.setStatusCode(500).end();
-                                      return;
-                                    } else {
-                                    	response.setStatusCode(500).end();
-                                      return;
-                                    }
-                                  });
-                        } else if (validator_reply.failed()) {
+                          databaseHandler(database_action, response, request_body);
+                          
+                         } else if (validator_reply.failed()) {
                           logger.info("Validator Failed");
                           response.setStatusCode(500).end();
                           return;
@@ -280,25 +240,8 @@ public class APIServerVerticle extends AbstractVerticle{
               DeliveryOptions database_action = new DeliveryOptions();
               database_action.addHeader("action", "write-schema");
 
-              vertx
-                  .eventBus()
-                  .send(
-                      "database",
-                      request_body,
-                      database_action,
-                      database_reply -> {
-                        if (database_reply.succeeded()) {
-                        	response.setStatusCode(201).end();
-                          return;
-                        } else if (database_reply.failed()) {
-                          logger.info("Database Failed");
-                          response.setStatusCode(500).end();
-                          return;
-                        } else {
-                        	response.setStatusCode(500).end();
-                          return;
-                        }
-                      });
+              databaseHandler(database_action, response, request_body);
+              
             } catch (Exception e) {
             	response.setStatusCode(400).end("Invalid schema: Not a Json Object");
               return;
@@ -379,29 +322,10 @@ public class APIServerVerticle extends AbstractVerticle{
 
       DeliveryOptions database_action = new DeliveryOptions();
       logger.info(query);
+      
       database_action.addHeader("action", "search-attribute");
-
-      vertx
-          .eventBus()
-          .send(
-              "database",
-              request_body,
-              database_action,
-              database_reply -> {
-                if (database_reply.succeeded()) {
-                  logger.info(database_reply.result().body().toString());
-                  response.setStatusCode(200)
-                      .end(((JsonArray) database_reply.result().body()).encodePrettily());
-                  return;
-                } else if (database_reply.failed()) {
-                  logger.info("Search Failed");
-                  response.setStatusCode(500).end();
-                  return;
-                } else {
-                	response.setStatusCode(500).end();
-                  return;
-                }
-              });
+      
+      databaseHandler(database_action, response, request_body);
   }
 
   /**
@@ -422,27 +346,9 @@ public class APIServerVerticle extends AbstractVerticle{
       database_action.addHeader("action", "read-item");
       request_body = new JsonObject();
       request_body.put("id", itemID);
-      vertx
-          .eventBus()
-          .send(
-              "database",
-              request_body,
-              database_action,
-              database_reply -> {
-                if (database_reply.succeeded()) {
-                  logger.info(database_reply.result().body().toString());
-                  response.setStatusCode(200)
-                      .end(((JsonArray) database_reply.result().body()).encodePrettily());
-                  return;
-                } else if (database_reply.failed()) {
-                  logger.info("Database Failed");
-                  response.setStatusCode(500).end();
-                  return;
-                } else {
-                	response.setStatusCode(500).end();
-                  return;
-                }
-              });
+      
+      databaseHandler(database_action, response, request_body);
+      
    } else {
 	      logger.info("Invalid Parameters");
 	      response.setStatusCode(400).end("Invalid request parameters");
@@ -468,28 +374,10 @@ public class APIServerVerticle extends AbstractVerticle{
       database_action.addHeader("action", "read-schema");
       request_body = new JsonObject();
       request_body.put("id", schemaID);
-      vertx
-          .eventBus()
-          .send(
-              "database",
-              request_body,
-              database_action,
-              database_reply -> {
-                if (database_reply.succeeded()) {
-                  logger.info(database_reply.result().body().toString());
-                  response.setStatusCode(200)
-                      .end(((JsonArray) database_reply.result().body()).encodePrettily());
-                  return;
-                } else if (database_reply.failed()) {
-                  logger.info("Validator Failed");
-                  response.setStatusCode(500).end();
-                  return;
-                } else {
-                	response.setStatusCode(500).end();
-                	return;
-                }
-              });
-    } else {
+   
+      databaseHandler(database_action, response, request_body);
+      
+   } else {
         logger.info("Invalid Parameters");
         response.setStatusCode(400).end("Invalid request parameters");
         return;
@@ -513,31 +401,56 @@ public class APIServerVerticle extends AbstractVerticle{
       database_action.addHeader("action", "delete-item");
       request_body = new JsonObject();
       request_body.put("id", itemID);
-      vertx
-          .eventBus()
-          .send(
-              "database",
-              request_body,
-              database_action,
-              database_reply -> {
-                if (database_reply.succeeded()) {
-                  logger.info(database_reply.result().body().toString());
-                  response.setStatusCode(204).end();
-                  return;
-                } else if (database_reply.failed()) {
-                  logger.info("Database Failed");
-                  response.setStatusCode(500).end();
-                  return;
-                } else {
-                	response.setStatusCode(500).end();
-                	return;
-                }
-              });
-    } else {
+
+      databaseHandler(database_action, response, request_body);
+      
+   } else {
         logger.info("Unauthorised");
         response.setStatusCode(401).end();
         return;
     }
+  }
+
+  private void databaseHandler(
+      DeliveryOptions database_action, HttpServerResponse response, JsonObject request_body) {
+
+    MultiMap headers = database_action.getHeaders();
+    String action = headers.get("action");
+
+    vertx
+        .eventBus()
+        .send(
+            "database",
+            request_body,
+            database_action,
+            database_reply -> {
+              if (database_reply.succeeded()) {
+                logger.info(database_reply.result().body().toString());
+
+                if (action.equals("read-item")
+                    || action.equals("read-schema")
+                    || action.equals("search-attribute")) {
+                  response
+                      .setStatusCode(200)
+                      .end(((JsonArray) database_reply.result().body()).encodePrettily());
+                  return;
+                } else if (action.equals("delete-item")) {
+                  response.setStatusCode(204).end();
+                  return;
+                } else if (action.equals("write-item") || action.equals("write-schema")) {
+                  String id = database_reply.result().body().toString();
+                  response.setStatusCode(201).end(id);
+                  return;
+                }
+              } else if (database_reply.failed()) {
+                logger.info("Failed in database handler");
+                response.setStatusCode(500).end();
+                return;
+              } else {
+                response.setStatusCode(500).end();
+                return;
+              }
+            });
   }
 
   private Future<String> decodeRequest(HttpServerRequest request, HttpServerResponse response) {
