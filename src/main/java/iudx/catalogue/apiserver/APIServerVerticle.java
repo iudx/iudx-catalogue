@@ -395,14 +395,24 @@ public class APIServerVerticle extends AbstractVerticle{
    path = request.path();
 
    if (authenticateRequest(request, response, "user.list")) {
-	      logger.info(path);
 
-      DeliveryOptions database_action = new DeliveryOptions();
-      database_action.addHeader("action", "delete-item");
-      request_body = new JsonObject();
-      request_body.put("id", itemID);
+	   logger.info(path);
+	   
+	   Future<String> decode_request = decodeRequest(request, response);
+	   
+	   if (decode_request.result().equalsIgnoreCase("valid")) {
+      
+		DeliveryOptions database_action = new DeliveryOptions();
+		database_action.addHeader("action", "delete-item");
+		request_body = new JsonObject();
+		request_body.put("id", itemID);
 
-      databaseHandler(database_action, response, request_body);
+		databaseHandler(database_action, response, request_body);
+      } else {
+          logger.info("Invalid Parameters");
+          response.setStatusCode(400).end("Invalid request parameters");
+          return;
+      }
       
    } else {
         logger.info("Unauthorised");
@@ -427,17 +437,17 @@ public class APIServerVerticle extends AbstractVerticle{
               if (database_reply.succeeded()) {
                 logger.info(database_reply.result().body().toString());
 
-                if (action.equals("read-item")
-                    || action.equals("read-schema")
-                    || action.equals("search-attribute")) {
+                if ("read-item".equals(action)
+                    || "read-schema".equals(action)
+                    || "search-attribute".equals(action)) {
                   response
                       .setStatusCode(200)
                       .end(((JsonArray) database_reply.result().body()).encodePrettily());
                   return;
-                } else if (action.equals("delete-item")) {
+                } else if ("delete-item".equals(action) && "Success".equals(database_reply.result().body().toString())) {
                   response.setStatusCode(204).end();
                   return;
-                } else if (action.equals("write-item") || action.equals("write-schema")) {
+                } else if ("write-item".equals(action) || "write-schema".equals(action)) {
                   String id = database_reply.result().body().toString();
                   response.setStatusCode(201).end(id);
                   return;
