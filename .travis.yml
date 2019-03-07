@@ -8,3 +8,9 @@ before_install:
 
 install:
   - sh install
+
+before_script:
+  - sleep 10
+
+script: 
+  - ./docker/test_deploy.sh
