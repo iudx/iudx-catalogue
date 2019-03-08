@@ -22,6 +22,8 @@ import iudx.catalogue.validator.Validator;
 import iudx.catalogue.validator.ValidatorInterface;
 import iudx.catalogue.validator.ValidatorVerticle;
 
+import java.util.Base64;
+
 @ExtendWith(VertxExtension.class)
 class ApiTest implements CatlogueTesting {
 
@@ -78,11 +80,15 @@ class ApiTest implements CatlogueTesting {
   public void insertValidItem(Vertx vertx, VertxTestContext testContext) {
 
     JsonObject data = new JsonObject().put("hello", "OH yeah hello").put("how", "youhu");
+    
+    String auth = "shyamal:shyamalrbccps";
+    String encodedAuthString = Base64.getEncoder().encodeToString(auth.getBytes());
+        
     webClient
-        .postAbs("https://arun:arunrbccps@localhost:8455/cat/items")
-        .ssl(true)
+        .post("/cat/items")
         .putHeader("Content-Type", "application/json")
         .putHeader("skip_validation", "true")
+        .putHeader("authorization", "Basic " + encodedAuthString)
         .as(BodyCodec.string())
         .sendJsonObject(
             data,
@@ -90,7 +96,7 @@ class ApiTest implements CatlogueTesting {
                 resp -> {
                   testContext.verify(
                       () -> {
-                        assertThat(resp.statusCode()).isEqualTo(200);
+                        assertThat(resp.statusCode()).isEqualTo(201);
                         assertThat(resp.body().isEmpty()).isFalse();
                         System.out.println(resp.body()); 
                         testContext.completeNow();
