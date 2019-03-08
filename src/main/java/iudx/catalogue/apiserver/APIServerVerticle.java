@@ -70,6 +70,8 @@ public class APIServerVerticle extends AbstractVerticle{
     server.requestHandler(router::accept).listen(port);
 
     logger.info("API Server Verticle started!");
+    startFuture.complete();
+
   }
 
   /**
