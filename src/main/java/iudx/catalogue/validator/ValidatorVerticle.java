@@ -34,6 +34,8 @@ public class ValidatorVerticle extends AbstractVerticle {
             message -> {
               validateRequest(message);
             });
+    startFuture.complete();
+
   }
 
   /**
