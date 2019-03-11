@@ -6,7 +6,10 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.Order;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
@@ -30,6 +33,7 @@ import java.util.Base64;
 import java.util.logging.LogManager;
 
 @ExtendWith(VertxExtension.class)
+@TestMethodOrder(OrderAnnotation.class)
 class ApiTest implements CatlogueTesting {
 
   static WebClient webClient;
@@ -82,6 +86,7 @@ class ApiTest implements CatlogueTesting {
   }
 
   @Test
+  @Order(1)
   @DisplayName("Testing valid item (JSON and auth) POST to catalogue.")
   public void insertValidItem(VertxTestContext testContext) throws IOException {
     ClassLoader classLoader = getClass().getClassLoader();
@@ -202,6 +207,29 @@ class ApiTest implements CatlogueTesting {
                 }));
   }
 
+  @Test
+  @Order(2)
+  @DisplayName("Testing delete item")
+  public void deleteItem(VertxTestContext testContext) {
+
+    String auth = "shyamal:shyamalrbccps";
+    String realm = "Basic";
+    String encodedAuthString = Base64.getEncoder().encodeToString(auth.getBytes());
+
+    webClient
+        .delete("/cat/items/id/" + this.id)
+        .putHeader("authorization", realm + " " + encodedAuthString)
+        .send(
+            testContext.succeeding(
+                resp -> {
+                  testContext.verify(
+                      () -> {
+                        assertThat(resp.statusCode()).isEqualTo(204);
+                        testContext.completeNow();
+                      });
+                }));
+  }
+
   //  @Test
   //  @DisplayName("Testing valid tag search.")
   //  public void validTagSearch(VertxTestContext testContext) {}
@@ -269,4 +297,5 @@ class ApiTest implements CatlogueTesting {
   //  @Test
   //  @DisplayName("Testing catalogue search with in-valid ID.")
   //  public void invalidIdSearch(VertxTestContext testContext) {}
+
 }
