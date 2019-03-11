@@ -37,7 +37,7 @@ import java.util.logging.LogManager;
 class ApiTest implements CatlogueTesting {
 
   static WebClient webClient;
-  private String id;
+  private static String id;
 
   @BeforeAll
   public static void prepare(Vertx vertx, VertxTestContext testContext) {
@@ -116,7 +116,7 @@ class ApiTest implements CatlogueTesting {
                       () -> {
                         assertThat(resp.statusCode()).isEqualTo(201);
                         assertThat(resp.body().isEmpty()).isFalse();
-                        this.id = resp.body();
+                        id = resp.body();
                         testContext.completeNow();
                       });
                 }));
@@ -217,7 +217,7 @@ class ApiTest implements CatlogueTesting {
     String encodedAuthString = Base64.getEncoder().encodeToString(auth.getBytes());
 
     webClient
-        .delete("/cat/items/id/" + this.id)
+        .delete("/cat/items/id/" + id)
         .putHeader("authorization", realm + " " + encodedAuthString)
         .send(
             testContext.succeeding(
