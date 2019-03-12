@@ -220,7 +220,6 @@ class ApiTest implements CatlogueTesting {
     String auth = "shyamal:shyamalrbccps";
     String realm = "Basic";
     String encodedAuthString = Base64.getEncoder().encodeToString(auth.getBytes());
-    System.out.println("id in delete= "+id);
     webClient
         .delete("/cat/items/id/" + id)
         .putHeader("authorization", realm + " " + encodedAuthString)
@@ -242,7 +241,7 @@ class ApiTest implements CatlogueTesting {
   @DisplayName("Testing valid key and attributeFilter search.")
   public void validSearch(VertxTestContext testContext) {
     webClient
-        .get("/cat/search/attribute?tags=(Water)&attributeFilter=(id)")
+        .get("/cat/search/attribute?tags=(O)&attributeFilter=(id)")
         .as(BodyCodec.jsonArray())
         .send(
             testContext.succeeding(
@@ -324,7 +323,7 @@ class ApiTest implements CatlogueTesting {
   @DisplayName("Testing in-valid attribute filter search.")
   public void invalidAttributeFilterSearch(VertxTestContext testContext) {
     webClient
-        .get("/cat/search/attribute?tags=(Water)&attributeFilter=(id,UUID)")
+        .get("/cat/search/attribute?tags=(O)&attributeFilter=(id,invalid_filter)")
         .as(BodyCodec.jsonArray())
         .send(
             testContext.succeeding(
@@ -343,7 +342,7 @@ class ApiTest implements CatlogueTesting {
                         testContext.verify(
                             () -> {
                               assertThat(s.equalsIgnoreCase("id")).isTrue();
-                              assertThat(s.equalsIgnoreCase("UUID")).isFalse();
+                              assertThat(s.equalsIgnoreCase("invalid_filter")).isFalse();
                             });
                       }
                     }
@@ -511,7 +510,7 @@ class ApiTest implements CatlogueTesting {
   @DisplayName("Testing catalogue search with valid ID.")
   public void validIdSearch(VertxTestContext testContext) {
     webClient
-        .get("/cat/items/id/" + this.id)
+        .get("/cat/items/id/" + id)
         .as(BodyCodec.jsonArray())
         .send(
             testContext.succeeding(
