@@ -5,8 +5,7 @@
     "__itemStatus": "active",
     "refDataModel": "https://raw.githubusercontent.com/rbccps-iisc/iudx-schemas/master/data_models/environment/airQuality/env_aqm_climoPune_0.json",
     "tags": [
-      "air",
-      "pollution",
+      "air pollution",
       "SO2",
       "CO2",
       "CO",

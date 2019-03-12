@@ -14,6 +14,7 @@ import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.ext.web.codec.BodyCodec;
@@ -29,6 +30,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import io.vertx.core.json.JsonArray;
+
 import java.util.Base64;
 import java.util.logging.LogManager;
 
@@ -85,6 +88,7 @@ class ApiTest implements CatlogueTesting {
     vertx.close();
   }
 
+  // -------------------------POST Testing-------------------------------------------
   @Test
   @Order(1)
   @DisplayName("Testing valid item (JSON and auth) POST to catalogue.")
@@ -207,15 +211,15 @@ class ApiTest implements CatlogueTesting {
                 }));
   }
 
+  // ----------------------DELETE Item----------------------------
   @Test
-  @Order(2)
+  @Order(3)
   @DisplayName("Testing delete item")
   public void deleteItem(VertxTestContext testContext) {
 
     String auth = "shyamal:shyamalrbccps";
     String realm = "Basic";
     String encodedAuthString = Base64.getEncoder().encodeToString(auth.getBytes());
-
     webClient
         .delete("/cat/items/id/" + id)
         .putHeader("authorization", realm + " " + encodedAuthString)
@@ -230,72 +234,320 @@ class ApiTest implements CatlogueTesting {
                 }));
   }
 
-  //  @Test
-  //  @DisplayName("Testing valid tag search.")
-  //  public void validTagSearch(VertxTestContext testContext) {}
+  // ----------------------Attribute Search Testing-------------------------------
+
+  @Test
+  @Order(2)
+  @DisplayName("Testing valid key and attributeFilter search.")
+  public void validSearch(VertxTestContext testContext) {
+    webClient
+        .get("/cat/search/attribute?tags=(O)&attributeFilter=(id)")
+        .as(BodyCodec.jsonArray())
+        .send(
+            testContext.succeeding(
+                resp -> {
+                  testContext.verify(
+                      () -> {
+                        assertThat(resp.statusCode()).isEqualTo(200);
+                      });
+                  JsonArray result = resp.body();
+                  for (Object j : result) {
+                    JsonObject k = (JsonObject) j;
+                    if (k.isEmpty()) {
+                      continue;
+                    } else {
+                      for (String s : k.fieldNames()) {
+                        testContext.verify(
+                            () -> {
+                              assertThat(s.equalsIgnoreCase("id")).isTrue();
+                            });
+                      }
+                    }
+                  }
+                  testContext.completeNow();
+                }));
+  }
+
+  @Test
+  @Order(2)
+  @DisplayName("Testing in-valid key search.")
+  public void invalidKeySearch(VertxTestContext testContext) {
+    webClient
+        .get("/cat/search/attribute?randomKey=(value)&attributeFilter=(id)")
+        .as(BodyCodec.jsonArray())
+        .send(
+            testContext.succeeding(
+                resp -> {
+                  testContext.verify(
+                      () -> {
+                        assertThat(resp.statusCode()).isEqualTo(200);
+                        testContext.completeNow();
+                      });
+                }));
+  }
+
+  @Test
+  @Order(2)
+  @DisplayName("Testing catalogue search with empty key.")
+  public void emptyKeySearch(VertxTestContext testContext) {
+    webClient
+        .get("/cat/search/attribute?attributeFilter=id")
+        .as(BodyCodec.jsonArray())
+        .send(
+            testContext.succeeding(
+                resp -> {
+                  testContext.verify(
+                      () -> {
+                        assertThat(resp.statusCode()).isEqualTo(200);
+                      });
+                  JsonArray result = resp.body();
+                  for (Object j : result) {
+                    JsonObject k = (JsonObject) j;
+                    if (k.isEmpty()) {
+                      continue;
+                    } else {
+                      for (String s : k.fieldNames()) {
+                        testContext.verify(
+                            () -> {
+                              assertThat(s.equalsIgnoreCase("id")).isTrue();
+                            });
+                      }
+                    }
+                  }
+                  testContext.completeNow();
+                }));
+  }
+
+  @Test
+  @Order(2)
+  @DisplayName("Testing in-valid attribute filter search.")
+  public void invalidAttributeFilterSearch(VertxTestContext testContext) {
+    webClient
+        .get("/cat/search/attribute?tags=(O)&attributeFilter=(id,invalid_filter)")
+        .as(BodyCodec.jsonArray())
+        .send(
+            testContext.succeeding(
+                resp -> {
+                  testContext.verify(
+                      () -> {
+                        assertThat(resp.statusCode()).isEqualTo(200);
+                      });
+                  JsonArray result = resp.body();
+                  for (Object j : result) {
+                    JsonObject k = (JsonObject) j;
+                    if (k.isEmpty()) {
+                      continue;
+                    } else {
+                      for (String s : k.fieldNames()) {
+                        testContext.verify(
+                            () -> {
+                              assertThat(s.equalsIgnoreCase("id")).isTrue();
+                              assertThat(s.equalsIgnoreCase("invalid_filter")).isFalse();
+                            });
+                      }
+                    }
+                  }
+                  testContext.completeNow();
+                }));
+  }
+
+  @Test
+  @Order(2)
+  @DisplayName("Testing catalogue search with empty attribute filters.")
+  public void emptyAttributeFilterSearch(VertxTestContext testContext) {
+    webClient
+        .get("/cat/search/attribute?tags=(O)")
+        .as(BodyCodec.jsonArray())
+        .send(
+            testContext.succeeding(
+                resp -> {
+                  testContext.verify(
+                      () -> {
+                        assertThat(resp.statusCode()).isEqualTo(200);
+                        assertThat(resp.body().isEmpty()).isFalse();
+                        testContext.completeNow();
+                      });
+                }));
+  }
+
+  @Test
+  @Order(2)
+  @DisplayName("Testing catalogue search with white-spaces in attribute filters.")
+  public void whiteSpaceAttributeFilterSearch(VertxTestContext testContext) {
+    webClient
+        .get("/cat/search/attribute?tags=air%20pollution&attributeFilter=id")
+        .as(BodyCodec.jsonArray())
+        .send(
+            testContext.succeeding(
+                resp -> {
+                  testContext.verify(
+                      () -> {
+                        assertThat(resp.statusCode()).isEqualTo(200);
+                        assertThat(resp.body().isEmpty()).isFalse();
+                        testContext.completeNow();
+                      });
+                }));
+  }
+
+  @Test
+  @Order(2)
+  @DisplayName("Testing catalogue search with valid SINGLE TAG.")
+  public void validSingleTagSearch(VertxTestContext testContext) {
+    webClient
+        .get("/cat/search/attribute?tags=air pollution&attributeFilter=id")
+        .as(BodyCodec.jsonArray())
+        .send(
+            testContext.succeeding(
+                resp -> {
+                  testContext.verify(
+                      () -> {
+                        assertThat(resp.statusCode()).isEqualTo(200);
+                        assertThat(resp.body().isEmpty()).isFalse();
+                        testContext.completeNow();
+                      });
+                }));
+  }
+
+  @Test
+  @Order(2)
+  @DisplayName("Testing catalogue search with valid MULTIPLE TAG.")
+  public void validMultipleTagSearch(VertxTestContext testContext) {
+    webClient
+        .get("/cat/search/attribute?tags=(O,UV)&attributeFilter=id")
+        .as(BodyCodec.jsonArray())
+        .send(
+            testContext.succeeding(
+                resp -> {
+                  testContext.verify(
+                      () -> {
+                        assertThat(resp.statusCode()).isEqualTo(200);
+                        assertThat(resp.body().isEmpty()).isFalse();
+                        testContext.completeNow();
+                      });
+                }));
+  }
+
+  @Test
+  @Order(2)
+  @DisplayName("Testing catalogue search with valid SINGLE in-valid TAG.")
+  public void invalidSingleTagSearch(VertxTestContext testContext) {
+    webClient
+        .get("/cat/search/attribute?tags=Invalid&attributeFilter=id")
+        .as(BodyCodec.jsonArray())
+        .send(
+            testContext.succeeding(
+                resp -> {
+                  testContext.verify(
+                      () -> {
+                        assertThat(resp.statusCode()).isEqualTo(200);
+                        assertThat(resp.body().isEmpty()).isTrue();
+                        testContext.completeNow();
+                      });
+                }));
+  }
+
+  @Test
+  @Order(2)
+  @DisplayName("Testing catalogue search with valid MULTIPLE in-valid TAG.")
+  public void invalidMultipleTagSearch(VertxTestContext testContext) {
+    webClient
+        .get("/cat/search/attribute?tags=(O,Invalid)&attributeFilter=id")
+        .as(BodyCodec.jsonArray())
+        .send(
+            testContext.succeeding(
+                resp -> {
+                  testContext.verify(
+                      () -> {
+                        assertThat(resp.statusCode()).isEqualTo(200);
+                        assertThat(resp.body().isEmpty()).isFalse();
+                        testContext.completeNow();
+                      });
+                }));
+  }
+
+  @Test
+  @Order(2)
+  @DisplayName("Testing catalogue search with valid single in-case-sensitive TAG.")
+  public void validCaseInsensitiveTagSearch(VertxTestContext testContext) {
+    webClient
+        .get("/cat/search/attribute?tags=(o,uV)&attributeFilter=id")
+        .as(BodyCodec.jsonArray())
+        .send(
+            testContext.succeeding(
+                resp -> {
+                  testContext.verify(
+                      () -> {
+                        assertThat(resp.statusCode()).isEqualTo(200);
+                        assertThat(resp.body().isEmpty()).isFalse();
+                        testContext.completeNow();
+                      });
+                }));
+  }
+
+  // ------------------------------All Items Search------------------
+  @Test
+  @Order(2)
+  @DisplayName("Testing item search.")
+  public void testItemSearch(VertxTestContext testContext) {
+    webClient
+        .get("/cat/search")
+        .as(BodyCodec.jsonArray())
+        .send(
+            testContext.succeeding(
+                resp -> {
+                  testContext.verify(
+                      () -> {
+                        assertThat(resp.statusCode()).isEqualTo(200);
+                        assertThat(resp.body().isEmpty()).isFalse();
+                        testContext.completeNow();
+                      });
+                }));
+  }
+  // -----------------------------GET Item Search----------------------------------
+
+  @Test
+  @Order(2)
+  @DisplayName("Testing catalogue search with valid ID.")
+  public void validIdSearch(VertxTestContext testContext) {
+    webClient
+        .get("/cat/items/id/" + id)
+        .as(BodyCodec.jsonArray())
+        .send(
+            testContext.succeeding(
+                resp -> {
+                  testContext.verify(
+                      () -> {
+                        assertThat(resp.statusCode()).isEqualTo(200);
+                        assertThat(resp.body().isEmpty()).isFalse();
+                        testContext.completeNow();
+                      });
+                }));
+  }
+
+  @Test
+  @Order(2)
+  @DisplayName("Testing catalogue search with in-valid ID.")
+  public void invalidIdSearch(VertxTestContext testContext) {
+    webClient
+        .get("/cat/items/id/invalidId")
+        .as(BodyCodec.jsonArray())
+        .send(
+            testContext.succeeding(
+                resp -> {
+                  testContext.verify(
+                      () -> {
+                        assertThat(resp.statusCode()).isEqualTo(200);
+                        assertThat(resp.body().isEmpty()).isTrue();
+                        testContext.completeNow();
+                      });
+                }));
+  }
+
+  // ------------------------HOME Page Testing-----------------------------
+
   //
-  //  @Test
-  //  @DisplayName("Testing in-valid tag search.")
-  //  public void invalidTagSearch(VertxTestContext testContext) {}
-  //
-  //  @Test
-  //  @DisplayName("Testing valid attribute filter search.")
-  //  public void validAttributeFilterSearch(VertxTestContext testContext) {}
-  //
-  //  @Test
-  //  @DisplayName("Testing in-valid attribute filter search.")
-  //  public void invalidAttributeFilterSearch(VertxTestContext testContext) {}
-  //
-  //  @Test
-  //  @DisplayName("Testing home page.")
-  //  public void testHomePage(VertxTestContext testContext) {}
-  //
-  //  @Test
-  //  @DisplayName("Testing item search.")
-  //  public void testItemSearch(VertxTestContext testContext) {}
-  //
-  //  @Test
-  //  @DisplayName("Testing catalogue search with in-valid key.")
-  //  public void invalidKeySearch(VertxTestContext testContext) {}
-  //
-  //  @Test
-  //  @DisplayName("Testing catalogue search with empty key.")
-  //  public void emptyKeySearch(VertxTestContext testContext) {}
-  //
-  //  @Test
-  //  @DisplayName("Testing catalogue search with empty attribute filters.")
-  //  public void emptyAttributeFilterSearch(VertxTestContext testContext) {}
-  //
-  //  @Test
-  //  @DisplayName("Testing catalogue search with white-spaces in attribute filters.")
-  //  public void whiteSpaceAttributeFilterSearch(VertxTestContext testContext) {}
-  //
-  //  @Test
-  //  @DisplayName("Testing catalogue search with valid SINGLE TAG.")
-  //  public void validSingleTagSearch(VertxTestContext testContext) {}
-  //
-  //  @Test
-  //  @DisplayName("Testing catalogue search with valid MULTIPLE TAG.")
-  //  public void validMultipleTagSearch(VertxTestContext testContext) {}
-  //
-  //  @Test
-  //  @DisplayName("Testing catalogue search with valid SINGLE in-valid TAG.")
-  //  public void invalidSingleTagSearch(VertxTestContext testContext) {}
-  //
-  //  @Test
-  //  @DisplayName("Testing catalogue search with valid MULTIPLE in-valid TAG.")
-  //  public void invalidMultipleTagSearch(VertxTestContext testContext) {}
-  //
-  //  @Test
-  //  @DisplayName("Testing catalogue search with valid single in-case-sensitive TAG.")
-  //  public void validCaseInsensitiveTagSearch(VertxTestContext testContext) {}
-  //
-  //  @Test
-  //  @DisplayName("Testing catalogue search with valid ID.")
-  //  public void validIdSearch(VertxTestContext testContext) {}
-  //
-  //  @Test
-  //  @DisplayName("Testing catalogue search with in-valid ID.")
-  //  public void invalidIdSearch(VertxTestContext testContext) {}
+  //    @Test
+  //    @DisplayName("Testing home page.")
+  //    public void testHomePage(VertxTestContext testContext) {}
 
 }
