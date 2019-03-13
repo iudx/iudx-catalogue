@@ -120,7 +120,7 @@ class ApiTest implements CatlogueTesting {
                       () -> {
                         assertThat(resp.statusCode()).isEqualTo(201);
                         assertThat(resp.body().isEmpty()).isFalse();
-                        id = resp.body();
+                        id = new JsonObject(resp.body()).getString("id");
                         testContext.completeNow();
                       });
                 }));
