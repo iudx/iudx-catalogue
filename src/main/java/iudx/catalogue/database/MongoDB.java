@@ -191,7 +191,6 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     updated.put("id", UUID.randomUUID().toString());
     updated.put("Provider", "iudx-provider");
 
-    
     if (updated.containsKey("tags")) {
       JsonArray tagsInLowerCase = new JsonArray();
       JsonArray tags = updated.getJsonArray("tags");
@@ -261,12 +260,14 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     // Populate query
     query.put("id", request_body.getString("id"));
 
-    mongo.removeDocument(
+    mongo.findOneAndDelete(
         ITEM_COLLECTION,
         query,
         res -> {
-          if (res.succeeded()) {
+          if (res.succeeded() && !(res.result() == null)) {
             message.reply("Success");
+          } else if (res.result() == null) {
+            message.reply("Item not found");
           } else {
             message.fail(0, "Failure");
           }
@@ -282,12 +283,14 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     // Populate query
     query.put("id", request_body.getString("id"));
 
-    mongo.removeDocument(
+    mongo.findOneAndDelete(
         SCHEMA_COLLECTION,
         query,
         res -> {
-          if (res.succeeded()) {
+          if (res.succeeded() && !(res.result() == null)) {
             message.reply("Success");
+          } else if (res.result() == null) {
+            message.reply("Schema not found");
           } else {
             message.fail(0, "Failure");
           }

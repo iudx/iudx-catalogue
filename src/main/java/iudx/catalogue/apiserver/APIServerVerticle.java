@@ -452,10 +452,15 @@ public class APIServerVerticle extends AbstractVerticle {
                       .setStatusCode(200)
                       .end(((JsonArray) database_reply.result().body()).encodePrettily());
                   return;
-                } else if ("delete-item".equals(action)
-                    && "Success".equals(database_reply.result().body().toString())) {
-                  response.setStatusCode(204).end();
-                  return;
+                } else if ("delete-item".equals(action)) {
+                  if ("Success".equals(database_reply.result().body().toString())) {
+                    response.setStatusCode(204).end();
+                    return;
+                  } else {
+                    logger.info("Item not found");
+                    response.setStatusCode(400).end(database_reply.result().body().toString());
+                    return;
+                  }
                 } else if ("write-item".equals(action) || "write-schema".equals(action)) {
                   String id = database_reply.result().body().toString();
                   response.setStatusCode(201).end(id);
