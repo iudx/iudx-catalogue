@@ -90,9 +90,9 @@ public class APIServerVerticle extends AbstractVerticle {
    * @param file_path The path of the file which contains the list of users and their permissions
    * @return
    */
-  private boolean authenticateRequest(
-      HttpServerRequest request, HttpServerResponse response, String file_path) {
+  private boolean authenticateRequest(RoutingContext routingContext, String file_path) {
 
+    HttpServerRequest request = routingContext.request();
     boolean allowed = false;
     String authorization = request.getHeader("authorization");
 
@@ -111,7 +111,7 @@ public class APIServerVerticle extends AbstractVerticle {
 
         if (!"Basic".equals(scheme)) {
           
-          response.setStatusCode(401).end("Use Basic HTTP authorization");
+          handle401(routingContext, "Use Basic HTTP authorization");
         } else {
           if (userId != null && password != null) {
             try (InputStream inputStream = new FileInputStream(file_path)) {
@@ -122,34 +122,31 @@ public class APIServerVerticle extends AbstractVerticle {
                 if (password.equals(user.getString("password"))) {
                   allowed = true;
                 } else {
-                  response.setStatusCode(400).end("Your password is invalid");
+                  handle400(routingContext, "Your password is invalid");
                 }
 
                 if (allowed && !user.getBoolean("write_permission")) {
                   allowed = false;
-                  response.setStatusCode(401).end("You do not have write access to the server");
+                  handle401(routingContext, "You do not have write access to the server");
                 }
               } else {
-                response.setStatusCode(400).end("User " + userId + " is not registered");
+                handle400(routingContext, "User " + userId + "is not registered");
               }
 
             } catch (Exception e) {
-              response.setStatusCode(500).end();
-              logger.info(e.toString());
+              handle500(routingContext);
             }
 
           } else {
-            response
-                .setStatusCode(400)
-                .end("Add userId and password in the header of your request");
+            handle400(routingContext, "Add 'authenticaton' in the header of your request");
           }
         }
       } catch (Exception e) {
-        response.setStatusCode(401).end("Use Basic HTTP authorization");
+        handle401(routingContext, "Use Basic HTTP authentication");
       }
 
     } else {
-      response.setStatusCode(401).end("Use Basic HTTP authorization");
+      handle401(routingContext, "Use Basic HTTP authorization");
     }
 
     logger.info("Authentication ended with flag : " + allowed);
@@ -180,7 +177,7 @@ public class APIServerVerticle extends AbstractVerticle {
     path = request.path();
     String skip_validation = request.getHeader("skip_validation").toLowerCase();
 
-    if (authenticateRequest(request, response, "user.list")) {
+    if (authenticateRequest(routingContext, "user.list")) {
       logger.info(path);
 
       try {
@@ -245,7 +242,7 @@ public class APIServerVerticle extends AbstractVerticle {
     HttpServerResponse response = routingContext.response();
     path = request.path();
 
-    if (authenticateRequest(request, response, "user.list")) {
+    if (authenticateRequest(routingContext, "user.list")) {
       logger.info(path);
 
       request.bodyHandler(
@@ -412,7 +409,7 @@ public class APIServerVerticle extends AbstractVerticle {
     HttpServerResponse response = routingContext.response();
     path = request.path();
 
-    if (authenticateRequest(request, response, "user.list")) {
+    if (authenticateRequest(routingContext, "user.list")) {
 
       logger.info(path);
 
