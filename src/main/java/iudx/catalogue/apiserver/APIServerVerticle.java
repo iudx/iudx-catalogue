@@ -11,6 +11,7 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.MultiMap;
 import io.vertx.core.eventbus.DeliveryOptions;
+import io.vertx.core.eventbus.Message;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.http.HttpServerRequest;
@@ -26,12 +27,19 @@ import java.util.Base64;
 
 public class APIServerVerticle extends AbstractVerticle {
 
-  private HttpServerResponse response;
   private JsonObject request_body;
   private String path;
   private String itemID;
   private String schemaID;
   private static final Logger logger = Logger.getLogger(APIServerVerticle.class.getName());
+
+  static final int HTTP_STATUS_OK = 200;
+  static final int HTTP_STATUS_CREATED = 201;
+  static final int HTTP_STATUS_DELETED = 204;
+  static final int HTTP_STATUS_BAD_REQUEST = 400;
+  static final int HTTP_STATUS_NOT_FOUND = 404;
+  static final int HTTP_STATUS_INTERNAL_SERVER_ERROR = 500;
+  static final int HTTP_STATUS_UNAUTHORIZED = 401;
 
   @Override
   public void start(Future<Void> startFuture) {
@@ -46,7 +54,7 @@ public class APIServerVerticle extends AbstractVerticle {
         .route("/")
         .handler(
             routingContext -> {
-              response = routingContext.response();
+              HttpServerResponse response = routingContext.response();
               response.sendFile("ui/landing/landing.html");
             });
 
@@ -83,9 +91,9 @@ public class APIServerVerticle extends AbstractVerticle {
    * @param file_path The path of the file which contains the list of users and their permissions
    * @return
    */
-  private boolean authenticateRequest(
-      HttpServerRequest request, HttpServerResponse response, String file_path) {
+  private boolean authenticateRequest(RoutingContext routingContext, String file_path) {
 
+    HttpServerRequest request = routingContext.request();
     boolean allowed = false;
     String authorization = request.getHeader("authorization");
 
@@ -103,7 +111,8 @@ public class APIServerVerticle extends AbstractVerticle {
         password = credentials.length > 1 ? credentials[1] : null;
 
         if (!"Basic".equals(scheme)) {
-          response.setStatusCode(401).end("Use Basic HTTP authorization");
+
+          handle401(routingContext, "Use Basic HTTP authorization");
         } else {
           if (userId != null && password != null) {
             try (InputStream inputStream = new FileInputStream(file_path)) {
@@ -114,34 +123,31 @@ public class APIServerVerticle extends AbstractVerticle {
                 if (password.equals(user.getString("password"))) {
                   allowed = true;
                 } else {
-                  response.setStatusCode(400).end("Your password is invalid");
+                  handle400(routingContext, "Your password is invalid");
                 }
 
                 if (allowed && !user.getBoolean("write_permission")) {
                   allowed = false;
-                  response.setStatusCode(401).end("You do not have write access to the server");
+                  handle401(routingContext, "You do not have write access to the server");
                 }
               } else {
-                response.setStatusCode(400).end("User " + userId + " is not registered");
+                handle400(routingContext, "User " + userId + "is not registered");
               }
 
             } catch (Exception e) {
-              response.setStatusCode(500).end();
-              logger.info(e.toString());
+              handle500(routingContext);
             }
 
           } else {
-            response
-                .setStatusCode(400)
-                .end("Add userId and password in the header of your request");
+            handle400(routingContext, "Add 'authenticaton' in the header of your request");
           }
         }
       } catch (Exception e) {
-        response.setStatusCode(401).end("Use Basic HTTP authorization");
+        handle401(routingContext, "Use Basic HTTP authentication");
       }
 
     } else {
-      response.setStatusCode(401).end("Use Basic HTTP authorization");
+      handle401(routingContext, "Use Basic HTTP authorization");
     }
 
     logger.info("Authentication ended with flag : " + allowed);
@@ -153,11 +159,10 @@ public class APIServerVerticle extends AbstractVerticle {
    * @param event The server request
    */
   private void getAll(RoutingContext routingContext) {
-    HttpServerResponse response = routingContext.response();
     request_body = new JsonObject();
     DeliveryOptions database_action = new DeliveryOptions();
     database_action.addHeader("action", "search-attribute");
-    databaseHandler(database_action, response, request_body);
+    databaseHandler(database_action, routingContext, request_body);
   }
   /**
    * Sends a request to ValidatorVerticle to validate the item and DatabaseVerticle to insert it in
@@ -168,11 +173,10 @@ public class APIServerVerticle extends AbstractVerticle {
    */
   private void createItems(RoutingContext routingContext) {
     HttpServerRequest request = routingContext.request();
-    HttpServerResponse response = routingContext.response();
     path = request.path();
     String skip_validation = request.getHeader("skip_validation").toLowerCase();
 
-    if (authenticateRequest(request, response, "user.list")) {
+    if (authenticateRequest(routingContext, "user.list")) {
       logger.info(path);
 
       try {
@@ -182,7 +186,8 @@ public class APIServerVerticle extends AbstractVerticle {
         if (skip_validation != null) {
           if (!("true".equals(skip_validation)) && !("false".equals(skip_validation))) {
             logger.info("skip_validation not a boolean");
-            response.setStatusCode(400).end("Invalid value: skip_validation is not a boolean");
+
+            handle400(routingContext, "Invalid value: skip_validation is not a boolean");
             return;
           } else {
             validator_action.addHeader("skip_validation", skip_validation);
@@ -201,26 +206,27 @@ public class APIServerVerticle extends AbstractVerticle {
                     DeliveryOptions database_action = new DeliveryOptions();
                     database_action.addHeader("action", "write-item");
 
-                    databaseHandler(database_action, response, request_body);
+                    databaseHandler(database_action, routingContext, request_body);
 
                   } else if (validator_reply.failed()) {
                     logger.info("Validator Failed");
-                    response.setStatusCode(500).end();
+                    handle500(routingContext);
                     return;
                   } else {
                     logger.info("No reply");
-                    response.setStatusCode(500).end();
+                    handle500(routingContext);
+
                     return;
                   }
                 });
 
       } catch (Exception e) {
-        response.setStatusCode(400).end("Invalid item: Not a Json Object");
+        handle400(routingContext, "Invalid item: Not a Json Object");
         return;
       }
     } else {
       logger.info("Unauthorised");
-      response.setStatusCode(401).end();
+      handle401(routingContext, "Unauthorised");
       return;
     }
   }
@@ -232,10 +238,9 @@ public class APIServerVerticle extends AbstractVerticle {
   private void createSchema(RoutingContext routingContext) {
 
     HttpServerRequest request = routingContext.request();
-    HttpServerResponse response = routingContext.response();
     path = request.path();
 
-    if (authenticateRequest(request, response, "user.list")) {
+    if (authenticateRequest(routingContext, "user.list")) {
       logger.info(path);
 
       request.bodyHandler(
@@ -245,16 +250,16 @@ public class APIServerVerticle extends AbstractVerticle {
               DeliveryOptions database_action = new DeliveryOptions();
               database_action.addHeader("action", "write-schema");
 
-              databaseHandler(database_action, response, request_body);
+              databaseHandler(database_action, routingContext, request_body);
 
             } catch (Exception e) {
-              response.setStatusCode(400).end("Invalid schema: Not a Json Object");
+              handle400(routingContext, "Invalid schema: Not a Json Object");
               return;
             }
           });
     } else {
       logger.info("Unauthorised");
-      response.setStatusCode(401).end();
+      handle401(routingContext, "Unauthorised");
       return;
     }
   }
@@ -299,7 +304,6 @@ public class APIServerVerticle extends AbstractVerticle {
   private void searchAttribute(RoutingContext routingContext) {
 
     HttpServerRequest request = routingContext.request();
-    HttpServerResponse response = routingContext.response();
 
     // Example Query : curl -ik -XGET
     // 'https://localhost:8443/cat/search/attribute?owner=rbccps&tags=(etoilet,sanitation)&attributeFilter=(id,latitude,longitude)'
@@ -308,7 +312,7 @@ public class APIServerVerticle extends AbstractVerticle {
     try {
       query = URLDecoder.decode(request.query().toString(), "UTF-8");
     } catch (UnsupportedEncodingException e) { // TODO Auto-generated catch block
-      response.setStatusCode(400).end("Bad Query");
+      handle400(routingContext, "Bad Query");
       return;
     }
     logger.info(query);
@@ -333,7 +337,7 @@ public class APIServerVerticle extends AbstractVerticle {
 
     database_action.addHeader("action", "search-attribute");
 
-    databaseHandler(database_action, response, request_body);
+    databaseHandler(database_action, routingContext, request_body);
   }
 
   /**
@@ -355,11 +359,11 @@ public class APIServerVerticle extends AbstractVerticle {
       request_body = new JsonObject();
       request_body.put("id", itemID);
 
-      databaseHandler(database_action, response, request_body);
+      databaseHandler(database_action, routingContext, request_body);
 
     } else {
       logger.info("Invalid Parameters");
-      response.setStatusCode(400).end("Invalid request parameters");
+      handle400(routingContext, "Invalid request parameters");
       return;
     }
   }
@@ -383,11 +387,11 @@ public class APIServerVerticle extends AbstractVerticle {
       request_body = new JsonObject();
       request_body.put("id", schemaID);
 
-      databaseHandler(database_action, response, request_body);
+      databaseHandler(database_action, routingContext, request_body);
 
     } else {
       logger.info("Invalid Parameters");
-      response.setStatusCode(400).end("Invalid request parameters");
+      handle400(routingContext, "Invalid request parameters");
       return;
     }
   }
@@ -402,7 +406,7 @@ public class APIServerVerticle extends AbstractVerticle {
     HttpServerResponse response = routingContext.response();
     path = request.path();
 
-    if (authenticateRequest(request, response, "user.list")) {
+    if (authenticateRequest(routingContext, "user.list")) {
 
       logger.info(path);
 
@@ -415,22 +419,22 @@ public class APIServerVerticle extends AbstractVerticle {
         request_body = new JsonObject();
         request_body.put("id", itemID);
 
-        databaseHandler(database_action, response, request_body);
+        databaseHandler(database_action, routingContext, request_body);
       } else {
         logger.info("Invalid Parameters");
-        response.setStatusCode(400).end("Invalid request parameters");
+        handle400(routingContext, "Invalid request parameters");
         return;
       }
 
     } else {
       logger.info("Unauthorised");
-      response.setStatusCode(401).end();
+      handle401(routingContext, "Unauthorised");
       return;
     }
   }
 
   private void databaseHandler(
-      DeliveryOptions database_action, HttpServerResponse response, JsonObject request_body) {
+      DeliveryOptions database_action, RoutingContext routingContext, JsonObject request_body) {
 
     MultiMap headers = database_action.getHeaders();
     String action = headers.get("action");
@@ -448,31 +452,21 @@ public class APIServerVerticle extends AbstractVerticle {
                 if ("read-item".equals(action)
                     || "read-schema".equals(action)
                     || "search-attribute".equals(action)) {
-                  response
-                      .setStatusCode(200)
-                      .end(((JsonArray) database_reply.result().body()).encodePrettily());
-                  return;
+                  handle200(routingContext, database_reply.result());
                 } else if ("delete-item".equals(action)) {
                   if ("Success".equals(database_reply.result().body().toString())) {
-                    response.setStatusCode(204).end();
-                    return;
+                    handle204(routingContext);
                   } else {
                     logger.info("Item not found");
-                    response.setStatusCode(400).end(database_reply.result().body().toString());
-                    return;
+                    handle400(routingContext, database_reply.result().body().toString());
                   }
+
                 } else if ("write-item".equals(action) || "write-schema".equals(action)) {
                   String id = database_reply.result().body().toString();
-                  response.setStatusCode(201).end(id);
-                  return;
+                  handle201(routingContext, id);
                 }
-              } else if (database_reply.failed()) {
-                logger.info("Failed in database handler");
-                response.setStatusCode(500).end();
-                return;
               } else {
-                response.setStatusCode(500).end();
-                return;
+                handle500(routingContext);
               }
             });
   }
@@ -511,5 +505,53 @@ public class APIServerVerticle extends AbstractVerticle {
     }
 
     return decode_request;
+  }
+
+  private String getStatusInJson(String status) {
+    return (new JsonObject().put("Status", status)).encodePrettily();
+  }
+
+  private void handle400(RoutingContext routingContext, String status) {
+    HttpServerResponse response = routingContext.response();
+    String jsonStatus = getStatusInJson(status);
+    response
+        .setStatusCode(HTTP_STATUS_BAD_REQUEST)
+        .putHeader("content-type", "application/json; charset=utf-8")
+        .end(jsonStatus);
+  }
+
+  private void handle401(RoutingContext routingContext, String status) {
+    HttpServerResponse response = routingContext.response();
+    String jsonStatus = getStatusInJson(status);
+    response
+        .setStatusCode(HTTP_STATUS_UNAUTHORIZED)
+        .putHeader("content-type", "application/json; charset=utf-8")
+        .end(jsonStatus);
+  }
+
+  private void handle500(RoutingContext routingContext) {
+    HttpServerResponse response = routingContext.response();
+
+    response.setStatusCode(HTTP_STATUS_BAD_REQUEST).end();
+  }
+
+  private void handle200(RoutingContext routingContext, Message<Object> databaseReply) {
+    HttpServerResponse response = routingContext.response();
+
+    response.setStatusCode(HTTP_STATUS_OK).end(((JsonArray) databaseReply.body()).encodePrettily());
+  }
+
+  private void handle204(RoutingContext routingContext) {
+    HttpServerResponse response = routingContext.response();
+
+    response.setStatusCode(HTTP_STATUS_DELETED).end();
+  }
+
+  private void handle201(RoutingContext routingContext, String id) {
+    HttpServerResponse response = routingContext.response();
+
+    String JsonId = (new JsonObject().put("id", id)).encodePrettily();
+
+    response.setStatusCode(HTTP_STATUS_CREATED).end(JsonId);
   }
 }
