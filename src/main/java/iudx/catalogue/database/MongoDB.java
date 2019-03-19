@@ -181,15 +181,17 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
    * @param version The version of the document
    * @return The JsonObject with additional fields
    */
-  private JsonObject addNewAttributes(JsonObject doc, String version) {
+  private JsonObject addNewAttributes(JsonObject doc, int version, boolean addId) {
 
     JsonObject updated = doc.copy();
     updated.put("Created", new java.util.Date().toString());
     updated.put("Last modified on", new java.util.Date().toString());
     updated.put("Status", "Live");
     updated.put("Version", version);
-    updated.put("id", UUID.randomUUID().toString());
     updated.put("Provider", "iudx-provider");
+    if (addId) {
+      updated.put("id", UUID.randomUUID().toString());
+    }
 
     if (updated.containsKey("tags")) {
       JsonArray tagsInLowerCase = new JsonArray();
@@ -208,7 +210,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   public void writeItem(Message<Object> message) {
 
     JsonObject request_body = (JsonObject) message.body();
-    JsonObject updated_item = addNewAttributes(request_body, "1.0");
+    JsonObject updated_item = addNewAttributes(request_body, 1, true);
 
     mongo.insert(
         ITEM_COLLECTION,
@@ -242,7 +244,68 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   @Override
   public void updateItem(Message<Object> message) {
     // TODO Auto-generated method stub
+    JsonObject query = new JsonObject();
+    JsonObject request_body = (JsonObject) message.body();
 
+    // Populate query
+    if (request_body.containsKey("id")) {
+      String id = request_body.getString("id");
+      query.put("id", id);
+      // Get its version
+      FindOptions options = new FindOptions().setFields(new JsonObject().put("Version", 1));
+      mongo.findWithOptions(
+          ITEM_COLLECTION,
+          query,
+          options,
+          res -> {
+            if (res.succeeded()) {
+              int version;
+              if (res.result().isEmpty()) {
+                System.out.println("Does not exist");
+                message.reply("Error: The item with id: " + id + " does not exist.");
+              } else if (res.result().size() > 1) {
+                System.out.println("Multiple items");
+                message.reply("Error: There are multiple items with id: " + id);
+              } else {
+                version = res.result().get(0).getInteger("Version");
+                // Populate update fields
+                JsonObject update = new JsonObject();
+                JsonObject to_update = new JsonObject();
+                to_update.put("Status", "Deprecated");
+                to_update.put("id", id + "_v" + String.valueOf(version)+".0");
+                to_update.put("Last modified on", new java.util.Date().toString());
+                update.put("$set", to_update);
+                mongo.updateCollection(
+                    ITEM_COLLECTION,
+                    query,
+                    update,
+                    res2 -> {
+                      if (res2.succeeded()) {
+                        JsonObject updated_item =
+                            addNewAttributes(request_body, version + 1, false);
+
+                        mongo.insert(
+                            ITEM_COLLECTION,
+                            updated_item,
+                            res3 -> {
+                              if (res3.succeeded()) {
+                                message.reply(updated_item.getString("id"));
+                              } else {
+                                message.fail(0, "failure");
+                              }
+                            });
+                      } else {
+                        message.fail(0, "failure");
+                      }
+                    });
+              }
+            } else {
+              message.fail(0, "failure");
+            }
+          });
+    } else {
+      message.reply("Specify the id of the item that you want to update");
+    }
   }
 
   @Override
