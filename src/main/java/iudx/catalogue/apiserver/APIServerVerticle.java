@@ -571,7 +571,7 @@ public class APIServerVerticle extends AbstractVerticle {
   private void handle500(RoutingContext routingContext) {
     HttpServerResponse response = routingContext.response();
 
-    response.setStatusCode(HTTP_STATUS_BAD_REQUEST).end();
+    response.setStatusCode(HTTP_STATUS_INTERNAL_SERVER_ERROR).end();
   }
 
   private void handle200(RoutingContext routingContext, Message<Object> databaseReply) {
