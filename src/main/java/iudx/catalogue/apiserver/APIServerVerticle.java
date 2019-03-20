@@ -68,6 +68,8 @@ public class APIServerVerticle extends AbstractVerticle {
 
     router.delete("/cat/items/id/:itemID").handler(this::deleteItems);
 
+    router.put("/cat/items").handler(this::updateItems);
+
     logger.info("IUDX Catalogue Routes Defined !");
 
     server =
@@ -432,6 +434,35 @@ public class APIServerVerticle extends AbstractVerticle {
       return;
     }
   }
+  /**
+   * Updates the item from the database
+   *
+   * @param routingContext Contains the updated item
+   */
+  private void updateItems(RoutingContext routingContext) {
+    HttpServerRequest request = routingContext.request();
+    path = request.path();
+
+    if (authenticateRequest(routingContext, "user.list")) {
+      logger.info(path);
+
+      try {
+        request_body = routingContext.getBodyAsJson();
+        DeliveryOptions database_action = new DeliveryOptions();
+        database_action.addHeader("action", "update-item");
+
+        databaseHandler(database_action, routingContext, request_body);
+
+      } catch (Exception e) {
+        handle400(routingContext, "Invalid item: Not a Json Object");
+        return;
+      }
+    } else {
+      logger.info("Unauthorised");
+      handle401(routingContext, "Unauthorised");
+      return;
+    }
+  }
 
   private void databaseHandler(
       DeliveryOptions database_action, RoutingContext routingContext, JsonObject request_body) {
@@ -464,6 +495,14 @@ public class APIServerVerticle extends AbstractVerticle {
                 } else if ("write-item".equals(action) || "write-schema".equals(action)) {
                   String id = database_reply.result().body().toString();
                   handle201(routingContext, id);
+                } else if ("update-item".equals(action)) {
+                  if (database_reply.result().body().toString().contains("Error")) {
+                    System.out.println("adp");
+                    handle400(routingContext, database_reply.result().body().toString());
+                  } else {
+                    String id = database_reply.result().body().toString();
+                    handle201(routingContext, id);
+                  }
                 }
               } else {
                 handle500(routingContext);
