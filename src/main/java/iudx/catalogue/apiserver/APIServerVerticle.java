@@ -55,6 +55,11 @@ public class APIServerVerticle extends AbstractVerticle {
     
     ClientAuth clientAuth;
     Properties systemProps;
+    String keystore;
+    String keystorePassword;
+    String truststore;
+    String truststorePassword;
+    
 
     Router router = Router.router(vertx);
     router.route().handler(BodyHandler.create());
@@ -83,13 +88,18 @@ public class APIServerVerticle extends AbstractVerticle {
 
     clientAuth = ClientAuth.REQUEST;
     
+    keystore = config().getString("keystore");
+    keystorePassword = config().getString("keystorePassword");
+    truststore = config().getString("truststore");
+    truststorePassword = config().getString("truststorePassword");
+    
     systemProps = System.getProperties();
     
-    systemProps.put("javax.net.ssl.keyStore","my-keystore.jks");
-    systemProps.put("javax.net.ssl.keyStorePassword","password");
+    systemProps.put("javax.net.ssl.keyStore", keystore);
+    systemProps.put("javax.net.ssl.keyStorePassword", keystorePassword);
     
-    systemProps.put("javax.net.ssl.trustStore", "my-keystore.jks");
-    systemProps.put("javax.net.ssl.trustStorePassword","password");
+    systemProps.put("javax.net.ssl.trustStore", truststore);
+    systemProps.put("javax.net.ssl.trustStorePassword", truststorePassword);
     
     System.setProperties(systemProps);
     
@@ -101,7 +111,7 @@ public class APIServerVerticle extends AbstractVerticle {
                 .setSsl(true)
                 .setClientAuth(clientAuth)
                 .setKeyStoreOptions(
-                    new JksOptions().setPath("my-keystore.jks").setPassword("password")));
+                    new JksOptions().setPath(keystore).setPassword(keystorePassword)));
 
     server.requestHandler(router::accept).listen(port);
 
