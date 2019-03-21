@@ -4,7 +4,11 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.security.Principal;
 import java.util.logging.Logger;
+
+import javax.net.ssl.SSLPeerUnverifiedException;
+
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import io.vertx.core.AbstractVerticle;
@@ -12,6 +16,7 @@ import io.vertx.core.Future;
 import io.vertx.core.MultiMap;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
+import io.vertx.core.http.ClientAuth;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.http.HttpServerRequest;
@@ -24,6 +29,7 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 
 import java.util.Base64;
+import java.util.Properties;
 
 public class APIServerVerticle extends AbstractVerticle {
 
@@ -46,6 +52,14 @@ public class APIServerVerticle extends AbstractVerticle {
 
     HttpServer server;
     int port = config().getInteger("http.port", 8443);
+    
+    ClientAuth clientAuth;
+    Properties systemProps;
+    String keystore;
+    String keystorePassword;
+    String truststore;
+    String truststorePassword;
+    
 
     Router router = Router.router(vertx);
     router.route().handler(BodyHandler.create());
@@ -72,12 +86,32 @@ public class APIServerVerticle extends AbstractVerticle {
 
     logger.info("IUDX Catalogue Routes Defined !");
 
+    clientAuth = ClientAuth.REQUEST;
+    
+    keystore = config().getString("keystore");
+    keystorePassword = config().getString("keystorePassword");
+    truststore = config().getString("truststore");
+    truststorePassword = config().getString("truststorePassword");
+    
+    systemProps = System.getProperties();
+    
+    systemProps.put("javax.net.ssl.keyStore", keystore);
+    systemProps.put("javax.net.ssl.keyStorePassword", keystorePassword);
+    
+    systemProps.put("javax.net.ssl.trustStore", truststore);
+    systemProps.put("javax.net.ssl.trustStorePassword", truststorePassword);
+    
+    System.setProperties(systemProps);
+    
+    logger.info("IUDX TLS Property Defined !");
+    
     server =
         vertx.createHttpServer(
             new HttpServerOptions()
                 .setSsl(true)
+                .setClientAuth(clientAuth)
                 .setKeyStoreOptions(
-                    new JksOptions().setPath("my-keystore.jks").setPassword("password")));
+                    new JksOptions().setPath(keystore).setPassword(keystorePassword)));
 
     server.requestHandler(router::accept).listen(port);
 
@@ -155,6 +189,25 @@ public class APIServerVerticle extends AbstractVerticle {
     logger.info("Authentication ended with flag : " + allowed);
     return allowed;
   }
+
+	private boolean decodeCertificate(RoutingContext routingContext) {
+		
+		boolean status = false;
+
+		try {
+			Principal cn = routingContext.request().connection().sslSession().getPeerPrincipal();
+			String providerCN[] = cn.getName().split("=");
+			String provider = providerCN[1];
+			
+			logger.info("Provider Name as per Certificate is " + provider);
+			status = true;
+		} catch (SSLPeerUnverifiedException e) { // TODO
+			status = false;
+		}
+
+		return status;
+	}
+
   /**
    * Sends a request to the database to display all items
    *
@@ -174,63 +227,63 @@ public class APIServerVerticle extends AbstractVerticle {
    *     skip_validation header.
    */
   private void createItems(RoutingContext routingContext) {
-    HttpServerRequest request = routingContext.request();
-    path = request.path();
-    String skip_validation = request.getHeader("skip_validation").toLowerCase();
+		HttpServerRequest request = routingContext.request();
+		path = request.path();
+		String skip_validation = request.getHeader("skip_validation").toLowerCase();
 
-    if (authenticateRequest(routingContext, "user.list")) {
-      logger.info(path);
+		if (decodeCertificate(routingContext)) {
+			if (authenticateRequest(routingContext, "user.list")) {
+				logger.info(path);
 
-      try {
-        request_body = routingContext.getBodyAsJson();
-        DeliveryOptions validator_action = new DeliveryOptions();
-        validator_action.addHeader("action", "validate-item");
-        if (skip_validation != null) {
-          if (!("true".equals(skip_validation)) && !("false".equals(skip_validation))) {
-            logger.info("skip_validation not a boolean");
+				try {
+					request_body = routingContext.getBodyAsJson();
+					DeliveryOptions validator_action = new DeliveryOptions();
+					validator_action.addHeader("action", "validate-item");
+					if (skip_validation != null) {
+						if (!("true".equals(skip_validation)) && !("false".equals(skip_validation))) {
+							logger.info("skip_validation not a boolean");
 
-            handle400(routingContext, "Invalid value: skip_validation is not a boolean");
-            return;
-          } else {
-            validator_action.addHeader("skip_validation", skip_validation);
-          }
-        }
+							handle400(routingContext, "Invalid value: skip_validation is not a boolean");
+							return;
+						} else {
+							validator_action.addHeader("skip_validation", skip_validation);
+						}
+					}
 
-        vertx
-            .eventBus()
-            .send(
-                "validator",
-                request_body,
-                validator_action,
-                validator_reply -> {
-                  if (validator_reply.succeeded()) {
+					vertx.eventBus().send("validator", request_body, validator_action, validator_reply -> {
+						if (validator_reply.succeeded()) {
 
-                    DeliveryOptions database_action = new DeliveryOptions();
-                    database_action.addHeader("action", "write-item");
+							DeliveryOptions database_action = new DeliveryOptions();
+							database_action.addHeader("action", "write-item");
 
-                    databaseHandler(database_action, routingContext, request_body);
+							databaseHandler(database_action, routingContext, request_body);
 
-                  } else if (validator_reply.failed()) {
-                    logger.info("Validator Failed");
-                    handle500(routingContext);
-                    return;
-                  } else {
-                    logger.info("No reply");
-                    handle500(routingContext);
+						} else if (validator_reply.failed()) {
+							logger.info("Validator Failed");
+							handle500(routingContext);
+							return;
+						} else {
+							logger.info("No reply");
+							handle500(routingContext);
 
-                    return;
-                  }
-                });
+							return;
+						}
+					});
 
-      } catch (Exception e) {
-        handle400(routingContext, "Invalid item: Not a Json Object");
-        return;
-      }
-    } else {
-      logger.info("Unauthorised");
-      handle401(routingContext, "Unauthorised");
-      return;
-    }
+				} catch (Exception e) {
+					handle400(routingContext, "Invalid item: Not a Json Object");
+					return;
+				}
+			} else {
+				logger.info("Unauthorised");
+				handle401(routingContext, "Unauthorised");
+				return;
+			}
+		} else {
+			logger.info("Invalid Certificate");
+			handle400(routingContext, "Certificate 'authenticaton' error");
+			return;
+		}
   }
   /**
    * Inserts the given schema into the database.
@@ -241,7 +294,7 @@ public class APIServerVerticle extends AbstractVerticle {
 
     HttpServerRequest request = routingContext.request();
     path = request.path();
-
+	if (decodeCertificate(routingContext)) {
     if (authenticateRequest(routingContext, "user.list")) {
       logger.info(path);
 
@@ -260,10 +313,15 @@ public class APIServerVerticle extends AbstractVerticle {
             }
           });
     } else {
-      logger.info("Unauthorised");
-      handle401(routingContext, "Unauthorised");
+      logger.info("Certificate Authentication failed");
+      handle400(routingContext, "Certificate 'authentication' failed");
       return;
     }
+	} else {
+		logger.info("Invalid Certificate");
+		handle400(routingContext, "Certificate 'authenticaton' error");
+		return;
+	}
   }
   /**
    * Converts the lost of values in string to JsoArray
@@ -407,7 +465,7 @@ public class APIServerVerticle extends AbstractVerticle {
     HttpServerRequest request = routingContext.request();
     HttpServerResponse response = routingContext.response();
     path = request.path();
-
+    if (decodeCertificate(routingContext)) {
     if (authenticateRequest(routingContext, "user.list")) {
 
       logger.info(path);
@@ -433,6 +491,11 @@ public class APIServerVerticle extends AbstractVerticle {
       handle401(routingContext, "Unauthorised");
       return;
     }
+  } else {
+		logger.info("Invalid Certificate");
+		handle400(routingContext, "Certificate 'authenticaton' error");
+		return;
+	}
   }
   /**
    * Updates the item from the database
@@ -442,7 +505,7 @@ public class APIServerVerticle extends AbstractVerticle {
   private void updateItems(RoutingContext routingContext) {
     HttpServerRequest request = routingContext.request();
     path = request.path();
-
+    if (decodeCertificate(routingContext)) {
     if (authenticateRequest(routingContext, "user.list")) {
       logger.info(path);
 
@@ -462,6 +525,11 @@ public class APIServerVerticle extends AbstractVerticle {
       handle401(routingContext, "Unauthorised");
       return;
     }
+  } else {
+		logger.info("Invalid Certificate");
+		handle400(routingContext, "Certificate 'authenticaton' error");
+		return;
+	}
   }
 
   private void databaseHandler(
