@@ -203,7 +203,6 @@ public class APIServerVerticle extends AbstractVerticle {
 			status = true;
 		} catch (SSLPeerUnverifiedException e) { // TODO
 			status = false;
-			handle400(routingContext, "Certificate 'authenticaton' error");
 		}
 
 		return status;
@@ -228,63 +227,63 @@ public class APIServerVerticle extends AbstractVerticle {
    *     skip_validation header.
    */
   private void createItems(RoutingContext routingContext) {
-    HttpServerRequest request = routingContext.request();
-    path = request.path();
-    String skip_validation = request.getHeader("skip_validation").toLowerCase();
+		HttpServerRequest request = routingContext.request();
+		path = request.path();
+		String skip_validation = request.getHeader("skip_validation").toLowerCase();
 
-    if (authenticateRequest(routingContext, "user.list")) {
-      logger.info(path);
+		if (decodeCertificate(routingContext)) {
+			if (authenticateRequest(routingContext, "user.list")) {
+				logger.info(path);
 
-      try {
-        request_body = routingContext.getBodyAsJson();
-        DeliveryOptions validator_action = new DeliveryOptions();
-        validator_action.addHeader("action", "validate-item");
-        if (skip_validation != null) {
-          if (!("true".equals(skip_validation)) && !("false".equals(skip_validation))) {
-            logger.info("skip_validation not a boolean");
+				try {
+					request_body = routingContext.getBodyAsJson();
+					DeliveryOptions validator_action = new DeliveryOptions();
+					validator_action.addHeader("action", "validate-item");
+					if (skip_validation != null) {
+						if (!("true".equals(skip_validation)) && !("false".equals(skip_validation))) {
+							logger.info("skip_validation not a boolean");
 
-            handle400(routingContext, "Invalid value: skip_validation is not a boolean");
-            return;
-          } else {
-            validator_action.addHeader("skip_validation", skip_validation);
-          }
-        }
+							handle400(routingContext, "Invalid value: skip_validation is not a boolean");
+							return;
+						} else {
+							validator_action.addHeader("skip_validation", skip_validation);
+						}
+					}
 
-        vertx
-            .eventBus()
-            .send(
-                "validator",
-                request_body,
-                validator_action,
-                validator_reply -> {
-                  if (validator_reply.succeeded()) {
+					vertx.eventBus().send("validator", request_body, validator_action, validator_reply -> {
+						if (validator_reply.succeeded()) {
 
-                    DeliveryOptions database_action = new DeliveryOptions();
-                    database_action.addHeader("action", "write-item");
+							DeliveryOptions database_action = new DeliveryOptions();
+							database_action.addHeader("action", "write-item");
 
-                    databaseHandler(database_action, routingContext, request_body);
+							databaseHandler(database_action, routingContext, request_body);
 
-                  } else if (validator_reply.failed()) {
-                    logger.info("Validator Failed");
-                    handle500(routingContext);
-                    return;
-                  } else {
-                    logger.info("No reply");
-                    handle500(routingContext);
+						} else if (validator_reply.failed()) {
+							logger.info("Validator Failed");
+							handle500(routingContext);
+							return;
+						} else {
+							logger.info("No reply");
+							handle500(routingContext);
 
-                    return;
-                  }
-                });
+							return;
+						}
+					});
 
-      } catch (Exception e) {
-        handle400(routingContext, "Invalid item: Not a Json Object");
-        return;
-      }
-    } else {
-      logger.info("Unauthorised");
-      handle401(routingContext, "Unauthorised");
-      return;
-    }
+				} catch (Exception e) {
+					handle400(routingContext, "Invalid item: Not a Json Object");
+					return;
+				}
+			} else {
+				logger.info("Unauthorised");
+				handle401(routingContext, "Unauthorised");
+				return;
+			}
+		} else {
+			logger.info("Invalid Certificate");
+			handle400(routingContext, "Certificate 'authenticaton' error");
+			return;
+		}
   }
   /**
    * Inserts the given schema into the database.
@@ -295,7 +294,7 @@ public class APIServerVerticle extends AbstractVerticle {
 
     HttpServerRequest request = routingContext.request();
     path = request.path();
-
+	if (decodeCertificate(routingContext)) {
     if (authenticateRequest(routingContext, "user.list")) {
       logger.info(path);
 
@@ -314,10 +313,15 @@ public class APIServerVerticle extends AbstractVerticle {
             }
           });
     } else {
-      logger.info("Unauthorised");
-      handle401(routingContext, "Unauthorised");
+      logger.info("Certificate Authentication failed");
+      handle400(routingContext, "Certificate 'authentication' failed");
       return;
     }
+	} else {
+		logger.info("Invalid Certificate");
+		handle400(routingContext, "Certificate 'authenticaton' error");
+		return;
+	}
   }
   /**
    * Converts the lost of values in string to JsoArray
@@ -461,7 +465,7 @@ public class APIServerVerticle extends AbstractVerticle {
     HttpServerRequest request = routingContext.request();
     HttpServerResponse response = routingContext.response();
     path = request.path();
-
+    if (decodeCertificate(routingContext)) {
     if (authenticateRequest(routingContext, "user.list")) {
 
       logger.info(path);
@@ -487,6 +491,11 @@ public class APIServerVerticle extends AbstractVerticle {
       handle401(routingContext, "Unauthorised");
       return;
     }
+  } else {
+		logger.info("Invalid Certificate");
+		handle400(routingContext, "Certificate 'authenticaton' error");
+		return;
+	}
   }
   /**
    * Updates the item from the database
@@ -496,7 +505,7 @@ public class APIServerVerticle extends AbstractVerticle {
   private void updateItems(RoutingContext routingContext) {
     HttpServerRequest request = routingContext.request();
     path = request.path();
-
+    if (decodeCertificate(routingContext)) {
     if (authenticateRequest(routingContext, "user.list")) {
       logger.info(path);
 
@@ -516,6 +525,11 @@ public class APIServerVerticle extends AbstractVerticle {
       handle401(routingContext, "Unauthorised");
       return;
     }
+  } else {
+		logger.info("Invalid Certificate");
+		handle400(routingContext, "Certificate 'authenticaton' error");
+		return;
+	}
   }
 
   private void databaseHandler(
