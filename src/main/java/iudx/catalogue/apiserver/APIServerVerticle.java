@@ -4,7 +4,11 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.security.Principal;
 import java.util.logging.Logger;
+
+import javax.net.ssl.SSLPeerUnverifiedException;
+
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import io.vertx.core.AbstractVerticle;
@@ -12,6 +16,7 @@ import io.vertx.core.Future;
 import io.vertx.core.MultiMap;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
+import io.vertx.core.http.ClientAuth;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.http.HttpServerRequest;
@@ -24,6 +29,7 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 
 import java.util.Base64;
+import java.util.Properties;
 
 public class APIServerVerticle extends AbstractVerticle {
 
@@ -46,6 +52,9 @@ public class APIServerVerticle extends AbstractVerticle {
 
     HttpServer server;
     int port = config().getInteger("http.port", 8443);
+    
+    ClientAuth clientAuth;
+    Properties systemProps;
 
     Router router = Router.router(vertx);
     router.route().handler(BodyHandler.create());
@@ -72,10 +81,25 @@ public class APIServerVerticle extends AbstractVerticle {
 
     logger.info("IUDX Catalogue Routes Defined !");
 
+    clientAuth = ClientAuth.REQUEST;
+    
+    systemProps = System.getProperties();
+    
+    systemProps.put("javax.net.ssl.keyStore","my-keystore.jks");
+    systemProps.put("javax.net.ssl.keyStorePassword","password");
+    
+    systemProps.put("javax.net.ssl.trustStore", "my-keystore.jks");
+    systemProps.put("javax.net.ssl.trustStorePassword","password");
+    
+    System.setProperties(systemProps);
+    
+    logger.info("IUDX TLS Property Defined !");
+    
     server =
         vertx.createHttpServer(
             new HttpServerOptions()
                 .setSsl(true)
+                .setClientAuth(clientAuth)
                 .setKeyStoreOptions(
                     new JksOptions().setPath("my-keystore.jks").setPassword("password")));
 
@@ -155,6 +179,26 @@ public class APIServerVerticle extends AbstractVerticle {
     logger.info("Authentication ended with flag : " + allowed);
     return allowed;
   }
+
+	private boolean decodeCertificate(RoutingContext routingContext) {
+		
+		boolean status = false;
+
+		try {
+			Principal cn = routingContext.request().connection().sslSession().getPeerPrincipal();
+			String providerCN[] = cn.getName().split("=");
+			String provider = providerCN[1];
+			
+			logger.info("Provider Name as per Certificate is " + provider);
+			status = true;
+		} catch (SSLPeerUnverifiedException e) { // TODO
+			status = false;
+			handle400(routingContext, "Certificate 'authenticaton' error");
+		}
+
+		return status;
+	}
+
   /**
    * Sends a request to the database to display all items
    *
