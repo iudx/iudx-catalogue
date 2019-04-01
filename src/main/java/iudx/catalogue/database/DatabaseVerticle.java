@@ -20,7 +20,7 @@ public class DatabaseVerticle extends AbstractVerticle {
   public DatabaseVerticle(String which_database) {
 
     if ("mongo".equals(which_database)) {
-      db = new MongoDB("items", "schemas");
+      db = new MongoDB("items", "schemas","tags");
     }
   }
 
