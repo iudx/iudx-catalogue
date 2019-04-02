@@ -78,16 +78,16 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
         });
   }
 
-  private void updateHitsTags(JsonArray tags) {
+  private void updateNoOfHits(JsonArray tags) {
     JsonObject query = new JsonObject();
     query.put("tag", new JsonObject().put("$in", tags));
     mongo.find(
         TAG_COLLECTION,
         query,
-        res -> {
-          if (res.succeeded()) {
+        searchedTags -> {
+          if (searchedTags.succeeded()) {
             List<BulkOperation> bulk = new ArrayList<BulkOperation>();
-            for (JsonObject j : res.result()) {
+            for (JsonObject j : searchedTags.result()) {
               j.put("noOfHits", (j.getInteger("noOfHits") + 1));
               JsonObject filter = new JsonObject().put("tag", j.getString("tag"));
               bulk.add(BulkOperation.createReplace(filter, j));
@@ -113,14 +113,14 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
         if (key.equalsIgnoreCase("tags")) {
           if (values.size() == 1) {
             query.put("_tags", values.getString(0).toLowerCase());
-            updateHitsTags(new JsonArray().add(query.getString("_tags")));
+            updateNoOfHits(new JsonArray().add(query.getString("_tags")));
           } else {
             JsonArray tag_values = new JsonArray();
             for (int i = 0; i < values.size(); i++) {
               tag_values.add(values.getString(i).toLowerCase());
             }
             query.put("_tags", new JsonObject().put("$in", tag_values));
-            updateHitsTags(tag_values);
+            updateNoOfHits(tag_values);
           }
         } else {
           for (int i = 0; i < values.size(); i++) {
@@ -239,11 +239,11 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     mongo.find(
         TAG_COLLECTION,
         query,
-        res -> {
-          if (res.succeeded()) {
+        already_present_tags -> {
+          if (already_present_tags.succeeded()) {
             List<BulkOperation> bulk = new ArrayList<BulkOperation>();
             Set<String> tags_completed = new HashSet<String>();
-            for (JsonObject j : res.result()) {
+            for (JsonObject j : already_present_tags.result()) {
               tags_completed.add(j.getString("tag"));
               j.put("noOfItems", (j.getInteger("noOfItems") + 1));
               JsonObject filter = new JsonObject().put("tag", j.getString("tag"));
@@ -259,7 +259,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
               ins.put("noOfItems", 1);
               bulk.add(BulkOperation.createInsert(ins));
             }
-            mongo.bulkWrite(TAG_COLLECTION, bulk, res2 -> {});
+            mongo.bulkWrite(TAG_COLLECTION, bulk,tagsUpdated-> {});
           }
         });
   }
@@ -302,7 +302,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
         });
   }
 
-  private void updateItemTags(JsonArray old_tags, JsonArray new_tags) {
+  private void updateNoOfItems(JsonArray old_tags, JsonArray new_tags) {
     JsonArray to_dec = new JsonArray();
     for (Object t : old_tags) {
       if (new_tags.contains(((String) t))) {
@@ -314,7 +314,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
       }
     }
     writeTags(new_tags);
-    decItemsTags(to_dec);
+    decNoOfItems(to_dec);
   }
 
   @Override
@@ -367,7 +367,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
                           JsonArray old_tags = old_item.getJsonArray("_tags");
                           if (updated_item.containsKey("_tags")) {
                             JsonArray new_tags = updated_item.getJsonArray("_tags");
-                            updateItemTags(old_tags, new_tags);
+                            updateNoOfItems(old_tags, new_tags);
                           }
                         }
 
@@ -401,16 +401,16 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 
   }
 
-  private void decItemsTags(JsonArray tags) {
+  private void decNoOfItems(JsonArray tags) {
     JsonObject query = new JsonObject();
     query.put("tag", new JsonObject().put("$in", tags));
     mongo.find(
         TAG_COLLECTION,
         query,
-        res -> {
-          if (res.succeeded()) {
+        find_tags -> {
+          if (find_tags.succeeded()) {
             List<BulkOperation> bulk = new ArrayList<BulkOperation>();
-            for (JsonObject j : res.result()) {
+            for (JsonObject j : find_tags.result()) {
               j.put("noOfItems", (j.getInteger("noOfItems") - 1));
               JsonObject filter = new JsonObject().put("tag", j.getString("tag"));
               bulk.add(BulkOperation.createReplace(filter, j));
@@ -435,7 +435,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
         res -> {
           if (res.succeeded() && !(res.result() == null)) {
             if (res.result().containsKey("_tags")) {
-              decItemsTags(res.result().getJsonArray("_tags"));
+            	decNoOfItems(res.result().getJsonArray("_tags"));
             }
             message.reply("Success");
           } else if (res.result() == null) {
