@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>RBCCPS | IDEAM-CATALOGUE VISUALIZER</title>
+    <meta name="viewport" content="initial-scale=1.0", user-scalable=no>
+    <meta charset="utf-8">
+    <meta name="description" content="Visualizer for IUDX-CATALOGUE">
+    <meta name="organization" content="RBCCPS, IISc Bangalore">
+    <meta name="keywords" content="IUDX, CATALOGUE, CATALOGUE VISUALIZER, RBCCPS, IISc BANGALORE">
+    <meta name="author" content="Jishnu Jaykumar P (http://jishnujayakumar.github.io)">
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <style>
+      /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+      #map {
+        height: 100%;
+      }
+      /* Optional: Makes the sample page fill the window. */
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      #description {
+        font-family: Roboto;
+        font-size: 15px;
+        font-weight: 300;
+      }
+
+      #infowindow-content .title {
+        font-weight: bold;
+      }
+
+      #infowindow-content {
+        display: none;
+      }
+
+      #map #infowindow-content {
+        display: inline;
+      }
+
+      .pac-card {
+        margin: 10px 10px 0 0;
+        border-radius: 2px 0 0 2px;
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        outline: none;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        background-color: #fff;
+        font-family: Roboto;
+      }
+
+      #pac-container {
+        padding-bottom: 12px;
+        margin-right: 12px;
+      }
+
+      .pac-controls {
+        display: inline-block;
+        padding: 5px 11px;
+      }
+
+      .pac-controls label {
+        font-family: Roboto;
+        font-size: 13px;
+        font-weight: 300;
+      }
+
+      #pac-input {
+        background-color: #fff;
+        font-family: Roboto;
+        font-size: 15px;
+        font-weight: 300;
+        margin-left: 12px;
+        padding: 0 11px 0 13px;
+        text-overflow: ellipsis;
+        width: 400px;
+      }
+
+      #pac-input:focus {
+        border-color: #4d90fe;
+      }
+
+      #title {
+        color: #fff;
+        background-color: #4d90fe;
+        font-size: 25px;
+        font-weight: 500;
+        padding: 6px 12px;
+      }
+      #target {
+        width: 345px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <!-- <input id="pac-input" class="controls" type="text" placeholder="Search Box"> -->
+    <div id="map"></div>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCeTLW-rrhj3qy7RvZl-X8feE4UmIDpsrI&callback=initMap" async defer></script>
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+
+    const marker_image = 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png';
+    const rbc_marker_image = 'https://i1.wp.com/www.rbccps.org/wp-content/uploads/2016/12/cropped-BCCPS-Logo.png?fit=24%2C24';
+    const rbccps_title = "Robert Bosch Centre for Cyber Physical Systems"
+    const rbccps_lat_lng = {lat: 13.0138, lng: 77.5703}
+
+    // https://stackoverflow.com/questions/2014570/save-data-from-ajax-request-in-variable-jquery
+
+    var ret_data=$.ajax({
+                       async:false,
+                       url: '/get-cat-json',
+                       type: 'GET',
+                       dataType:"JSON"
+                       }).responseJSON;
+    var map;
+
+    function initMap() {
+
+      map = new google.maps.Map(document.getElementById('map'), {
+        center: rbccps_lat_lng,
+        zoom: 11,
+        mapTypeId: 'terrain'
+      });
+
+      var plot_data = ret_data['value']
+
+      var id,lat,long, _marker;
+      var _contentString, _infowindow;
+
+      _contentString = '<h6>' + rbccps_title + '</h6>'
+
+      _infowindow = new google.maps.InfoWindow({
+        content: _contentString
+      });
+
+      _marker = new google.maps.Marker({
+        position: rbccps_lat_lng,
+        map: map,
+        title: rbccps_title,
+        icon:rbc_marker_image,
+        zIndex: 1
+      });
+
+
+      _marker.addListener('click', function() {
+        _infowindow.open(map, _marker);
+      });
+
+      for (var i = 0; i < plot_data['items'].length; i++) {
+        id = plot_data['items'][i]['id'];
+        lat = plot_data['items'][i]['latitude']
+        long = plot_data['items'][i]['longitude']
+        if (id != undefined && lat != undefined && long != undefined){
+            var lat_lng = new google.maps.LatLng(lat['value'],long['value'])
+            console.log(plot_data['items'][i]['id'], plot_data['items'][i]['latitude']['value'], plot_data['items'][i]['longitude']['value'])
+            // var contentString = '<h4>' + id + " | " + lat['value'] + "," + long['value'] + '</h4><a class="waves-effect waves-light btn">Follow</a>'
+            var contentString = '<a href=' + ret_data['url'] + '?id=' + id + ' target="_blank"><h5>' + id + '<i class="large material-icons"><h5>launch</h5></i></h5></a><a class="waves-effect waves-light btn" style="text-align:center;font-weight: bold;">Follow  <i class="material-icons right">arrow_forward</i></a>'
+
+            var infowindow = new google.maps.InfoWindow({
+              content: contentString
+            });
+
+            var marker = new google.maps.Marker({
+              position: lat_lng,
+              map: map,
+              title: id,
+              icon:marker_image,
+              zIndex: 1
+            });
+
+            google.maps.event.addListener(marker,'click', (function(marker,content,infowindow){
+                return function() {
+                   infowindow.setContent(content);
+                   infowindow.open(map,marker);
+                };
+            })(marker,contentString,infowindow));
+        }
+      }
+
+      // // Create the search box and link it to the UI element.
+      //   var input = document.getElementById('pac-input');
+      //   var searchBox = new google.maps.places.SearchBox(input);
+      //   map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+      }
+    </script>
+    <link rel="stylesheet" type="text/css" href="//code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css" />
+    <footer  style="position:absolute;bottom:0;width:100%;z-index:100">
+        <center>
+          <div class="container" style="font-size:14px;font-weight:bold;">
+            Made by <a href="https://jishnujayakumar.github.io" target="_blank">Jishnu P</a> <br>  © <script>document.write(new Date().getFullYear()) </script> RBCCPS, IISc Bangalore
+          <!-- Made with <i class="icon ion-heart" style="color:red"></i> by <a>Jishnu P</a> -->
+
+        </center>
+        </div>
+    </footer>
+
+    <!-- <center style="z-index:100;"><h6>Made with <i class="icon ion-heart"></i> by <a>Jishnu P</a></h6></center> -->
+  </body>
+</html>
