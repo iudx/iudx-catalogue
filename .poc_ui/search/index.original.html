@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <!-- <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport" /> -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="description" content="IUDX | Indian Urban Data Exchange">
+    <meta name="organization" content="RBCCPS, IISc Bangalore">
+    <meta name="keywords" content="IUDX, CATALOGUE, RBCCPS, IISc BANGALORE">
+    <meta name="author" content="Jishnu Jaykumar P (https://jishnujayakumar.github.io)">
+    <title>
+        IUDX | Indian Urban Data Exchange Catalogue
+    </title>
+    <!-- Favicon -->
+    <link href="../../assets/img/logo/iudx.png" rel="icon" type="image/png">
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet">
+    <!--Import Google Icon Font-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <!-- Material Kit CSS -->
+    <link href="../../assets/css/material-dashboard.css?v=2.1.1" rel="stylesheet" />
+    <style type="text/css">
+     
+    </style>
+</head>
+
+<!-- <body> -->
+<body oncontextmenu="return false">
+    <div class="wrapper ">
+        <div class="sidebar" data-color="purple" data-background-color="white">
+            <!--
+      Tip 1: You can change the color of the sidebar using: data-color="purple | azure | green | orange | danger"
+
+      Tip 2: you can also add an image using data-image tag
+  -->
+            <div class="logo center">
+                <a href="#" class="simple-text logo-mini">
+                    IUDX 
+                </a>
+                <a href="#" class="simple-text logo-normal">
+                    Catalogue
+                </a>
+                <hr>
+                <a class="waves-effect waves-light btn-large deep-purple darken-1" style="color:white" onclick="refresh_tags()">
+                            <!--<i class="material-icons right">refresh</i-->Refresh tags</a>
+                            <!-- <hr><span id="item_result_count"></span> -->
+
+            </div>
+            
+            <!-- <div class="logo center"></div> -->
+            <div class="sidebar-wrapper">
+
+                <ul id="tags_side_bar" class="nav">
+
+                    <!-- your sidebar here -->
+                </ul>
+            </div>
+        </div>
+        <div class="main-panel white">
+            <!-- Navbar -->
+                 <nav id="navbar"  class="navbar navbar-expand-lg navbar-transparent navbar-absolute fixed-top">
+                <div class="container-fluid">
+                    <div class="navbar-wrapper">
+                        <br>
+                        <div class="row">
+                            <div class="col s12 navbar-brand">
+                                <div class="row">
+                                    <div class="input-field col s12">
+                                        <i class="material-icons prefix"></i>
+                                        <input type="text" id="autocomplete-input" class="autocomplete">
+                                        <label for="autocomplete-input">Search</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>&nbsp;&nbsp;&nbsp;
+                        <a class="btn-floating btn-large waves-effect waves-light orange darken-3" onclick='show_items_of("false",$("#autocomplete-input").val())'><i class="material-icons">search</i></a> &nbsp;&nbsp;&nbsp;<span id="item_result_count"></span>
+                        <!-- <span id="location"></span> -->
+                    </div>
+                    </div>
+            </nav>
+            <!-- End Navbar -->
+            <div class="content">
+                <span id="location"></span>
+                <div class="container-fluid">
+                <hr>        
+                    <div class="row">
+                        <div class="col s6">
+                            <div id="searched_items">
+                                <!-- Display searched items       -->
+                            </div>
+                        </div>
+                        <div id="item_details_card_div" class="col s5">
+                            <div id="item_details_card">
+                                <!-- Display item details -->
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+</body>
+<!-- Compiled and minified JavaScript -->
+<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+<script src="../../assets/js/script.js"></script>
+<!-- Core -->
+<script type="text/javascript">
+    M.AutoInit();
+    get_location();
+    populate_side_bar();
+    $(document).ready(function() {
+        // pushpin
+        $('#item_details_card').pushpin({
+            top: 150
+        });
+        $('.navbar-wrapper').pushpin({
+            top: 180
+        });
+        var data = JSON.parse(localStorage.getItem("data"));
+        // console.log(seen_tags_dict)
+        $('input.autocomplete').autocomplete({
+            data: seen_tags_dict,
+        });
+        M.toast({
+            html: 'Select a tag from side bar to get started.',
+            classes: 'rounded',
+            displayLength: 4000
+        })
+    });
+
+    $(window).on("scroll", function() {
+        if ($(window).scrollTop() > 100) {
+
+            $(".navbar-wrapper").css('background-color', 'white');
+        } else {
+            //remove the background property so it comes transparent again (defined in your css)
+            $(".navbar-wrapper").css('background-color', 'white');
+        }
+    });
+</script>
+
+</html>
