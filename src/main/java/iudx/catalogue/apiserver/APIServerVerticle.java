@@ -27,7 +27,7 @@ import io.vertx.core.net.JksOptions;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
-
+import io.vertx.ext.web.handler.StaticHandler;
 import java.util.Base64;
 import java.util.Properties;
 
@@ -69,8 +69,15 @@ public class APIServerVerticle extends AbstractVerticle {
         .handler(
             routingContext -> {
               HttpServerResponse response = routingContext.response();
-              response.sendFile("ui/landing/landing.html");
+              response.sendFile("ui/landing/index.html");
             });
+    router
+    .route("/search")
+    .handler(
+        routingContext -> {
+          HttpServerResponse response = routingContext.response();
+          response.sendFile("ui/search/index.html");
+        });
 
     router.get("/cat/search").handler(this::getAll);
     router.get("/cat/search/attribute").handler(this::searchAttribute);
@@ -83,7 +90,8 @@ public class APIServerVerticle extends AbstractVerticle {
     router.delete("/cat/items/id/:itemID").handler(this::deleteItems);
 
     router.put("/cat/items").handler(this::updateItems);
-
+    
+    router.route("/assets/*").handler(StaticHandler.create("ui/assets"));
     logger.info("IUDX Catalogue Routes Defined !");
 
     clientAuth = ClientAuth.REQUEST;
