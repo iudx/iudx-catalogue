@@ -75,9 +75,9 @@
         $("#item_result_count").html("Total number of items: " + data.length);
         for (var item_index = 0; item_index < data.length - 1; item_index++) {
             for (var tag_item_index = 0; tag_item_index < data[item_index]['tags'].length - 1; tag_item_index++) {
-                if(data[item_index]['tags'][tag_item_index].toLowerCase()=="feeder" || data[item_index]['tags'][tag_item_index].toLowerCase()=="streetlight" || data[item_index]['tags'][tag_item_index].toLowerCase()=="streetlighting"){
-                    continue;
-                }
+                // if(data[item_index]['tags'][tag_item_index].toLowerCase()=="feeder" || data[item_index]['tags'][tag_item_index].toLowerCase()=="streetlight" || data[item_index]['tags'][tag_item_index].toLowerCase()=="streetlighting"){
+                //     continue;
+                // }
                 if (!seen_tags_set.includes(data[item_index]['tags'][tag_item_index].toLowerCase())) {
                     seen_tags_set.push(data[item_index]['tags'][tag_item_index].toLowerCase())
                 }
@@ -87,7 +87,7 @@
         for (var i = seen_tags_set.length - 1; i >= 0; i--) {
 
             //For sidebar
-            tag_cloud_html.push(`<li class="nav-item" onclick="show_items_of(this,'` + seen_tags_set[i] + `','`+i+`')">
+            tag_cloud_html.push(`<li class="nav-item nav-profile" onclick="show_items_of(this,'` + seen_tags_set[i] + `','`+i+`')">
             <a class="nav-link" href="#">` + seen_tags_set[i] + ` &nbsp;
               <span id="tag_item_count-`+i+`" class="tag_item_count"></span>
             </a>
@@ -110,8 +110,8 @@
     };
 
     function show_items_of(e, tag, index) {
-        $(".nav-item").removeClass("active");
-        $(e).addClass("active");
+        $(".nav-item").removeClass("_active");
+        $(e).addClass("_active");
          $(".tag_item_count").html("");
         $.get("/cat/search/attribute?tags=(" + tag + ")", function(data) {
             // console.log(data)
