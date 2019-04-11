@@ -5,8 +5,6 @@ RUN apt-get update		&& \
     apt-get install net-tools && \ 
     apt-get install bash-completion
 
-COPY start.sh /home
-COPY vertx-test-0.0.1-SNAPSHOT-jar-with-dependencies.jar /home
-COPY my-keystore.jks /home
+COPY apiserver_start.sh /
 
-CMD tail -f /dev/null 
+ENTRYPOINT [ "/apiserver_start.sh" ]

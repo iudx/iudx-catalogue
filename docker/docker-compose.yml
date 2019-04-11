@@ -25,8 +25,8 @@ services:
       - mongodb-data:/data/db/ 
       - ../setup/mongodb:/scripts/  
 
-   vertx:
-    image: ideam/vertx
+   apiserver:
+    image: vasanthrajaraman/catalogue-apiserver
     container_name: catalogue-apiserver
     hostname: catalogue-apiserver
     restart: always
@@ -38,5 +38,4 @@ services:
       - ALL
     volumes:
       - ../../iudx-catalogue:/iudx-catalogue/
-      - ../setup/apiserver:/scripts/
 
