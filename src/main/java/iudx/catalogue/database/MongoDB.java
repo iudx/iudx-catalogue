@@ -45,7 +45,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 
     mongo.createIndex(
         ITEM_COLLECTION,
-        new JsonObject().put("location", "2dsphere"),
+        new JsonObject().put("geoJsonLocation", "2dsphere"),
         ar -> {
           if (ar.succeeded()) {
             init_fut.complete();
@@ -117,7 +117,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     double rad = location.getDouble("radius", 1.0) * 1000.0;
 
     query.put(
-        "location",
+        "geoJsonLocation",
         new JsonObject()
             .put(
                 "$nearSphere",
@@ -143,9 +143,10 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     Iterator<Map.Entry<String, Object>> it = request_body.iterator();
     while (it.hasNext()) {
       String key = it.next().getKey();
-      JsonArray values = request_body.getJsonArray(key);
+
       if (!key.equalsIgnoreCase("attributeFilter")) {
         if (key.equalsIgnoreCase("tags")) {
+          JsonArray values = request_body.getJsonArray(key);
           if (values.size() == 1) {
             query.put("_tags", values.getString(0).toLowerCase());
             updateNoOfHits(new JsonArray().add(query.getString("_tags")));
@@ -158,8 +159,12 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
             updateNoOfHits(tag_values);
           }
         } else if (key.equalsIgnoreCase("location")) {
-          add_geo_search_query(values.getJsonObject(0), query);
+          String values = request_body.getString(key);
+          String[] temp = StringUtils.split(values, "\\");
+          String fin_val = StringUtils.join(temp, "");
+          add_geo_search_query(new JsonObject(fin_val), query);
         } else {
+          JsonArray values = request_body.getJsonArray(key);
           for (int i = 0; i < values.size(); i++) {
             query.put(key, values.getString(i));
           }

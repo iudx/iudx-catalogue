@@ -397,9 +397,17 @@ public class APIServerVerticle extends AbstractVerticle {
       logger.info(Integer.toString(query_parameter_length));
 
       for (int i = 0; i < query_parameter_length; i++) {
-        request_body.put(
-            query_parameters[i].split("\\=")[0],
-            changeToArray(query_parameters[i].split("\\=")[1]));
+        if(query_parameters[i].split("\\=")[0].equalsIgnoreCase("location")) {
+          request_body.put(
+              query_parameters[i].split("\\=")[0],
+              query_parameters[i].split("\\=")[1]);
+
+        }else {
+          request_body.put(
+              query_parameters[i].split("\\=")[0],
+              changeToArray(query_parameters[i].split("\\=")[1]));
+          
+        }
         logger.info(query_parameters[i]);
       }
       logger.info(request_body.toString());
