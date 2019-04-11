@@ -114,7 +114,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   private void add_geo_search_query(JsonObject location, JsonObject query) {
     double latitude = location.getDouble("lat");
     double longitude = location.getDouble("long");
-    double rad = location.getDouble("radius", 1000.0);
+    double rad = location.getDouble("radius", 1.0) * 1000.0;
 
     query.put(
         "location",
