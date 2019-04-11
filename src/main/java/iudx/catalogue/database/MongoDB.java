@@ -5,6 +5,7 @@ import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Future;
 import io.vertx.ext.mongo.BulkOperation;
 import io.vertx.ext.mongo.FindOptions;
 import io.vertx.ext.mongo.MongoClient;
@@ -37,9 +38,22 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     TAG_COLLECTION = tag_database;
   }
 
-  public void initDB(Vertx vertx, JsonObject mongoconfig) {
+  public Future<Void> initDB(Vertx vertx, JsonObject mongoconfig) {
 
+    Future<Void> init_fut = Future.future();
     mongo = MongoClient.createShared(vertx, mongoconfig);
+
+    mongo.createIndex(
+        ITEM_COLLECTION,
+        new JsonObject().put("location", "2dsphere"),
+        ar -> {
+          if (ar.succeeded()) {
+            init_fut.complete();
+          } else {
+            init_fut.fail(ar.cause());
+          }
+        });
+    return init_fut;
   }
   /**
    * Searches the Mongo DB
@@ -97,6 +111,27 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
         });
   }
 
+  private void add_geo_search_query(JsonObject location, JsonObject query) {
+    double latitude = location.getDouble("lat");
+    double longitude = location.getDouble("long");
+    double rad = location.getDouble("radius", 1.0) * 1000.0;
+
+    query.put(
+        "location",
+        new JsonObject()
+            .put(
+                "$nearSphere",
+                new JsonObject()
+                    .put(
+                        "$geometry",
+                        new JsonObject()
+                            .put("type", "Point")
+                            .put(
+                                "coordinates",
+                                new JsonArray("[" + longitude + "," + latitude + "]")))
+                    .put("$maxDistance", rad)));
+  }
+
   @Override
   public void searchAttribute(Message<Object> message) {
 
@@ -122,6 +157,8 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
             query.put("_tags", new JsonObject().put("$in", tag_values));
             updateNoOfHits(tag_values);
           }
+        } else if (key.equalsIgnoreCase("location")) {
+          add_geo_search_query(values.getJsonObject(0), query);
         } else {
           for (int i = 0; i < values.size(); i++) {
             query.put(key, values.getString(i));
@@ -259,7 +296,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
               ins.put("noOfItems", 1);
               bulk.add(BulkOperation.createInsert(ins));
             }
-            mongo.bulkWrite(TAG_COLLECTION, bulk,tagsUpdated-> {});
+            mongo.bulkWrite(TAG_COLLECTION, bulk, tagsUpdated -> {});
           }
         });
   }
@@ -435,7 +472,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
         res -> {
           if (res.succeeded() && !(res.result() == null)) {
             if (res.result().containsKey("_tags")) {
-            	decNoOfItems(res.result().getJsonArray("_tags"));
+              decNoOfItems(res.result().getJsonArray("_tags"));
             }
             message.reply("Success");
           } else if (res.result() == null) {

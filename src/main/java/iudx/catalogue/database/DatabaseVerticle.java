@@ -47,8 +47,8 @@ public class DatabaseVerticle extends AbstractVerticle {
     mongoconfig =
         new JsonObject().put("connection_string", database_uri).put("db_name", database_name);
 
-    db.initDB(vertx, mongoconfig);
-    startFuture.complete();
+    Future<Void> init_fut = db.initDB(vertx, mongoconfig);
+    init_fut.setHandler(startFuture.completer());
   }
 
   /**
