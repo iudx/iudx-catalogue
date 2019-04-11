@@ -5,6 +5,7 @@ import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Future;
 import io.vertx.ext.mongo.BulkOperation;
 import io.vertx.ext.mongo.FindOptions;
 import io.vertx.ext.mongo.MongoClient;
@@ -37,9 +38,19 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     TAG_COLLECTION = tag_database;
   }
 
-  public void initDB(Vertx vertx, JsonObject mongoconfig) {
-
+  public Future<Void> initDB(Vertx vertx, JsonObject mongoconfig) {
+    
+    Future<Void> init_fut = Future.future();
     mongo = MongoClient.createShared(vertx, mongoconfig);
+    
+    mongo.createIndex(ITEM_COLLECTION, new JsonObject().put("location", "2dsphere"), ar ->{
+      if(ar.succeeded()) {
+        init_fut.complete();
+      }else {
+        init_fut.fail(ar.cause());
+      }
+    });
+    return init_fut;
   }
   /**
    * Searches the Mongo DB
@@ -122,7 +133,11 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
             query.put("_tags", new JsonObject().put("$in", tag_values));
             updateNoOfHits(tag_values);
           }
-        } else {
+        }else if(key.equalsIgnoreCase("location")) {
+          
+        }
+        
+        else {
           for (int i = 0; i < values.size(); i++) {
             query.put(key, values.getString(i));
           }
