@@ -106,7 +106,9 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
               JsonObject filter = new JsonObject().put("tag", j.getString("tag"));
               bulk.add(BulkOperation.createReplace(filter, j));
             }
-            mongo.bulkWrite(TAG_COLLECTION, bulk, res2 -> {});
+            if (!bulk.isEmpty()) {
+              mongo.bulkWrite(TAG_COLLECTION, bulk, res2 -> {});
+            }
           }
         });
   }
@@ -301,7 +303,9 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
               ins.put("noOfItems", 1);
               bulk.add(BulkOperation.createInsert(ins));
             }
-            mongo.bulkWrite(TAG_COLLECTION, bulk, tagsUpdated -> {});
+            if (!bulk.isEmpty()) {
+              mongo.bulkWrite(TAG_COLLECTION, bulk, tagsUpdated -> {});
+            }
           }
         });
   }
@@ -355,8 +359,12 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
         to_dec.add(t);
       }
     }
-    writeTags(new_tags);
-    decNoOfItems(to_dec);
+    if (!new_tags.isEmpty()) {
+      writeTags(new_tags);
+    }
+    if (!to_dec.isEmpty()) {
+      decNoOfItems(to_dec);
+    }
   }
 
   @Override
@@ -455,9 +463,15 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
             for (JsonObject j : find_tags.result()) {
               j.put("noOfItems", (j.getInteger("noOfItems") - 1));
               JsonObject filter = new JsonObject().put("tag", j.getString("tag"));
-              bulk.add(BulkOperation.createReplace(filter, j));
+              if (j.getInteger("noOfItems") > 0) {
+                bulk.add(BulkOperation.createReplace(filter, j));
+              } else {
+                bulk.add(BulkOperation.createDelete(filter));
+              }
             }
-            mongo.bulkWrite(TAG_COLLECTION, bulk, res2 -> {});
+            if (!bulk.isEmpty()) {
+              mongo.bulkWrite(TAG_COLLECTION, bulk, res2 -> {});
+            }
           }
         });
   }
