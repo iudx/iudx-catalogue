@@ -583,7 +583,7 @@ public class APIServerVerticle extends AbstractVerticle {
                 if ("read-item".equals(action)
                     || "read-schema".equals(action)
                     || "search-attribute".equals(action)) {
-                  handle200(routingContext, database_reply.result());
+                  handle200(routingContext, (JsonArray)database_reply.result().body());
                 } else if ("delete-item".equals(action)) {
                   if ("Success".equals(database_reply.result().body().toString())) {
                     handle204(routingContext);
@@ -674,10 +674,16 @@ public class APIServerVerticle extends AbstractVerticle {
     response.setStatusCode(HTTP_STATUS_INTERNAL_SERVER_ERROR).end();
   }
 
-  private void handle200(RoutingContext routingContext, Message<Object> databaseReply) {
+  private void handle200(RoutingContext routingContext, JsonArray reply) {
     HttpServerResponse response = routingContext.response();
 
-    response.setStatusCode(HTTP_STATUS_OK).end(((JsonArray) databaseReply.body()).encodePrettily());
+    response.setStatusCode(HTTP_STATUS_OK).end(reply.encodePrettily());
+  }
+  
+  private void handle200(RoutingContext routingContext, JsonObject reply) {
+    HttpServerResponse response = routingContext.response();
+
+    response.setStatusCode(HTTP_STATUS_OK).end(reply.encodePrettily());
   }
 
   private void handle204(RoutingContext routingContext) {
