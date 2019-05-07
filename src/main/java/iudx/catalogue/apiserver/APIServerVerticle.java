@@ -28,6 +28,7 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.StaticHandler;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Properties;
 
@@ -49,17 +50,39 @@ public class APIServerVerticle extends AbstractVerticle {
 
   @Override
   public void start(Future<Void> startFuture) {
+    
+    Router router = defineApiRouting();
 
-    HttpServer server;
+    setSystemProps();
+
+    HttpServer server = createServer();
+
     int port = config().getInteger("http.port", 8443);
 
-    ClientAuth clientAuth;
-    Properties systemProps;
-    String keystore;
-    String keystorePassword;
-    String truststore;
-    String truststorePassword;
+    server.requestHandler(router::accept).listen(port);
 
+    logger.info("API Server Verticle started!");
+
+    startFuture.complete();
+  }
+
+
+  private HttpServer createServer() {
+    ClientAuth clientAuth = ClientAuth.REQUEST;
+    String keystore = config().getString("keystore");
+    String keystorePassword = config().getString("keystorePassword");
+
+    HttpServer server =
+        vertx.createHttpServer(
+            new HttpServerOptions()
+                .setSsl(true)
+                .setClientAuth(clientAuth)
+                .setKeyStoreOptions(
+                    new JksOptions().setPath(keystore).setPassword(keystorePassword)));
+    return server;
+  }
+
+  private Router defineApiRouting() {
     Router router = Router.router(vertx);
     router.route().handler(BodyHandler.create());
 
@@ -78,6 +101,7 @@ public class APIServerVerticle extends AbstractVerticle {
               response.sendFile("ui/search/index.html");
             });
 
+    // OLD APIs
     router.get("/cat/search").handler(this::getAll);
     router.get("/cat/search/attribute").handler(this::searchAttribute);
     router.get("/cat/items/id/:itemID").handler(this::getItems);
@@ -89,18 +113,19 @@ public class APIServerVerticle extends AbstractVerticle {
     router.delete("/cat/items/id/:itemID").handler(this::deleteItems);
 
     router.put("/cat/items").handler(this::updateItems);
-
+    
     router.route("/assets/*").handler(StaticHandler.create("ui/assets"));
-    logger.info("IUDX Catalogue Routes Defined !");
+    return router;
+  }
 
-    clientAuth = ClientAuth.REQUEST;
+  private void setSystemProps() {
+    String keystore = config().getString("keystore");
+    String keystorePassword = config().getString("keystorePassword");
 
-    keystore = config().getString("keystore");
-    keystorePassword = config().getString("keystorePassword");
-    truststore = config().getString("truststore");
-    truststorePassword = config().getString("truststorePassword");
+    String truststore = config().getString("truststore");
+    String truststorePassword = config().getString("truststorePassword");
 
-    systemProps = System.getProperties();
+    Properties systemProps = System.getProperties();
 
     systemProps.put("javax.net.ssl.keyStore", keystore);
     systemProps.put("javax.net.ssl.keyStorePassword", keystorePassword);
@@ -109,21 +134,7 @@ public class APIServerVerticle extends AbstractVerticle {
     systemProps.put("javax.net.ssl.trustStorePassword", truststorePassword);
 
     System.setProperties(systemProps);
-
     logger.info("IUDX TLS Property Defined !");
-
-    server =
-        vertx.createHttpServer(
-            new HttpServerOptions()
-                .setSsl(true)
-                .setClientAuth(clientAuth)
-                .setKeyStoreOptions(
-                    new JksOptions().setPath(keystore).setPassword(keystorePassword)));
-
-    server.requestHandler(router::accept).listen(port);
-
-    logger.info("API Server Verticle started!");
-    startFuture.complete();
   }
 
   /**
@@ -214,7 +225,7 @@ public class APIServerVerticle extends AbstractVerticle {
 
     return status;
   }
-
+  
   /**
    * Sends a request to the database to display all items
    *
