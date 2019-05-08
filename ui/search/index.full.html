@@ -24,19 +24,19 @@
   <!-- endinject -->
   <link rel="shortcut icon" href="../../assets/img/logo/iudx.png" />
   <style type="text/css">
-
-    .active{
+  
+    ._active{
       background: linear-gradient(to right, #da8cff, #9a55ff) !important;
       border-radius: 10px;
       color: #fff !important;
       text-align: center !important;
     }
 
-    .active > .nav-link > .tag_item_count{
+    ._active > .nav-link > .tag_item_count{
       color: #fff !important;
     }
 
-    .active > .nav-link{
+    ._active > .nav-link{
       color: #fff !important; 
     }
 
@@ -75,22 +75,15 @@
     }
 
     #tags_side_bar {
-      margin-left: -250px;
-      left: 250px;
-      width: 250px;
+      width: 260px;
       background: #fff;
       position: fixed;
       height: 100%;
-      overflow-y: auto;
-      z-index: 1000;
+      overflow-y: auto !important;
       transition: all 0.4s ease 0s;
     }
 
-    #tags_side_bar > li > a{
-      text-align: justify !important;
-    }
-
-        /* width */
+    /* width */
     ::-webkit-scrollbar {
       width: 10px;
     }
@@ -166,7 +159,7 @@
             </a>
           </li>
      
-          <li class="nav-item nav-logout d-none d-lg-block">
+          <li class="nav-item nav-logout">
             <a class="nav-link" href="#" onclick="refresh_tags()">
               <i class="mdi mdi-refresh"></i>
             </a>
@@ -181,7 +174,7 @@
     <!-- partial -->
     <div class="container-fluid page-body-wrapper">
       <!-- partial:partials/_sidebar.html -->
-      <nav class="sidebar sidebar-offcanvas justify-content-center" id="sidebar">
+      <nav class="sidebar sidebar-offcanvas" id="sidebar">
         <ul id="tags_side_bar" class="nav">
           <!-- your sidebar with tags will be populated here -->
         </ul>
@@ -194,6 +187,7 @@
               <span class="d-flex align-items-center purchase-popup">
                 <p id="item_result_count"></p> &nbsp;
                 <!-- <a href="#" target="_blank" class="btn ml-auto purchase-button">Development under progress</a> -->
+                <a href="#" class="btn ml-auto purchase-button">Version 1.0</a>
                 <!-- <i class="mdi mdi-close popup-dismiss"></i> -->
               </span>
             </div>
@@ -245,7 +239,9 @@
         <footer class="footer">
           <div class="d-sm-flex justify-content-center justify-content-sm-between">
             <span class="text-muted text-center text-sm-left d-block d-sm-inline-block"> <!--Copyright © 2017 --> <a id="location" href="#" ></a><!-- . All rights reserved. --></span>
-            <span class="float-none float-sm-right d-block mt-1 mt-sm-0 text-center">Hand-crafted & made with <i class="mdi mdi-heart text-danger"></i></span>
+            <span class="float-none float-sm-right d-block mt-1 mt-sm-0 text-center">Hand-crafted & made with <i class="mdi mdi-heart text-danger"></i>
+            <br>Icons made by <a href="https://flat-icons.com/">Flat-Icons</a> from <a href="www.flaticon.com ">flaticon.com </a>
+            </span>
             <!-- <span id="location"></span> -->
           </div>
         </footer>
@@ -273,7 +269,7 @@
   <script src="../../assets/js/dashboard.js"></script>
   <script src="../../assets/js/script.js"></script>
   <script src="../../assets/js/jquery.toast.js"></script>
-  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <script src="../../assets/js/jquery-ui.js"></script>
 
   <script type="text/javascript">
     $(document).bind('keydown', function(e) {
