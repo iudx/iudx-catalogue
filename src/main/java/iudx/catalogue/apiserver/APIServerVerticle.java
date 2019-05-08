@@ -13,9 +13,7 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
-import io.vertx.core.MultiMap;
 import io.vertx.core.eventbus.DeliveryOptions;
-import io.vertx.core.eventbus.Message;
 import io.vertx.core.http.ClientAuth;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
@@ -34,10 +32,6 @@ import java.util.Properties;
 
 public class APIServerVerticle extends AbstractVerticle {
 
-  private JsonObject request_body;
-  private String path;
-  private String itemID;
-  private String schemaID;
   private static final Logger logger = Logger.getLogger(APIServerVerticle.class.getName());
 
   static final int HTTP_STATUS_OK = 200;
@@ -47,10 +41,13 @@ public class APIServerVerticle extends AbstractVerticle {
   static final int HTTP_STATUS_NOT_FOUND = 404;
   static final int HTTP_STATUS_INTERNAL_SERVER_ERROR = 500;
   static final int HTTP_STATUS_UNAUTHORIZED = 401;
+  private ArrayList<String> itemTypes;
 
   @Override
   public void start(Future<Void> startFuture) {
-    
+
+    populateItemTypes();
+
     Router router = defineApiRouting();
 
     setSystemProps();
@@ -66,6 +63,15 @@ public class APIServerVerticle extends AbstractVerticle {
     startFuture.complete();
   }
 
+  private void populateItemTypes() {
+    itemTypes.add("resource-item");
+    itemTypes.add("data-model");
+    itemTypes.add("access-object");
+    itemTypes.add("resource-server");
+    itemTypes.add("provider");
+    itemTypes.add("base-schema");
+    itemTypes.add("catalogue-item");
+  }
 
   private HttpServer createServer() {
     ClientAuth clientAuth = ClientAuth.REQUEST;
@@ -101,19 +107,14 @@ public class APIServerVerticle extends AbstractVerticle {
               response.sendFile("ui/search/index.html");
             });
 
-    // OLD APIs
-    router.get("/cat/search").handler(this::getAll);
-    router.get("/cat/search/attribute").handler(this::searchAttribute);
-    router.get("/cat/items/id/:itemID").handler(this::getItems);
-    router.get("/cat/schemas/id/:schemaID").handler(this::getSchemas);
+    // NEW APIs
+    router.get("/list/catalogue/:itemtype").handler(this::list);
+    router.get("/search/catalogue/attribute").handler(this::searchAttribute);
+    router.get("/count/catalogue/attribute").handler(this::count);
+    router.post("/create/catalogue/:itemtype").handler(this::create);
+    router.put("/update/catalogue/:itemtype/:id").handler(this::update);
+    router.delete("remove/catalogue/:itemtype/:id").handler(this::delete);
 
-    router.post("/cat/items").handler(this::createItems);
-    router.post("/cat/schemas").handler(this::createSchema);
-
-    router.delete("/cat/items/id/:itemID").handler(this::deleteItems);
-
-    router.put("/cat/items").handler(this::updateItems);
-    
     router.route("/assets/*").handler(StaticHandler.create("ui/assets"));
     return router;
   }
@@ -219,24 +220,32 @@ public class APIServerVerticle extends AbstractVerticle {
 
       logger.info("Provider Name as per Certificate is " + provider);
       status = true;
-    } catch (SSLPeerUnverifiedException e) { // TODO
+    } catch (SSLPeerUnverifiedException e) {
       status = false;
     }
 
     return status;
   }
-  
-  /**
-   * Sends a request to the database to display all items
-   *
-   * @param event The server request
-   */
-  private void getAll(RoutingContext routingContext) {
-    request_body = new JsonObject();
-    DeliveryOptions database_action = new DeliveryOptions();
-    database_action.addHeader("action", "search-attribute");
-    databaseHandler(database_action, routingContext, request_body);
+
+  private void list(RoutingContext routingContext) {
+    String currentType = routingContext.request().getParam("itemtype");
+
+    if (currentType.equals("item-types")) {
+      JsonArray allTypes = new JsonArray(itemTypes);
+      JsonObject reply = new JsonObject().put("item-types", allTypes);
+      handle200(routingContext, reply);
+    } else if (currentType.equals("tags")) {
+      JsonObject request_body = new JsonObject();
+      databaseHandler("get-tags", routingContext, request_body);
+    } else if (itemTypes.contains(currentType)) {
+      JsonObject request_body = new JsonObject();
+      request_body.put("item-type", currentType);
+      databaseHandler("list", routingContext, request_body);
+    } else {
+      handle400(routingContext, currentType + " does not exist in the catalogue. ");
+    }
   }
+
   /**
    * Sends a request to ValidatorVerticle to validate the item and DatabaseVerticle to insert it in
    * the database. Displays the id of the inserted item.
@@ -244,23 +253,19 @@ public class APIServerVerticle extends AbstractVerticle {
    * @param event The server request which contains the item to be inserted in the database and the
    *     skip_validation header.
    */
-  private void createItems(RoutingContext routingContext) {
+  private void create(RoutingContext routingContext) {
     HttpServerRequest request = routingContext.request();
-    path = request.path();
     String skip_validation = request.getHeader("skip_validation").toLowerCase();
 
     if (decodeCertificate(routingContext)) {
       if (authenticateRequest(routingContext, "user.list")) {
-        logger.info(path);
-
         try {
-          request_body = routingContext.getBodyAsJson();
+          JsonObject request_body = routingContext.getBodyAsJson();
           DeliveryOptions validator_action = new DeliveryOptions();
           validator_action.addHeader("action", "validate-item");
+
           if (skip_validation != null) {
             if (!("true".equals(skip_validation)) && !("false".equals(skip_validation))) {
-              logger.info("skip_validation not a boolean");
-
               handle400(routingContext, "Invalid value: skip_validation is not a boolean");
               return;
             } else {
@@ -276,109 +281,40 @@ public class APIServerVerticle extends AbstractVerticle {
                   validator_action,
                   validator_reply -> {
                     if (validator_reply.succeeded()) {
-
-                      DeliveryOptions database_action = new DeliveryOptions();
-                      database_action.addHeader("action", "write-item");
-
-                      databaseHandler(database_action, routingContext, request_body);
-
-                    } else if (validator_reply.failed()) {
-                      logger.info("Validator Failed");
-                      handle500(routingContext);
-                      return;
+                      String itemType = request.getParam("itemtype");
+                      request_body.put("item-type", itemType);
+                      databaseHandler("create", routingContext, request_body);
                     } else {
-                      logger.info("No reply");
                       handle500(routingContext);
-
-                      return;
                     }
                   });
 
         } catch (Exception e) {
           handle400(routingContext, "Invalid item: Not a Json Object");
-          return;
         }
       } else {
-        logger.info("Unauthorised");
         handle401(routingContext, "Unauthorised");
-        return;
       }
     } else {
-      logger.info("Invalid Certificate");
       handle400(routingContext, "Certificate 'authenticaton' error");
-      return;
     }
   }
-  /**
-   * Inserts the given schema into the database.
-   *
-   * @param event The server request which contains the schema to be inserted.
-   */
-  private void createSchema(RoutingContext routingContext) {
 
-    HttpServerRequest request = routingContext.request();
-    path = request.path();
-    if (decodeCertificate(routingContext)) {
-      if (authenticateRequest(routingContext, "user.list")) {
-        logger.info(path);
+  private JsonObject prepareQuery(String query) {
+    JsonObject request_body = new JsonObject();
+    if (!query.equals("") && query != null) {
+      String[] queryParams = query.split("\\&");
+      int queryLen = queryParams.length;
 
-        request.bodyHandler(
-            body -> {
-              try {
-                request_body = body.toJsonObject();
-                DeliveryOptions database_action = new DeliveryOptions();
-                database_action.addHeader("action", "write-schema");
-
-                databaseHandler(database_action, routingContext, request_body);
-
-              } catch (Exception e) {
-                handle400(routingContext, "Invalid schema: Not a Json Object");
-                return;
-              }
-            });
-      } else {
-        logger.info("Certificate Authentication failed");
-        handle400(routingContext, "Certificate 'authentication' failed");
-        return;
-      }
-    } else {
-      logger.info("Invalid Certificate");
-      handle400(routingContext, "Certificate 'authenticaton' error");
-      return;
-    }
-  }
-  /**
-   * Converts the lost of values in string to JsoArray
-   *
-   * @param s List of values in string form
-   * @return The JsonArray which contains values.
-   */
-  private JsonArray changeToArray(String s) {
-
-    JsonArray values = new JsonArray();
-    String[] arr = s.split(",");
-    for (String a : arr) {
-      if (a.charAt(0) == '(' && a.charAt(a.length() - 1) == ')') {
-        if (a.length() > 2) {
-          values.add(a.substring(1, a.length() - 1));
-        }
-      } else if (a.charAt(0) == '(') {
-        if (a.length() > 1) {
-          values.add(a.substring(1));
-        }
-      } else if (a.charAt(a.length() - 1) == ')') {
-        if (a.length() > 1) {
-          values.add(a.substring(0, a.length() - 1));
-        }
-      } else {
-        if (a.length() > 0) {
-          values.add(a);
-        }
+      for (int i = 0; i < queryLen; i++) {
+        String key = queryParams[i].split("\\=")[0];
+        String val = queryParams[i].split("\\=")[1];
+        request_body.put(key, val);
       }
     }
-
-    return values;
+    return request_body;
   }
+
   /**
    * Searches the database based on the given query and displays only those fields present in
    * attributeFilter.
@@ -389,144 +325,60 @@ public class APIServerVerticle extends AbstractVerticle {
 
     HttpServerRequest request = routingContext.request();
 
-    // Example Query : curl -ik -XGET
-    // 'https://localhost:8443/cat/search/attribute?owner=rbccps&tags=(etoilet,sanitation)&attributeFilter=(id,latitude,longitude)'
-
-    String query = "";
+    String query;
     try {
       query = URLDecoder.decode(request.query().toString(), "UTF-8");
-    } catch (UnsupportedEncodingException e) { // TODO Auto-generated catch block
+    } catch (UnsupportedEncodingException e) {
       handle400(routingContext, "Bad Query");
       return;
     }
     logger.info(query);
-    request_body = new JsonObject();
 
-    if (!query.equals("") && query != null) {
-      String[] query_parameters = query.split("\\&");
-      int query_parameter_length = query_parameters.length;
-      logger.info(Integer.toString(query_parameter_length));
+    JsonObject request_body = prepareQuery(query);
 
-      for (int i = 0; i < query_parameter_length; i++) {
-        if(query_parameters[i].split("\\=")[0].equalsIgnoreCase("location")) {
-          request_body.put(
-              query_parameters[i].split("\\=")[0],
-              query_parameters[i].split("\\=")[1]);
+    databaseHandler("search-attribute", routingContext, request_body);
+  }
 
-        }else {
-          request_body.put(
-              query_parameters[i].split("\\=")[0],
-              changeToArray(query_parameters[i].split("\\=")[1]));
-          
-        }
-        logger.info(query_parameters[i]);
-      }
-      logger.info(request_body.toString());
+  private void count(RoutingContext routingContext) {
+    HttpServerRequest request = routingContext.request();
+
+    String query;
+    try {
+      query = URLDecoder.decode(request.query().toString(), "UTF-8");
+    } catch (UnsupportedEncodingException e) {
+      handle400(routingContext, "Bad Query");
+      return;
     }
-
-    DeliveryOptions database_action = new DeliveryOptions();
     logger.info(query);
 
-    database_action.addHeader("action", "search-attribute");
+    JsonObject request_body = prepareQuery(query);
 
-    databaseHandler(database_action, routingContext, request_body);
+    databaseHandler("count", routingContext, request_body);
   }
 
-  /**
-   * Retrieves an item from the database
-   *
-   * @param event The server request which contains the id of the item
-   */
-  private void getItems(RoutingContext routingContext) {
-
-    HttpServerRequest request = routingContext.request();
-    HttpServerResponse response = routingContext.response();
-
-    Future<String> decode_request = decodeRequest(request, response);
-
-    if (decode_request.result().equalsIgnoreCase("valid")) {
-
-      DeliveryOptions database_action = new DeliveryOptions();
-      database_action.addHeader("action", "read-item");
-      request_body = new JsonObject();
-      request_body.put("id", itemID);
-
-      databaseHandler(database_action, routingContext, request_body);
-
-    } else {
-      logger.info("Invalid Parameters");
-      handle400(routingContext, "Invalid request parameters");
-      return;
-    }
-  }
-
-  /**
-   * Retrieves a schema from the database
-   *
-   * @param event The server request which contains the id of the schema.
-   */
-  private void getSchemas(RoutingContext routingContext) {
-
-    HttpServerRequest request = routingContext.request();
-    HttpServerResponse response = routingContext.response();
-
-    Future<String> decode_request = decodeRequest(request, response);
-
-    if (decode_request.result().equalsIgnoreCase("valid")) {
-
-      DeliveryOptions database_action = new DeliveryOptions();
-      database_action.addHeader("action", "read-schema");
-      request_body = new JsonObject();
-      request_body.put("id", schemaID);
-
-      databaseHandler(database_action, routingContext, request_body);
-
-    } else {
-      logger.info("Invalid Parameters");
-      handle400(routingContext, "Invalid request parameters");
-      return;
-    }
-  }
   /**
    * Deletes the item from the database
    *
    * @param event The server request which contains the id of the item.
    */
-  private void deleteItems(RoutingContext routingContext) {
-
+  private void delete(RoutingContext routingContext) {
     HttpServerRequest request = routingContext.request();
-    HttpServerResponse response = routingContext.response();
-    path = request.path();
+
     if (decodeCertificate(routingContext)) {
       if (authenticateRequest(routingContext, "user.list")) {
+        JsonObject request_body = new JsonObject();
 
-        logger.info(path);
+        String id = request.getParam("id");
+        String itemType = request.getParam("itemtype");
+        request_body.put("id", id);
+        request_body.put("item-type", itemType);
 
-        Future<String> decode_request = decodeRequest(request, response);
-
-        if (decode_request.result().equalsIgnoreCase("valid")) {
-
-          DeliveryOptions database_action = new DeliveryOptions();
-          database_action.addHeader("action", "delete-item");
-          request_body = new JsonObject();
-          request_body.put("id", itemID);
-
-          databaseHandler(database_action, routingContext, request_body);
-        } else {
-          logger.info("Invalid Parameters");
-          handle400(routingContext, "Invalid request parameters");
-          return;
-        }
-
+        databaseHandler("delete", routingContext, request_body);
       } else {
-        logger.info("Unauthorised");
         handle401(routingContext, "Unauthorised");
-        return;
       }
     } else {
-      logger.info("Invalid Certificate");
       handle400(routingContext, "Certificate 'authenticaton' error");
-      return;
     }
   }
   /**
@@ -534,41 +386,36 @@ public class APIServerVerticle extends AbstractVerticle {
    *
    * @param routingContext Contains the updated item
    */
-  private void updateItems(RoutingContext routingContext) {
+  private void update(RoutingContext routingContext) {
     HttpServerRequest request = routingContext.request();
-    path = request.path();
     if (decodeCertificate(routingContext)) {
       if (authenticateRequest(routingContext, "user.list")) {
-        logger.info(path);
-
         try {
-          request_body = routingContext.getBodyAsJson();
-          DeliveryOptions database_action = new DeliveryOptions();
-          database_action.addHeader("action", "update-item");
-
-          databaseHandler(database_action, routingContext, request_body);
-
+          JsonObject request_body = routingContext.getBodyAsJson();
+          String id = request.getParam("id");
+          if (id.equals(request_body.getString("id"))) {
+            String itemType = request.getParam("itemtype");
+            request_body.put("item-type", itemType);
+            databaseHandler("update", routingContext, request_body);
+          } else {
+            handle400(routingContext, "Ids provided in the URI and object does not match");
+          }
         } catch (Exception e) {
           handle400(routingContext, "Invalid item: Not a Json Object");
-          return;
         }
       } else {
-        logger.info("Unauthorised");
         handle401(routingContext, "Unauthorised");
-        return;
       }
     } else {
-      logger.info("Invalid Certificate");
       handle400(routingContext, "Certificate 'authenticaton' error");
-      return;
     }
   }
 
   private void databaseHandler(
-      DeliveryOptions database_action, RoutingContext routingContext, JsonObject request_body) {
+      String action, RoutingContext routingContext, JsonObject request_body) {
 
-    MultiMap headers = database_action.getHeaders();
-    String action = headers.get("action");
+    DeliveryOptions database_action = new DeliveryOptions();
+    database_action.addHeader("action", action);
 
     vertx
         .eventBus()
@@ -578,72 +425,32 @@ public class APIServerVerticle extends AbstractVerticle {
             database_action,
             database_reply -> {
               if (database_reply.succeeded()) {
-                logger.info(database_reply.result().body().toString());
-
-                if ("read-item".equals(action)
-                    || "read-schema".equals(action)
-                    || "search-attribute".equals(action)) {
-                  handle200(routingContext, (JsonArray)database_reply.result().body());
-                } else if ("delete-item".equals(action)) {
-                  if ("Success".equals(database_reply.result().body().toString())) {
+                switch (action) {
+                  case "list":
+                  case "get-tags":
+                  case "search-attribute":
+                    handle200(routingContext, (JsonArray) database_reply.result().body());
+                    break;
+                  case "count":
+                    handle200(routingContext, (JsonObject)database_reply.result().body());
+                    break;
+                  case "delete":
                     handle204(routingContext);
-                  } else {
-                    logger.info("Item not found");
-                    handle400(routingContext, database_reply.result().body().toString());
-                  }
-
-                } else if ("write-item".equals(action) || "write-schema".equals(action)) {
-                  String id = database_reply.result().body().toString();
-                  handle201(routingContext, id);
-                } else if ("update-item".equals(action)) {
-                  if (database_reply.result().body().toString().contains("Error")) {
-                    System.out.println("adp");
-                    handle400(routingContext, database_reply.result().body().toString());
-                  } else {
+                    break;
+                  case "create":
                     String id = database_reply.result().body().toString();
                     handle201(routingContext, id);
-                  }
+                    break;
+                  case "update":
+                    String id2 = database_reply.result().body().toString();
+                    handle201(routingContext, id2);
+                    break;
+                    
                 }
               } else {
                 handle500(routingContext);
               }
             });
-  }
-
-  private Future<String> decodeRequest(HttpServerRequest request, HttpServerResponse response) {
-
-    Future<String> decode_request = Future.future();
-
-    try {
-
-      if (request.absoluteURI().contains("items")) {
-        itemID = request.getParam("itemID");
-        logger.info(itemID);
-
-        if ((itemID == null)) {
-          response.setStatusCode(400).end("Invalid Request");
-          decode_request.complete("invalid-request");
-        } else {
-          decode_request.complete("valid");
-        }
-      } else if (request.absoluteURI().contains("schemas")) {
-        schemaID = request.getParam("schemaID");
-        logger.info(schemaID);
-
-        if ((schemaID == null)) {
-          response.setStatusCode(400).end("Invalid Request");
-          decode_request.complete("invalid-request");
-        } else {
-          decode_request.complete("valid");
-        }
-      }
-
-    } catch (Exception e) {
-      response.setStatusCode(400).end("Invalid Request");
-      decode_request.complete("invalid-request");
-    }
-
-    return decode_request;
   }
 
   private String getStatusInJson(String status) {
@@ -679,7 +486,7 @@ public class APIServerVerticle extends AbstractVerticle {
 
     response.setStatusCode(HTTP_STATUS_OK).end(reply.encodePrettily());
   }
-  
+
   private void handle200(RoutingContext routingContext, JsonObject reply) {
     HttpServerResponse response = routingContext.response();
 
