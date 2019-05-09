@@ -24,7 +24,8 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 
   private MongoClient mongo;
 
-  private String TAG_COLLECTION, COLLECTION;
+  private final String TAG_COLLECTION="tags";
+  private final String COLLECTION="catalogue";
 
   /**
    * Constructor for MongoDB
@@ -431,8 +432,8 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     if (!new_tags.isEmpty()) {
       writeTags(new_tags);
     }
-    if (!to_dec.isEmpty()) {
-      decNoOfItems(to_dec);
+    if (!toDelete.isEmpty()) {
+      deleteTags(toDelete);
     }
   }
 
