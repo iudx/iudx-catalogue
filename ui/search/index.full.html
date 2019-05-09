@@ -23,6 +23,11 @@
   <!-- <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"> -->
   <!-- endinject -->
   <link rel="shortcut icon" href="../../assets/img/logo/iudx.png" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css"
+   integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
+   crossorigin=""/>
+   <!-- <link href="style.css" type="text/css" rel=stylesheet> -->
+  
   <style type="text/css">
   
     ._active{
@@ -103,7 +108,7 @@
       background: #555; 
     }
 
-
+    #mapid { height: 600px; }
 
   </style>
 </head>
@@ -125,8 +130,8 @@
                   <i class="input-group-text border-0 mdi mdi-magnify" style="color: white"></i>                
               </div>
             </div>
-
           </form>
+
 
         </div>
 <!--         &nbsp;&nbsp;&nbsp;
@@ -152,7 +157,31 @@
           </form>
 
         </div> -->
+        &nbsp;&nbsp;&nbsp;&nbsp;
         <ul class="navbar-nav navbar-nav-right">
+         <li class="nav-item nav-profile dropdown show">
+            <a class="nav-link dropdown-toggle" id="profileDropdown" href="#" data-toggle="dropdown" aria-expanded="true">
+              <div class="nav-profile-img">
+                <!-- <img src="../../images/faces/face1.jpg" alt="image"> -->
+                <!-- <span class="availability-status online"></span>              -->
+              </div>
+              <div class="nav-profile-text">
+                <p class="mb-1 text-black">Change view</p>
+              </div>
+            </a>
+            <div class="dropdown-menu navbar-dropdown show" aria-labelledby="profileDropdown">
+              <a id="list_view" class="dropdown-item" href="#" onclick="changeView('list_view')">
+                <i class="mdi mdi-format-list-bulleted mr-2 text-success"></i>
+                List View
+              </a>
+              <div class="dropdown-divider"></div>
+              <a id="map_view" class="dropdown-item" href="#" onclick="changeView('map_view')">
+                <i class="mdi mdi-map-marker-circle mr-2 text-primary"></i>
+                Map View
+              </a>
+            </div>
+          </li>       
+
           <li class="nav-item d-none d-lg-block full-screen-link">
             <a class="nav-link">
               <i class="mdi mdi-fullscreen" id="fullscreen-button"></i>
@@ -185,11 +214,12 @@
           <div class="row">
             <div class="col-12">
               <span class="d-flex align-items-center purchase-popup">
-                <p id="item_result_count"></p> &nbsp;
+                <p id="item_result_count"></p> &nbsp; <p id="retrieved_item_count"> </p>
                 <!-- <a href="#" target="_blank" class="btn ml-auto purchase-button">Development under progress</a> -->
-                <a href="#" class="btn ml-auto purchase-button">Version 1.0</a>
+                <a href="#" class="btn ml-auto purchase-button">Version 1.1</a>
                 <!-- <i class="mdi mdi-close popup-dismiss"></i> -->
               </span>
+
             </div>
           </div>
 
@@ -267,9 +297,13 @@
   <!-- endinject -->
   <!-- Custom js for this page-->
   <script src="../../assets/js/dashboard.js"></script>
+     <script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js"
+   integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA=="
+   crossorigin=""></script>
   <script src="../../assets/js/script.js"></script>
   <script src="../../assets/js/jquery.toast.js"></script>
   <script src="../../assets/js/jquery-ui.js"></script>
+
 
   <script type="text/javascript">
     $(document).bind('keydown', function(e) {
@@ -292,4 +326,3 @@
 </body>
 
 </html>
-

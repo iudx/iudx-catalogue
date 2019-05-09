@@ -7,6 +7,16 @@
         }
     });
 
+    var sensorIcon = L.icon({
+    iconUrl: 'assets/img/icons/1481951.svg',
+
+    iconSize:     [38, 95], // size of the icon
+    shadowSize:   [50, 64], // size of the shadow
+    iconAnchor:   [22, 94], // point of the icon which will correspond to marker's location
+    shadowAnchor: [4, 62],  // the same for the shadow
+    popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
+    });
+
     function urlify(text) {
       var urlRegex = /(https?:\/\/[^"]+)/g;
       return text.replace(urlRegex, '<a href="$1" target="_blank" style="text-decoration:underline">$1</a>')
@@ -75,9 +85,9 @@
         $("#item_result_count").html("Total number of items: " + data.length);
         for (var item_index = 0; item_index < data.length - 1; item_index++) {
             for (var tag_item_index = 0; tag_item_index < data[item_index]['tags'].length - 1; tag_item_index++) {
-                if(data[item_index]['tags'][tag_item_index].toLowerCase()=="feeder" || data[item_index]['tags'][tag_item_index].toLowerCase()=="streetlight" || data[item_index]['tags'][tag_item_index].toLowerCase()=="streetlighting"){
-                    continue;
-                }
+                // if(data[item_index]['tags'][tag_item_index].toLowerCase()=="feeder" || data[item_index]['tags'][tag_item_index].toLowerCase()=="streetlight" || data[item_index]['tags'][tag_item_index].toLowerCase()=="streetlighting"){
+                //     continue;
+                // }
                 if (!seen_tags_set.includes(data[item_index]['tags'][tag_item_index].toLowerCase())) {
                     seen_tags_set.push(data[item_index]['tags'][tag_item_index].toLowerCase())
                 }
@@ -87,7 +97,9 @@
         for (var i = seen_tags_set.length - 1; i >= 0; i--) {
 
             //For sidebar
-            tag_cloud_html.push(`<li class="nav-item" onclick="show_items_of(this,'` + seen_tags_set[i] + `','`+i+`')">
+            // tag_cloud_html.push(`<li class="nav-item nav-profile" onclick="show_items_of(this,'` + seen_tags_set[i] + `','`+i+`')">
+            tag_cloud_html.push(`<li class="nav-item nav-profile" onclick="show_items_of(this)">
+           
             <a class="nav-link" href="#">` + seen_tags_set[i] + ` &nbsp;
               <span id="tag_item_count-`+i+`" class="tag_item_count"></span>
             </a>
@@ -97,6 +109,8 @@
         $("#tags_side_bar").html(tag_cloud_html.sort());
         // $("#tags_side_bar").html(tag_cloud_html);
         tag_cloud_html = []
+
+        // show_all_items();
 
         //For search auto complete
         return seen_tags_set;
@@ -109,16 +123,133 @@
         withLinks: true
     };
 
-    function show_items_of(e, tag, index) {
-        $(".nav-item").removeClass("active");
-        $(e).addClass("active");
+    // var myRenderer = L.canvas({ padding: 0.5 });
+
+
+    function plot_points_on_map(lat_long, message){
+        // L.marker(lat_long,{icon: sensorIcon}).addTo(map).bindPopup(message).openPopup();
+        L.marker(lat_long,{icon: sensorIcon}).addTo(map).bindPopup(message);
+            // L.circleMarker(lat_long, {
+            //     renderer: myRenderer
+            // }).addTo(map).bindPopup(message);
+    }
+
+    //For singular tag selection (like a radio button)
+  //   function show_items_of(e, tag, index) {
+  //       $(".nav-item").removeClass("_active");
+  //       $(e).addClass("_active");
+  //        $(".tag_item_count").html("");
+  //       $.get("/cat/search/attribute?tags=(" + tag + ")", function(data) {
+  //           // console.log(data)
+  //           data = JSON.parse(data)
+  //           var html_to_add = "";
+  //           var item_details_card_html = ""
+  //           $("#tag_item_count-"+index).html("("+data.length+")");
+  //           for (var i = data.length - 1; i >= 0; i--) {
+  //               html_to_add += 
+  // `            <div class="col-md-12 grid-margin stretch-card">
+  //             <div class="card">
+  //               <div class="card-body">
+  //                 <div class="d-flex align-items-top mb-2">
+  //                   <img src="https://image.flaticon.com/icons/svg/1481/1481951.svg" class="img-sm rounded-circle mr-3" alt="image">
+  //                   <div class="mb-0 flex-grow">
+  //                     <h5 class="mr-2 mb-0 text-info">` + data[i]['NAME'] + `</h5>
+  //                     <p class="mb-0 font-weight-light">` + data[i]['itemDescription'] + `</p>
+  //                   </div>
+  //                    <button type="button" class="btn btn-outline-success btn-fw btn-detail" onclick="show_details_of(this,'` + i + `')">Details</button>
+  //                   <!-- &nbsp;<button type="button" class="btn btn-outline-info btn-fw" onclick="show_latest_data('` + i + `','` + data[i]['latestResourceData'] + `')">Latest Data</button> -->
+  //                 </div>
+                  
+  //                  <pre id="json-renderer-` + i + `" class="id_row"  style="height: 450px; display:none;">` + jsonPrettyHighlightToId(data[i]) + `</pre>
+                  
+  //                 <!--<iframe id="iframe-` + i + `" width="100%" height="100%" src="` + data[i]['latestResourceData'] + `" style="display:none">
+  //                     <p>Your browser does not support iframes.</p> -->
+  //                 </iframe>
+  //               </div>
+  //             </div>
+  //           </div>`
+
+
+  //           }
+  //           $("#searched_items").html(html_to_add)
+  //           $("#item_details_card").html(item_details_card_html)
+  //       });
+  //   }
+
+    //For multi tag selection (like a checkbox)
+    function show_items_of(e) {
+        // $(".nav-item").removeClass("_active");
+        if($(e).hasClass("_active")){
+            $(e).removeClass("_active");
+        }else{
+            $(e).addClass("_active");    
+        }
+        var tags="";
+        $("._active").each(function() {
+            tags += $(this).find(".nav-link").html().split(" &nbsp;")[0];
+            tags +=",";
+        });
+        // console.log(tags.slice(0, -1))
          $(".tag_item_count").html("");
-        $.get("/cat/search/attribute?tags=(" + tag + ")", function(data) {
+        $.get("/cat/search/attribute?tags=(" + tags.slice(0, -1) + ")", function(data) {
             // console.log(data)
             data = JSON.parse(data)
             var html_to_add = "";
             var item_details_card_html = ""
-            $("#tag_item_count-"+index).html("("+data.length+")");
+            $("#retrieved_item_count").html("&nbsp;| &nbsp;Items retrieved : <span style='color:red'>"+data.length+"</span>");
+            for (var i = data.length - 1; i >= 0; i--) {
+                html_to_add += 
+  `            <div class="col-md-12 grid-margin stretch-card">
+              <div class="card">
+                <div class="card-body">
+                  <div class="d-flex align-items-top mb-2">
+                    <img src="https://image.flaticon.com/icons/svg/1481/1481951.svg" class="img-sm rounded-circle mr-3" alt="image">
+                    <div class="mb-0 flex-grow">
+                      <h5 class="mr-2 mb-0 text-info">` + data[i]['NAME'] + `</h5>
+                      <p class="mb-0 font-weight-light">` + data[i]['itemDescription'] + ` &nbsp;&nbsp;&nbsp;<br><label class="badge badge-danger">` + data[i]['accessInformation'][0]['accessVariables']['resourceClass'] + `</label></p>
+                    </div>
+                     <button type="button" class="btn btn-outline-success btn-fw btn-detail" onclick="show_details_of(this,'` + i + `')">Details</button>
+                    <!-- &nbsp;<button type="button" class="btn btn-outline-info btn-fw" onclick="show_latest_data('` + i + `','` + data[i]['latestResourceData'] + `')">Latest Data</button> -->
+                  </div>
+                  
+                   <pre id="json-renderer-` + i + `" class="id_row"  style="height: 450px; display:none;">` + jsonPrettyHighlightToId(data[i]) + `</pre>
+                  
+                  <!--<iframe id="iframe-` + i + `" width="100%" height="100%" src="` + data[i]['latestResourceData'] + `" style="display:none">
+                      <p>Your browser does not support iframes.</p> -->
+                  </iframe>
+                </div>
+              </div>
+            </div>`
+
+
+            }
+            $("#searched_items").html(html_to_add)
+            $("#item_details_card").html(item_details_card_html)
+        });
+    }
+
+    function show_all_items() {
+        // console.log($(".nav-item").hasClass("_active"));
+        console.log($(".__active").attr('id'))
+        if(!$(".nav-item").hasClass("_active")){
+            $.toast({ 
+              text : `Displaying all items. <br> Select tags for filtering`, 
+              showHideTransition : 'fade',  // It can be plain, fade or slide
+              bgColor : '#07cdae',              // Background color for toast
+              textColor : '#000',            // text color
+              allowToastClose : false,       // Show the close button or not
+              hideAfter : 3500,              // `false` to make it sticky or time in miliseconds to hide after
+              stack : 5,                     // `fakse` to show one stack at a time count showing the number of toasts that can be shown at once
+              textAlign : 'center',            // Alignment of text i.e. left, right, center
+              position : 'mid-center'       // bottom-left or bottom-right or bottom-center or top-left or top-right or top-center or mid-center or an object representing the left, right, top, bottom values to position the toast on page
+            })
+            if($(".__active").attr('id')=='list_view'){
+         $(".tag_item_count").html("");
+         
+            // console.log(data)
+            data = JSON.parse(localStorage.getItem("data"))
+            var html_to_add = "";
+            var item_details_card_html = ""
             for (var i = data.length - 1; i >= 0; i--) {
                 html_to_add += 
   `            <div class="col-md-12 grid-margin stretch-card">
@@ -147,8 +278,63 @@
             }
             $("#searched_items").html(html_to_add)
             $("#item_details_card").html(item_details_card_html)
+        
+         }else{
+            //Display all points in map plot_points_on_map([18.51957, 73.85535], "Hello Pop-up");
+            // console.log(data)
+            data = JSON.parse(localStorage.getItem("data"))
+            for (var i =  0; i < data.length; i++) {
+                
+                plot_points_on_map([data[i]['geoJsonLocation']['coordinates'][1],data[i]['geoJsonLocation']['coordinates'][0]],`<h5 class="mr-2 mb-0 text-info"><a href="`+data[i]['latestResourceData']+`" target="_blank">` + data[i]['NAME'] + `</a></h5>
+                      <p class="mb-0 font-weight-light">` + data[i]['itemDescription'] + `</p>`)
+
+            }
+         }
+
+        }else{
+
+            $.get("/cat/search/attribute?tags=(" + ($("._active > .nav-link").html()).split(" &nbsp")[0] + ")", function(data) {
+            // console.log(data)
+            data = JSON.parse(data)
+            if($(".__active").attr('id')=='list_view'){
+                var html_to_add = "";
+                var item_details_card_html = ""
+
+                for (var i = data.length - 1; i >= 0; i--) {
+                html_to_add += 
+                `            <div class="col-md-12 grid-margin stretch-card">
+                <div class="card">
+                <div class="card-body">
+                  <div class="d-flex align-items-top mb-2">
+                    <img src="https://image.flaticon.com/icons/svg/1481/1481951.svg" class="img-sm rounded-circle mr-3" alt="image">
+                    <div class="mb-0 flex-grow">
+                      <h5 class="mr-2 mb-0 text-info">` + data[i]['NAME'] + `</h5>
+                      <p class="mb-0 font-weight-light">` + data[i]['itemDescription'] + `</p>
+                    </div>
+                     <button type="button" class="btn btn-outline-success btn-fw btn-detail" onclick="show_details_of(this,'` + i + `')">Details</button>
+                    <!-- &nbsp;<button type="button" class="btn btn-outline-info btn-fw" onclick="show_latest_data('` + i + `','` + data[i]['latestResourceData'] + `')">Latest Data</button> -->
+                  </div>
+                  
+                   <pre id="json-renderer-` + i + `" class="id_row"  style="height: 450px; display:none;">` + jsonPrettyHighlightToId(data[i]) + `</pre>
+                  
+                  <!--<iframe id="iframe-` + i + `" width="100%" height="100%" src="` + data[i]['latestResourceData'] + `" style="display:none">
+                      <p>Your browser does not support iframes.</p> -->
+                  </iframe>
+                </div>
+                </div>
+                </div>`
+
+
+                }
+                $("#searched_items").html(html_to_add)
+                $("#item_details_card").html(item_details_card_html)
+            }else{
+                //Display points related to one tag
+            }
         });
-    }
+        }
+
+    }    
 
     function get_location() { //user clicks button
         if ("geolocation" in navigator){ //check geolocation available 
@@ -237,3 +423,28 @@
     }
 
     // console.log("l",localStorage.getItem("data"))
+
+    var map;
+
+    function changeView(view_name){
+        if(view_name=="list_view"){
+            $("#map_view").removeClass("__active");
+            $("#list_view").addClass("__active");
+            $("#searched_items").html("");
+        }else{
+            $("#list_view").removeClass("__active");
+            $("#map_view").addClass("__active");
+            $("#searched_items").html("<div id='mapid'></div>");
+            $("#searched_items").removeClass("row");
+            //get static map tiles, if possible https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png
+            map = new L.Map('mapid');
+            var osmUrl='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+            var osmAttrib='Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors';
+            var osm = new L.TileLayer(osmUrl, {minZoom: 12, maxZoom: 100, attribution: osmAttrib,opacity:0.5});  
+            map.setView(new L.LatLng(18.51957, 73.85535),12);
+            map.addLayer(osm);
+            L.marker([18.51957, 73.85535], {icon: sensorIcon}).addTo(map);
+            plot_points_on_map([18.51957, 73.85535], "Hello Pop-up");
+            }
+        show_all_items();
+    }
