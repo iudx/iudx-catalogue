@@ -7,6 +7,16 @@
         }
     });
 
+    var sensorIcon = L.icon({
+    iconUrl: 'assets/img/icons/1481951.svg',
+
+    iconSize:     [38, 95], // size of the icon
+    shadowSize:   [50, 64], // size of the shadow
+    iconAnchor:   [22, 94], // point of the icon which will correspond to marker's location
+    shadowAnchor: [4, 62],  // the same for the shadow
+    popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
+    });
+
     function urlify(text) {
       var urlRegex = /(https?:\/\/[^"]+)/g;
       return text.replace(urlRegex, '<a href="$1" target="_blank" style="text-decoration:underline">$1</a>')
@@ -87,7 +97,9 @@
         for (var i = seen_tags_set.length - 1; i >= 0; i--) {
 
             //For sidebar
-            tag_cloud_html.push(`<li class="nav-item nav-profile" onclick="show_items_of(this,'` + seen_tags_set[i] + `','`+i+`')">
+            // tag_cloud_html.push(`<li class="nav-item nav-profile" onclick="show_items_of(this,'` + seen_tags_set[i] + `','`+i+`')">
+            tag_cloud_html.push(`<li class="nav-item nav-profile" onclick="show_items_of(this)">
+           
             <a class="nav-link" href="#">` + seen_tags_set[i] + ` &nbsp;
               <span id="tag_item_count-`+i+`" class="tag_item_count"></span>
             </a>
@@ -111,21 +123,80 @@
         withLinks: true
     };
 
+    // var myRenderer = L.canvas({ padding: 0.5 });
+
+
     function plot_points_on_map(lat_long, message){
-        L.marker(lat_long).addTo(map).bindPopup(message).openPopup();
+        // L.marker(lat_long,{icon: sensorIcon}).addTo(map).bindPopup(message).openPopup();
+        L.marker(lat_long,{icon: sensorIcon}).addTo(map).bindPopup(message);
+            // L.circleMarker(lat_long, {
+            //     renderer: myRenderer
+            // }).addTo(map).bindPopup(message);
     }
 
+    //For singular tag selection (like a radio button)
+  //   function show_items_of(e, tag, index) {
+  //       $(".nav-item").removeClass("_active");
+  //       $(e).addClass("_active");
+  //        $(".tag_item_count").html("");
+  //       $.get("/cat/search/attribute?tags=(" + tag + ")", function(data) {
+  //           // console.log(data)
+  //           data = JSON.parse(data)
+  //           var html_to_add = "";
+  //           var item_details_card_html = ""
+  //           $("#tag_item_count-"+index).html("("+data.length+")");
+  //           for (var i = data.length - 1; i >= 0; i--) {
+  //               html_to_add += 
+  // `            <div class="col-md-12 grid-margin stretch-card">
+  //             <div class="card">
+  //               <div class="card-body">
+  //                 <div class="d-flex align-items-top mb-2">
+  //                   <img src="https://image.flaticon.com/icons/svg/1481/1481951.svg" class="img-sm rounded-circle mr-3" alt="image">
+  //                   <div class="mb-0 flex-grow">
+  //                     <h5 class="mr-2 mb-0 text-info">` + data[i]['NAME'] + `</h5>
+  //                     <p class="mb-0 font-weight-light">` + data[i]['itemDescription'] + `</p>
+  //                   </div>
+  //                    <button type="button" class="btn btn-outline-success btn-fw btn-detail" onclick="show_details_of(this,'` + i + `')">Details</button>
+  //                   <!-- &nbsp;<button type="button" class="btn btn-outline-info btn-fw" onclick="show_latest_data('` + i + `','` + data[i]['latestResourceData'] + `')">Latest Data</button> -->
+  //                 </div>
+                  
+  //                  <pre id="json-renderer-` + i + `" class="id_row"  style="height: 450px; display:none;">` + jsonPrettyHighlightToId(data[i]) + `</pre>
+                  
+  //                 <!--<iframe id="iframe-` + i + `" width="100%" height="100%" src="` + data[i]['latestResourceData'] + `" style="display:none">
+  //                     <p>Your browser does not support iframes.</p> -->
+  //                 </iframe>
+  //               </div>
+  //             </div>
+  //           </div>`
 
-    function show_items_of(e, tag, index) {
-        $(".nav-item").removeClass("_active");
-        $(e).addClass("_active");
+
+  //           }
+  //           $("#searched_items").html(html_to_add)
+  //           $("#item_details_card").html(item_details_card_html)
+  //       });
+  //   }
+
+    //For multi tag selection (like a checkbox)
+    function show_items_of(e) {
+        // $(".nav-item").removeClass("_active");
+        if($(e).hasClass("_active")){
+            $(e).removeClass("_active");
+        }else{
+            $(e).addClass("_active");    
+        }
+        var tags="";
+        $("._active").each(function() {
+            tags += $(this).find(".nav-link").html().split(" &nbsp;")[0];
+            tags +=",";
+        });
+        // console.log(tags.slice(0, -1))
          $(".tag_item_count").html("");
-        $.get("/cat/search/attribute?tags=(" + tag + ")", function(data) {
+        $.get("/cat/search/attribute?tags=(" + tags.slice(0, -1) + ")", function(data) {
             // console.log(data)
             data = JSON.parse(data)
             var html_to_add = "";
             var item_details_card_html = ""
-            $("#tag_item_count-"+index).html("("+data.length+")");
+            $("#retrieved_item_count").html("&nbsp;| &nbsp;Items retrieved : <span style='color:red'>"+data.length+"</span>");
             for (var i = data.length - 1; i >= 0; i--) {
                 html_to_add += 
   `            <div class="col-md-12 grid-margin stretch-card">
@@ -135,7 +206,7 @@
                     <img src="https://image.flaticon.com/icons/svg/1481/1481951.svg" class="img-sm rounded-circle mr-3" alt="image">
                     <div class="mb-0 flex-grow">
                       <h5 class="mr-2 mb-0 text-info">` + data[i]['NAME'] + `</h5>
-                      <p class="mb-0 font-weight-light">` + data[i]['itemDescription'] + `</p>
+                      <p class="mb-0 font-weight-light">` + data[i]['itemDescription'] + ` &nbsp;&nbsp;&nbsp;<br><label class="badge badge-danger">` + data[i]['accessInformation'][0]['accessVariables']['resourceClass'] + `</label></p>
                     </div>
                      <button type="button" class="btn btn-outline-success btn-fw btn-detail" onclick="show_details_of(this,'` + i + `')">Details</button>
                     <!-- &nbsp;<button type="button" class="btn btn-outline-info btn-fw" onclick="show_latest_data('` + i + `','` + data[i]['latestResourceData'] + `')">Latest Data</button> -->
@@ -372,6 +443,7 @@
             var osm = new L.TileLayer(osmUrl, {minZoom: 12, maxZoom: 100, attribution: osmAttrib,opacity:0.5});  
             map.setView(new L.LatLng(18.51957, 73.85535),12);
             map.addLayer(osm);
+            L.marker([18.51957, 73.85535], {icon: sensorIcon}).addTo(map);
             plot_points_on_map([18.51957, 73.85535], "Hello Pop-up");
             }
         show_all_items();
