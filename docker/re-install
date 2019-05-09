@@ -11,12 +11,16 @@ if [ "$@" = "apiserver" ]; then
 	echo "Deleting API Server Container"
 	docker rm -f catalogue-apiserver
 
+	cd ..
+
+	mvn clean compile assembly:single
+
+	cp target/catalogue-apiserver-0.0.1-jar-with-dependencies.jar .
+
+	cd docker
+
 	echo "Starting Containers"
-	docker-compose up -d vertx
-
-	echo "Configuring Catalogue API Server"
-
-	docker exec catalogue-apiserver ./scripts/apiserver_install.sh
+	docker-compose up -d apiserver
 	echo "Started Catalogue API Server"
 
 elif [ "$@" = "mongodb" ]; then

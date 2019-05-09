@@ -1,5 +1,6 @@
 package iudx.catalogue.database;
 
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
@@ -12,7 +13,7 @@ public interface DatabaseInterface {
    * @param vertx Reference to the Vert.x instance that deployed the verticles.
    * @param config Configuration to initialize the database
    */
-  public void initDB(Vertx vertx, JsonObject config);
+  public Future<Void> initDB(Vertx vertx, JsonObject mongoconfig);
 
   /**
    * Searches the database based on the query and returns only those attributes of the documents

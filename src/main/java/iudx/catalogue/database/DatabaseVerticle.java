@@ -20,7 +20,7 @@ public class DatabaseVerticle extends AbstractVerticle {
   public DatabaseVerticle(String which_database) {
 
     if ("mongo".equals(which_database)) {
-      db = new MongoDB("items", "schemas");
+      db = new MongoDB("items", "schemas","tags");
     }
   }
 
@@ -47,8 +47,8 @@ public class DatabaseVerticle extends AbstractVerticle {
     mongoconfig =
         new JsonObject().put("connection_string", database_uri).put("db_name", database_name);
 
-    db.initDB(vertx, mongoconfig);
-    startFuture.complete();
+    Future<Void> init_fut = db.initDB(vertx, mongoconfig);
+    init_fut.setHandler(startFuture.completer());
   }
 
   /**
