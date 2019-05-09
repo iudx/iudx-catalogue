@@ -134,47 +134,129 @@
             // }).addTo(map).bindPopup(message);
     }
 
+    //For search bar 
+    function search(tag) {
+         $(".tag_item_count").html("");
+        $.get("/cat/search/attribute?tags=(" + tag + ")", function(data) {
+            // console.log(data)
+            data = JSON.parse(data)
+            var html_to_add = "";
+            var item_details_card_html = ""
+            $("#retrieved_item_count").html("&nbsp;| &nbsp;Items retrieved : <span style='color:red'>"+data.length+"</span>");
+            for (var i = data.length - 1; i >= 0; i--) {
+                html_to_add += 
+  `            <div class="col-md-12 grid-margin stretch-card">
+              <div class="card">
+                <div class="card-body">
+                  <div class="d-flex align-items-top mb-2">
+                    <img src="https://image.flaticon.com/icons/svg/1481/1481951.svg" class="img-sm rounded-circle mr-3" alt="image">
+                    <div class="mb-0 flex-grow">
+                      <h5 class="mr-2 mb-0 text-info">` + data[i]['NAME'] + `</h5>
+                      <p class="mb-0 font-weight-light">` + data[i]['itemDescription'] + `</p>
+                    </div>
+                     <button type="button" class="btn btn-outline-success btn-fw btn-detail" onclick="show_details_of(this,'` + i + `')">Details</button>
+                    <!-- &nbsp;<button type="button" class="btn btn-outline-info btn-fw" onclick="show_latest_data('` + i + `','` + data[i]['latestResourceData'] + `')">Latest Data</button> -->
+                  </div>
+                  
+                   <pre id="json-renderer-` + i + `" class="id_row"  style="height: 450px; display:none;">` + jsonPrettyHighlightToId(data[i]) + `</pre>
+                  
+                  <!--<iframe id="iframe-` + i + `" width="100%" height="100%" src="` + data[i]['latestResourceData'] + `" style="display:none">
+                      <p>Your browser does not support iframes.</p> -->
+                  </iframe>
+                </div>
+              </div>
+            </div>`
+
+
+            }
+            $("#searched_items").html(html_to_add)
+            $("#item_details_card").html(item_details_card_html)
+        });
+    }
+
     //For singular tag selection (like a radio button)
-  //   function show_items_of(e, tag, index) {
-  //       $(".nav-item").removeClass("_active");
-  //       $(e).addClass("_active");
-  //        $(".tag_item_count").html("");
-  //       $.get("/cat/search/attribute?tags=(" + tag + ")", function(data) {
-  //           // console.log(data)
-  //           data = JSON.parse(data)
-  //           var html_to_add = "";
-  //           var item_details_card_html = ""
-  //           $("#tag_item_count-"+index).html("("+data.length+")");
-  //           for (var i = data.length - 1; i >= 0; i--) {
-  //               html_to_add += 
-  // `            <div class="col-md-12 grid-margin stretch-card">
-  //             <div class="card">
-  //               <div class="card-body">
-  //                 <div class="d-flex align-items-top mb-2">
-  //                   <img src="https://image.flaticon.com/icons/svg/1481/1481951.svg" class="img-sm rounded-circle mr-3" alt="image">
-  //                   <div class="mb-0 flex-grow">
-  //                     <h5 class="mr-2 mb-0 text-info">` + data[i]['NAME'] + `</h5>
-  //                     <p class="mb-0 font-weight-light">` + data[i]['itemDescription'] + `</p>
-  //                   </div>
-  //                    <button type="button" class="btn btn-outline-success btn-fw btn-detail" onclick="show_details_of(this,'` + i + `')">Details</button>
-  //                   <!-- &nbsp;<button type="button" class="btn btn-outline-info btn-fw" onclick="show_latest_data('` + i + `','` + data[i]['latestResourceData'] + `')">Latest Data</button> -->
-  //                 </div>
+    function show_items_of(e, tag, index) {
+        $(".nav-item").removeClass("_active");
+        $(e).addClass("_active");
+         $(".tag_item_count").html("");
+        $.get("/cat/search/attribute?tags=(" + tag + ")", function(data) {
+            // console.log(data)
+            data = JSON.parse(data)
+            var html_to_add = "";
+            var item_details_card_html = ""
+            $("#tag_item_count-"+index).html("("+data.length+")");
+            for (var i = data.length - 1; i >= 0; i--) {
+                html_to_add += 
+  `            <div class="col-md-12 grid-margin stretch-card">
+              <div class="card">
+                <div class="card-body">
+                  <div class="d-flex align-items-top mb-2">
+                    <img src="https://image.flaticon.com/icons/svg/1481/1481951.svg" class="img-sm rounded-circle mr-3" alt="image">
+                    <div class="mb-0 flex-grow">
+                      <h5 class="mr-2 mb-0 text-info">` + data[i]['NAME'] + `</h5>
+                      <p class="mb-0 font-weight-light">` + data[i]['itemDescription'] + `</p>
+                    </div>
+                     <button type="button" class="btn btn-outline-success btn-fw btn-detail" onclick="show_details_of(this,'` + i + `')">Details</button>
+                    <!-- &nbsp;<button type="button" class="btn btn-outline-info btn-fw" onclick="show_latest_data('` + i + `','` + data[i]['latestResourceData'] + `')">Latest Data</button> -->
+                  </div>
                   
-  //                  <pre id="json-renderer-` + i + `" class="id_row"  style="height: 450px; display:none;">` + jsonPrettyHighlightToId(data[i]) + `</pre>
+                   <pre id="json-renderer-` + i + `" class="id_row"  style="height: 450px; display:none;">` + jsonPrettyHighlightToId(data[i]) + `</pre>
                   
-  //                 <!--<iframe id="iframe-` + i + `" width="100%" height="100%" src="` + data[i]['latestResourceData'] + `" style="display:none">
-  //                     <p>Your browser does not support iframes.</p> -->
-  //                 </iframe>
-  //               </div>
-  //             </div>
-  //           </div>`
+                  <!--<iframe id="iframe-` + i + `" width="100%" height="100%" src="` + data[i]['latestResourceData'] + `" style="display:none">
+                      <p>Your browser does not support iframes.</p> -->
+                  </iframe>
+                </div>
+              </div>
+            </div>`
 
 
-  //           }
-  //           $("#searched_items").html(html_to_add)
-  //           $("#item_details_card").html(item_details_card_html)
-  //       });
-  //   }
+            }
+            $("#searched_items").html(html_to_add)
+            $("#item_details_card").html(item_details_card_html)
+        });
+    }
+
+    //For singular tag selection (like a radio button)
+    function show_items_of(e, tag, index) {
+        $(".nav-item").removeClass("_active");
+        $(e).addClass("_active");
+         $(".tag_item_count").html("");
+        $.get("/cat/search/attribute?tags=(" + tag + ")", function(data) {
+            // console.log(data)
+            data = JSON.parse(data)
+            var html_to_add = "";
+            var item_details_card_html = ""
+            $("#tag_item_count-"+index).html("("+data.length+")");
+            for (var i = data.length - 1; i >= 0; i--) {
+                html_to_add += 
+  `            <div class="col-md-12 grid-margin stretch-card">
+              <div class="card">
+                <div class="card-body">
+                  <div class="d-flex align-items-top mb-2">
+                    <img src="https://image.flaticon.com/icons/svg/1481/1481951.svg" class="img-sm rounded-circle mr-3" alt="image">
+                    <div class="mb-0 flex-grow">
+                      <h5 class="mr-2 mb-0 text-info">` + data[i]['NAME'] + `</h5>
+                      <p class="mb-0 font-weight-light">` + data[i]['itemDescription'] + `</p>
+                    </div>
+                     <button type="button" class="btn btn-outline-success btn-fw btn-detail" onclick="show_details_of(this,'` + i + `')">Details</button>
+                    <!-- &nbsp;<button type="button" class="btn btn-outline-info btn-fw" onclick="show_latest_data('` + i + `','` + data[i]['latestResourceData'] + `')">Latest Data</button> -->
+                  </div>
+                  
+                   <pre id="json-renderer-` + i + `" class="id_row"  style="height: 450px; display:none;">` + jsonPrettyHighlightToId(data[i]) + `</pre>
+                  
+                  <!--<iframe id="iframe-` + i + `" width="100%" height="100%" src="` + data[i]['latestResourceData'] + `" style="display:none">
+                      <p>Your browser does not support iframes.</p> -->
+                  </iframe>
+                </div>
+              </div>
+            </div>`
+
+
+            }
+            $("#searched_items").html(html_to_add)
+            $("#item_details_card").html(item_details_card_html)
+        });
+    }
 
     //For multi tag selection (like a checkbox)
     function show_items_of(e) {
