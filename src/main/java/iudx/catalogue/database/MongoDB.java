@@ -24,27 +24,21 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 
   private MongoClient mongo;
 
-  private String ITEM_COLLECTION, SCHEMA_COLLECTION, TAG_COLLECTION;
+  private String TAG_COLLECTION, COLLECTION;
+
   /**
    * Constructor for MongoDB
    *
    * @param item_database Name of the Item Collection
    * @param schema_database Name of the Schema Collection
    */
-  public MongoDB(String item_database, String schema_database, String tag_database) {
-
-    ITEM_COLLECTION = item_database;
-    SCHEMA_COLLECTION = schema_database;
-    TAG_COLLECTION = tag_database;
-  }
-
   public Future<Void> initDB(Vertx vertx, JsonObject mongoconfig) {
 
     Future<Void> init_fut = Future.future();
     mongo = MongoClient.createShared(vertx, mongoconfig);
 
     mongo.createIndex(
-        ITEM_COLLECTION,
+        COLLECTION,
         new JsonObject().put("geoJsonLocation", "2dsphere"),
         ar -> {
           if (ar.succeeded()) {
@@ -63,16 +57,18 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
    * @param options Options specify the fields that will (not) be displayed
    * @param message The message to which the result will be replied to
    */
-  private void mongoFind(
-      String collection, JsonObject query, FindOptions options, Message<Object> message) {
+  private void mongoFind(JsonObject query, JsonObject attributeFilter, Message<Object> message) {
 
-    JsonObject fields = options.getFields();
-    fields.put("_id", 0);
+    attributeFilter.put("_id", 0);
+    attributeFilter.put("Status", "Live");
 
-    options.setFields(fields);
+    String[] hiddenFields = {"_tags"};
+
+    FindOptions options = new FindOptions();
+    options.setFields(attributeFilter);
 
     mongo.findWithOptions(
-        collection,
+        COLLECTION,
         query,
         options,
         res -> {
@@ -80,14 +76,53 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
             // Send back the response
             JsonArray rep = new JsonArray();
             for (JsonObject j : res.result()) {
-              if (j.containsKey("_tags")) {
-                j.remove("_tags");
+              for (String hidden : hiddenFields) {
+                if (j.containsKey(hidden)) {
+                  j.remove(hidden);
+                }
               }
+              for (String key : j.fieldNames()) {
+                if (key.substring(0, 3).equals("_$_")) {
+                  Object value = j.getValue(key);
+                  j.remove(key);
+                  key = "$" + key.substring(3);
+                  j.put(key, value);
+                }
+              }
+
               rep.add(j);
             }
             message.reply(rep);
           } else {
             message.fail(0, "failure");
+          }
+        });
+  }
+
+  public void list(Message<Object> message) {
+    JsonObject request_body = (JsonObject) message.body();
+    String itemType = request_body.getString("item-type");
+    JsonObject query = new JsonObject();
+    query.put("item-type", itemType);
+
+    mongoFind(query, new JsonObject(), message);
+  }
+
+  public void listTags(Message<Object> message) {
+    JsonObject query = new JsonObject();
+    JsonObject fields = new JsonObject();
+    fields.put("id", 0);
+    fields.put("tag", 1);
+    FindOptions options = new FindOptions().setFields(fields);
+    mongo.findWithOptions(
+        TAG_COLLECTION,
+        query,
+        options,
+        tags -> {
+          if (tags.succeeded()) {
+            message.reply(tags);
+          } else {
+            message.fail(0, "Failure");
           }
         });
   }
@@ -113,138 +148,176 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
         });
   }
 
-  private void add_geo_search_query(JsonObject location, JsonObject query) {
-    double latitude = location.getDouble("lat");
-    double longitude = location.getDouble("long");
-    double rad = location.getDouble("radius", 1.0) * 1000.0;
+  private JsonObject geo_search_query(JsonObject location) {
+    JsonObject query = new JsonObject();
 
-    query.put(
-        "geoJsonLocation",
-        new JsonObject()
-            .put(
-                "$nearSphere",
-                new JsonObject()
-                    .put(
-                        "$geometry",
-                        new JsonObject()
-                            .put("type", "Point")
-                            .put(
-                                "coordinates",
-                                new JsonArray("[" + longitude + "," + latitude + "]")))
-                    .put("$maxDistance", rad)));
+    if (location.getString("bounding-type").equals("circle")) {
+      double latitude = location.getDouble("lat");
+      double longitude = location.getDouble("long");
+      double rad = location.getDouble("radius", 1.0) * 1000.0;
+
+      query.put(
+          "$nearSphere",
+          new JsonObject()
+              .put(
+                  "$geometry",
+                  new JsonObject()
+                      .put("type", "Point")
+                      .put("coordinates", new JsonArray("[" + longitude + "," + latitude + "]")))
+              .put("$maxDistance", rad));
+    }
+    return query;
+  }
+
+  private String extractString(String s, int b) {
+    String ans;
+    int i;
+    for (i = b; i < s.length() - 1; i++) {
+      if (s.charAt(i) == ',' || s.charAt(i) == ')') {
+        break;
+      }
+    }
+    ans = s.substring(b, i);
+    return ans;
+  }
+
+  private JsonArray extractElements(String s) {
+    JsonArray elements = new JsonArray();
+    for (int i = 1; i < s.length() - 1; i++) {
+      if (s.charAt(i) == ',') {
+        continue;
+      } else {
+        JsonArray ele = new JsonArray();
+        if (s.charAt(i) == '(') {
+          int j;
+          for (j = i + 1; j < s.length() - 1; j++) {
+            String e = extractString(s, j);
+            ele.add(e);
+            j = j + e.length();
+            if (j == ')') {
+              break;
+            }
+          }
+          i = j;
+          elements.add(ele);
+        } else {
+          String e = extractString(s, i);
+          i = i + e.length();
+          ele.add(e);
+          elements.add(ele);
+        }
+      }
+    }
+    return elements;
+  }
+
+  private JsonObject decodeQuery(JsonObject requestBody) {
+    JsonObject query = new JsonObject();
+
+    if (requestBody.containsKey("attribute-name") && requestBody.containsKey("attribute-value")) {
+      JsonArray attributeNames = extractElements(requestBody.getString("attribute-name"));
+      JsonArray attributeValues = extractElements(requestBody.getString("attribute-value"));
+
+      if (attributeNames.size() != attributeValues.size()) {
+        return null;
+      }
+
+      JsonArray expressions = new JsonArray();
+      for (int i = 0; i < attributeNames.size(); i++) {
+        String key = attributeNames.getJsonArray(i).getString(0);
+        JsonArray value = attributeValues.getJsonArray(i);
+
+        if (key.equalsIgnoreCase("tags")) {
+          key = "_tags";
+          JsonArray tags = attributeValues.getJsonArray(i);
+          value = new JsonArray();
+          for (int j = 0; j < tags.size(); j++) {
+            value.add(tags.getString(i).toLowerCase());
+          }
+          updateNoOfHits(value);
+        } else if (key.equalsIgnoreCase("location")) {
+          JsonObject location = new JsonObject();
+          location.put("bounding-type", value.getString(0));
+          location.put("lat", Double.parseDouble(value.getString(1)));
+          location.put("long", Double.parseDouble(value.getString(2)));
+          location.put("radius", Double.parseDouble(value.getString(3)));
+
+          key = "geoJsonLocation";
+          value = new JsonArray().add(geo_search_query(location));
+        } else if (key.charAt(0) == '$') {
+          key = "_$_" + key.substring(1);
+        }
+        JsonObject q = new JsonObject();
+
+        q.put(key, new JsonObject().put("$in", value));
+        expressions.add(q);
+      }
+      query.put("$and", expressions);
+    } else if (!requestBody.containsKey("attribute-name")
+        && !requestBody.containsKey("attribute-value")) {
+      query = null;
+    } else if (!requestBody.containsKey("attribute-name")
+        && !requestBody.containsKey("attribute-value")) {
+      query = null;
+    }
+
+    return query;
+  }
+
+  private JsonObject decodeFields(JsonObject requestBody) {
+    JsonObject fields = new JsonObject();
+    if (requestBody.containsKey("attribute-filter")) {
+      JsonArray attributeFilter = extractElements(requestBody.getString("attribute-filter"));
+      for (int i = 0; i < attributeFilter.size(); i++) {
+        String field = attributeFilter.getJsonArray(i).getString(0);
+        if (field.charAt(0) == '$') {
+          field = "_$_" + field.substring(1);
+        }
+        fields.put(field, 1);
+      }
+    }
+
+    return fields;
   }
 
   @Override
   public void searchAttribute(Message<Object> message) {
 
     JsonObject request_body = (JsonObject) message.body();
-    JsonObject query = new JsonObject();
-    JsonObject fields = new JsonObject();
+    JsonObject query = decodeQuery(request_body);
+    JsonObject fields = decodeFields(request_body);
 
-    // Populate query
-    Iterator<Map.Entry<String, Object>> it = request_body.iterator();
-    while (it.hasNext()) {
-      String key = it.next().getKey();
-
-      if (!key.equalsIgnoreCase("attributeFilter")) {
-        if (key.equalsIgnoreCase("tags")) {
-          JsonArray values = request_body.getJsonArray(key);
-          if (values.size() == 1) {
-            query.put("_tags", values.getString(0).toLowerCase());
-            updateNoOfHits(new JsonArray().add(query.getString("_tags")));
-          } else {
-            JsonArray tag_values = new JsonArray();
-            for (int i = 0; i < values.size(); i++) {
-              tag_values.add(values.getString(i).toLowerCase());
-            }
-            query.put("_tags", new JsonObject().put("$in", tag_values));
-            updateNoOfHits(tag_values);
-          }
-        } else if (key.equalsIgnoreCase("location")) {
-          String values = request_body.getString(key);
-          String[] temp = StringUtils.split(values, "\\");
-          String fin_val = StringUtils.join(temp, "");
-          add_geo_search_query(new JsonObject(fin_val), query);
-        } else {
-          JsonArray values = request_body.getJsonArray(key);
-          for (int i = 0; i < values.size(); i++) {
-            query.put(key, values.getString(i));
-          }
-        }
-      }
+    if (query == null) {
+      message.fail(0, "Bad query");
+    } else {
+      mongoFind(query, fields, message);
     }
-
-    // Populate fields
-    if (request_body.containsKey("attributeFilter")) {
-      JsonArray filter = request_body.getJsonArray("attributeFilter");
-      for (int i = 0; i < filter.size(); i++) {
-        fields.put(filter.getString(i), 1);
-      }
-    }
-
-    // Call mongo find
-    FindOptions options = new FindOptions().setFields(fields);
-    mongoFind(ITEM_COLLECTION, query, options, message);
   }
 
   @Override
-  public void readItem(Message<Object> message) {
-
-    JsonObject query = new JsonObject();
+  public void count(Message<Object> message) { // TODO Auto-generated method stub
     JsonObject request_body = (JsonObject) message.body();
+    JsonObject query = decodeQuery(request_body);
 
-    // Populate query
-    query.put("id", request_body.getString("id"));
-
-    // Call mongo find
-    mongoFind(ITEM_COLLECTION, query, new FindOptions(), message);
-  }
-  /**
-   * Replaces the '$' in the fields of schema with '&'
-   *
-   * @param schema The schema whose fields have to be changed
-   * @return The schema whose fields have '&' for '$'
-   */
-  private JsonObject encodeSchema(JsonObject schema) {
-
-    String[] temp = StringUtils.split(schema.encode(), "$");
-    String encodedSchema = StringUtils.join(temp, "&");
-    return new JsonObject(encodedSchema);
-  }
-  /**
-   * Replaces the '&' in the fields of encoded schema with '$'
-   *
-   * @param encodedSchema The encoded schema whose state has to be reverted
-   * @return The original schema, obtained by replacing the '&' in the fields of encoded schema by
-   *     '$'
-   */
-  private JsonObject decodeSchema(JsonObject encodedSchema) {
-
-    String[] temp = StringUtils.split(encodedSchema.encode(), "&");
-    String schema = StringUtils.join(temp, "$");
-    return new JsonObject(schema);
+    if (query == null) {
+      message.fail(0, "Bad query");
+    } else {
+      mongo.count(
+          COLLECTION,
+          query,
+          result -> {
+            if (result.succeeded()) {
+              JsonObject num = new JsonObject();
+              long numItems = result.result();
+              num.put("Count", numItems);
+              message.reply(num);
+            } else {
+              message.fail(0, "Failure");
+            }
+          });
+    }
   }
 
-  @Override
-  public void readSchema(Message<Object> message) {
-
-    JsonObject m = (JsonObject) message.body();
-    JsonObject query = new JsonObject();
-
-    query.put("id", m.getString("id"));
-
-    mongo.findOne(
-        SCHEMA_COLLECTION,
-        query,
-        new JsonObject(),
-        res -> {
-          if (res.succeeded()) {
-            message.reply(decodeSchema(res.result()));
-          } else {
-            message.fail(0, "failure");
-          }
-        });
-  }
   /**
    * Adds the fields id, Version, Status, Created, Last modified on to the given JsonObject
    *
@@ -310,14 +383,27 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
         });
   }
 
+  private JsonObject removeDollar(JsonObject item) {
+    for (String key : item.fieldNames()) {
+      if (key.charAt(0) == '$') {
+        Object value = item.getValue(key);
+        item.remove(key);
+        key = "_$_" + key.substring(1);
+        item.put(key, value);
+      }
+    }
+    return item;
+  }
+
   @Override
-  public void writeItem(Message<Object> message) {
+  public void create(Message<Object> message) {
 
     JsonObject request_body = (JsonObject) message.body();
-    JsonObject updated_item = addNewAttributes(request_body, 1, true);
+    JsonObject itemWithoutDol = removeDollar(request_body);
+    JsonObject updated_item = addNewAttributes(itemWithoutDol, 1, true);
 
     mongo.insert(
-        ITEM_COLLECTION,
+        COLLECTION,
         updated_item,
         res -> {
           if (res.succeeded()) {
@@ -331,32 +417,15 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
         });
   }
 
-  @Override
-  public void writeSchema(Message<Object> message) {
-
-    JsonObject request_body = (JsonObject) message.body();
-
-    mongo.insert(
-        SCHEMA_COLLECTION,
-        encodeSchema(request_body),
-        res -> {
-          if (res.succeeded()) {
-            message.reply("success");
-          } else {
-            message.fail(0, "failure");
-          }
-        });
-  }
-
-  private void updateNoOfItems(JsonArray old_tags, JsonArray new_tags) {
-    JsonArray to_dec = new JsonArray();
+  private void updateTags(JsonArray old_tags, JsonArray new_tags) {
+    JsonArray toDelete = new JsonArray();
     for (Object t : old_tags) {
       if (new_tags.contains(((String) t))) {
         // Don't change the item count
         new_tags.remove(t);
       } else {
         // Decrease its count
-        to_dec.add(t);
+        toDelete.add(t);
       }
     }
     if (!new_tags.isEmpty()) {
@@ -368,90 +437,81 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   }
 
   @Override
-  public void updateItem(Message<Object> message) {
+  public void update(Message<Object> message) {
     // TODO Auto-generated method stub
     JsonObject query = new JsonObject();
     JsonObject request_body = (JsonObject) message.body();
 
     // Populate query
-    if (request_body.containsKey("id")) {
-      String id = request_body.getString("id");
-      query.put("id", id);
-      // Get its version and tags
-      JsonObject fields = new JsonObject();
-      fields.put("Version", 1);
-      fields.put("_tags", 1);
-      FindOptions options = new FindOptions().setFields(fields);
-      mongo.findWithOptions(
-          ITEM_COLLECTION,
-          query,
-          options,
-          res -> {
-            if (res.succeeded()) {
-              int version;
-              if (res.result().isEmpty()) {
-                System.out.println("Does not exist");
-                message.reply("Error: The item with id: " + id + " does not exist.");
-              } else if (res.result().size() > 1) {
-                System.out.println("Multiple items");
-                message.reply("Error: There are multiple items with id: " + id);
-              } else {
-                JsonObject old_item = res.result().get(0);
-                version = old_item.getInteger("Version");
-                // Populate update fields
-                JsonObject update = new JsonObject();
-                JsonObject to_update = new JsonObject();
-                to_update.put("Status", "Deprecated");
-                to_update.put("id", id + "_v" + String.valueOf(version) + ".0");
-                to_update.put("Last modified on", new java.util.Date().toString());
-                update.put("$set", to_update);
-                mongo.updateCollection(
-                    ITEM_COLLECTION,
-                    query,
-                    update,
-                    res2 -> {
-                      if (res2.succeeded()) {
-                        JsonObject updated_item =
-                            addNewAttributes(request_body, version + 1, false);
-                        if (old_item.containsKey("_tags")) {
-                          JsonArray old_tags = old_item.getJsonArray("_tags");
-                          if (updated_item.containsKey("_tags")) {
-                            JsonArray new_tags = updated_item.getJsonArray("_tags");
-                            updateNoOfItems(old_tags, new_tags);
-                          }
-                        }
-
-                        mongo.insert(
-                            ITEM_COLLECTION,
-                            updated_item,
-                            res3 -> {
-                              if (res3.succeeded()) {
-                                message.reply(updated_item.getString("id"));
-                              } else {
-                                message.fail(0, "failure");
-                              }
-                            });
-                      } else {
-                        message.fail(0, "failure");
-                      }
-                    });
-              }
+    String id = request_body.getString("id");
+    String itemType = request_body.getString("item-type");
+    query.put("id", id);
+    query.put("item-type", itemType);
+    // Get its version and tags
+    JsonObject fields = new JsonObject();
+    fields.put("Version", 1);
+    fields.put("_tags", 1);
+    FindOptions options = new FindOptions().setFields(fields);
+    mongo.findWithOptions(
+        COLLECTION,
+        query,
+        options,
+        res -> {
+          if (res.succeeded()) {
+            int version;
+            if (res.result().isEmpty()) {
+              System.out.println("Does not exist");
+              message.fail(0, "Error: The item with id: " + id + " does not exist.");
             } else {
-              message.fail(0, "failure");
+              JsonObject old_item = res.result().get(0);
+              version = old_item.getInteger("Version");
+              // Populate update fields
+              JsonObject update = new JsonObject(); // Update query
+
+              JsonObject to_update = new JsonObject(); // Update fields
+              to_update.put("Status", "Deprecated");
+              to_update.put("id", id + "_v" + String.valueOf(version) + ".0");
+              to_update.put("Last modified on", new java.util.Date().toString());
+              update.put("$set", to_update);
+
+              mongo.updateCollection(
+                  COLLECTION,
+                  query,
+                  update,
+                  res2 -> {
+                    if (res2.succeeded()) {
+                      JsonObject updated_item = addNewAttributes(request_body, version + 1, false);
+                      updated_item.put("id", id);
+                      if (old_item.containsKey("_tags")) {
+                        JsonArray old_tags = old_item.getJsonArray("_tags");
+                        if (updated_item.containsKey("_tags")) {
+                          JsonArray new_tags = updated_item.getJsonArray("_tags");
+                          updateTags(old_tags, new_tags);
+                        }
+                      }
+
+                      mongo.insert(
+                          COLLECTION,
+                          updated_item,
+                          res3 -> {
+                            if (res3.succeeded()) {
+                              message.reply("Success");
+                            } else {
+                              message.fail(0, "failure");
+                            }
+                          });
+                    } else {
+                      message.fail(0, "failure");
+                    }
+                  });
             }
-          });
-    } else {
-      message.reply("Specify the id of the item that you want to update");
-    }
+          } else {
+            message.fail(0, "failure");
+          }
+        });
   }
 
-  @Override
-  public void updateSchema(Message<Object> message) {
-    // TODO Auto-generated method stub
-
-  }
-
-  private void decNoOfItems(JsonArray tags) {
+  private void deleteTags(JsonArray tags) {
     JsonObject query = new JsonObject();
     query.put("tag", new JsonObject().put("$in", tags));
     mongo.find(
@@ -477,48 +537,26 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   }
 
   @Override
-  public void deleteItem(Message<Object> message) {
+  public void delete(Message<Object> message) {
     // TODO Auto-generated method stub
-    JsonObject query = new JsonObject();
     JsonObject request_body = (JsonObject) message.body();
 
     // Populate query
+    JsonObject query = new JsonObject();
     query.put("id", request_body.getString("id"));
+    query.put("item-type", request_body.getString("item-type"));
 
     mongo.findOneAndDelete(
-        ITEM_COLLECTION,
+        COLLECTION,
         query,
         res -> {
           if (res.succeeded() && !(res.result() == null)) {
             if (res.result().containsKey("_tags")) {
-              decNoOfItems(res.result().getJsonArray("_tags"));
+              deleteTags(res.result().getJsonArray("_tags"));
             }
             message.reply("Success");
           } else if (res.result() == null) {
-            message.reply("Item not found");
-          } else {
-            message.fail(0, "Failure");
-          }
-        });
-  }
-
-  @Override
-  public void deleteSchema(Message<Object> message) {
-    // TODO Auto-generated method stub
-    JsonObject query = new JsonObject();
-    JsonObject request_body = (JsonObject) message.body();
-
-    // Populate query
-    query.put("id", request_body.getString("id"));
-
-    mongo.findOneAndDelete(
-        SCHEMA_COLLECTION,
-        query,
-        res -> {
-          if (res.succeeded() && !(res.result() == null)) {
-            message.reply("Success");
-          } else if (res.result() == null) {
-            message.reply("Schema not found");
+            message.fail(0, "Item not found");
           } else {
             message.fail(0, "Failure");
           }
