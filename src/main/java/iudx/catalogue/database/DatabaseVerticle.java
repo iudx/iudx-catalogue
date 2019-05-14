@@ -98,6 +98,11 @@ public class DatabaseVerticle extends AbstractVerticle {
           db.searchAttribute(message);
           break;
         }
+      case "count":
+      {
+    	  db.count(message);
+    	  break;
+      }
       default:
         {
           break;
