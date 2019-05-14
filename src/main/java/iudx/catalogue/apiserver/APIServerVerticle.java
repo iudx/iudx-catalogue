@@ -64,6 +64,7 @@ public class APIServerVerticle extends AbstractVerticle {
   }
 
   private void populateItemTypes() {
+    itemTypes = new ArrayList<String>();
     itemTypes.add("resource-item");
     itemTypes.add("data-model");
     itemTypes.add("access-object");
