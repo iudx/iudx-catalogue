@@ -9,6 +9,7 @@ import io.vertx.core.Future;
 import io.vertx.ext.mongo.BulkOperation;
 import io.vertx.ext.mongo.FindOptions;
 import io.vertx.ext.mongo.MongoClient;
+import io.vertx.ext.mongo.UpdateOptions;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -24,8 +25,8 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 
   private MongoClient mongo;
 
-  private final String TAG_COLLECTION="tags";
-  private final String COLLECTION="catalogue";
+  private final String TAG_COLLECTION = "tags";
+  private final String COLLECTION = "catalogue";
 
   /**
    * Constructor for MongoDB
@@ -112,7 +113,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   public void listTags(Message<Object> message) {
     JsonObject query = new JsonObject();
     JsonObject fields = new JsonObject();
-    fields.put("id", 0);
+    fields.put("_id", 0);
     fields.put("tag", 1);
     FindOptions options = new FindOptions().setFields(fields);
     mongo.findWithOptions(
@@ -121,7 +122,11 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
         options,
         tags -> {
           if (tags.succeeded()) {
-            message.reply(tags);
+            JsonArray tagCollection = new JsonArray();
+            for (JsonObject j : tags.result()) {
+              tagCollection.add(j);
+            }
+            message.reply(tagCollection);
           } else {
             message.fail(0, "Failure");
           }
@@ -195,7 +200,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
             String e = extractString(s, j);
             ele.add(e);
             j = j + e.length();
-            if (j == ')') {
+            if (s.charAt(j) == ')') {
               break;
             }
           }
@@ -227,6 +232,12 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
       for (int i = 0; i < attributeNames.size(); i++) {
         String key = attributeNames.getJsonArray(i).getString(0);
         JsonArray value = attributeValues.getJsonArray(i);
+        //        System.out.println(key);
+        //        System.out.println(value.size() );
+        //        for (int j = 0; j < value.size(); j++) {
+        //          System.out.print(value.getString(j) +" "+ value.getString(j).length());
+        //        }
+        //        System.out.println();
 
         if (key.equalsIgnoreCase("tags")) {
           key = "_tags";
@@ -326,7 +337,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
    * @param version The version of the document
    * @return The JsonObject with additional fields
    */
-  private JsonObject addNewAttributes(JsonObject doc, int version, boolean addId) {
+  private JsonObject addNewAttributes(JsonObject doc, int version, boolean addId, String bulkId) {
 
     JsonObject updated = doc.copy();
     updated.put("Created", new java.util.Date().toString());
@@ -336,6 +347,9 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     updated.put("Provider", "iudx-provider");
     if (addId) {
       updated.put("id", UUID.randomUUID().toString());
+    }
+    if (bulkId != null) {
+      updated.put("bulk-id", bulkId);
     }
 
     if (updated.containsKey("tags")) {
@@ -401,7 +415,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 
     JsonObject request_body = (JsonObject) message.body();
     JsonObject itemWithoutDol = removeDollar(request_body);
-    JsonObject updated_item = addNewAttributes(itemWithoutDol, 1, true);
+    JsonObject updated_item = addNewAttributes(itemWithoutDol, 1, true, null);
 
     mongo.insert(
         COLLECTION,
@@ -481,13 +495,21 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
                   update,
                   res2 -> {
                     if (res2.succeeded()) {
-                      JsonObject updated_item = addNewAttributes(request_body, version + 1, false);
+                      JsonObject updated_item =
+                          addNewAttributes(request_body, version + 1, false, null);
                       updated_item.put("id", id);
                       if (old_item.containsKey("_tags")) {
                         JsonArray old_tags = old_item.getJsonArray("_tags");
                         if (updated_item.containsKey("_tags")) {
                           JsonArray new_tags = updated_item.getJsonArray("_tags");
                           updateTags(old_tags, new_tags);
+                        } else {
+                          deleteTags(old_tags);
+                        }
+                      } else {
+                        if (updated_item.containsKey("_tags")) {
+                          JsonArray new_tags = updated_item.getJsonArray("_tags");
+                          writeTags(new_tags);
                         }
                       }
 
