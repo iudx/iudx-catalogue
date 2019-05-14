@@ -7,6 +7,16 @@
         }
     });
 
+    var sensorIcon = L.icon({
+    iconUrl: 'assets/img/icons/1481951.svg',
+
+    iconSize:     [38, 95], // size of the icon
+    shadowSize:   [50, 64], // size of the shadow
+    iconAnchor:   [22, 94], // point of the icon which will correspond to marker's location
+    shadowAnchor: [4, 62],  // the same for the shadow
+    popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
+    });
+
     function urlify(text) {
       var urlRegex = /(https?:\/\/[^"]+)/g;
       return text.replace(urlRegex, '<a href="$1" target="_blank" style="text-decoration:underline">$1</a>')
@@ -37,10 +47,28 @@
         return json;
     }
 
+
+    function getUniqueResourceClass(_data){
+        return $.unique(JSON.parse(_data).map(function (d) {
+                    return d.accessInformation[0].accessVariables.resourceClass;
+                }));
+    }
+
+
+    function performLocalStorage(_data){
+        localStorage.setItem("data", _data);
+        var rc = getUniqueResourceClass(_data);
+        localStorage.setItem("resourceClass", rc);
+        localStorage.setItem("resourceClassColors", randomColor({'luminosity':'light', 'count': rc.length}));
+    }
+
     function cache_cat() {
           return new Promise(function(resolve, reject) {
+            // resourceClass =  $.unique(data.map(function (d) {
+            //         return d.accessInformation[0].accessVariables.resourceClass
+            //     }));
              $.get("/cat/search", function(data) {
-                localStorage.setItem("data", data);
+                performLocalStorage(data)
                 resolve(data);
             });
           });
@@ -87,7 +115,9 @@
         for (var i = seen_tags_set.length - 1; i >= 0; i--) {
 
             //For sidebar
-            tag_cloud_html.push(`<li class="nav-item nav-profile" onclick="show_items_of(this,'` + seen_tags_set[i] + `','`+i+`')">
+            // tag_cloud_html.push(`<li class="nav-item nav-profile" onclick="show_items_of(this,'` + seen_tags_set[i] + `','`+i+`')">
+            tag_cloud_html.push(`<li class="nav-item nav-profile" onclick="show_items_of(this)">
+           
             <a class="nav-link" href="#">` + seen_tags_set[i] + ` &nbsp;
               <span id="tag_item_count-`+i+`" class="tag_item_count"></span>
             </a>
@@ -111,11 +141,46 @@
         withLinks: true
     };
 
-    function plot_points_on_map(lat_long, message){
-        L.marker(lat_long).addTo(map).bindPopup(message).openPopup();
+    var layerGroup;
+
+    function getIconOptions(color){
+        return {
+                    icon: 'plane'
+                        , borderColor: color
+                        , textColor: color
+                        , backgroundColor: color
+                };
     }
 
+    function getIndexOf(_resourceClass){
+        return localStorage.getItem('resourceClass').split(',').indexOf(_resourceClass);
+    }
 
+    function getColorOf(_index){
+        return localStorage.getItem('resourceClassColors').split(',')[_index];
+    }
+
+    function plot_point_on_map(lat_long, message){
+        // L.marker(lat_long,{icon: sensorIcon}).addTo(map).bindPopup(message).openPopup();
+        var marker = L.marker(lat_long,{icon: sensorIcon}).addTo(map).bindPopup(message);
+    }
+
+    function plot_point_on_map(lat_long, message, i){
+        // L.marker(lat_long,{icon: sensorIcon}).addTo(map).bindPopup(message).openPopup();
+        var marker = L.marker(lat_long,{
+            icon: L.BeautifyIcon.icon(getIconOptions(getColorOf(i)))
+        }).addTo(layerGroup).bindPopup(message);
+    }
+
+     function plot_points_on_map(data){
+        layerGroup.clearLayers();
+        for (var i =  0; i < data.length; i++) {
+                plot_point_on_map([data[i]['geoJsonLocation']['coordinates'][1],data[i]['geoJsonLocation']['coordinates'][0]],`<h5 class="mr-2 mb-0 text-info"><a href="`+data[i]['latestResourceData']+`" target="_blank">` + data[i]['NAME'] + `</a></h5>
+                      <p class="mb-0 font-weight-light">` + data[i]['itemDescription'] + `</p><br><label class="badge" style="background-color:`+getColorOf(getIndexOf(data[i]['accessInformation'][0]['accessVariables']['resourceClass']))+`">` + data[i]['accessInformation'][0]['accessVariables']['resourceClass'] + `</label>`, getIndexOf(data[i]['accessInformation'][0]['accessVariables']['resourceClass']))
+            }
+    }
+
+    //For singular tag selection (like a radio button)
     function show_items_of(e, tag, index) {
         $(".nav-item").removeClass("_active");
         $(e).addClass("_active");
@@ -157,9 +222,114 @@
         });
     }
 
+    //For multi tag selection (like a checkbox)
+    function show_items_of(e) {
+        // $(".nav-item").removeClass("_active");
+        if($(e).hasClass("_active")){
+            $(e).removeClass("_active");
+        }else{
+            $(e).addClass("_active");    
+        }
+        var tags="";
+        $("._active").each(function() {
+            tags += $(this).find(".nav-link").html().split(" &nbsp;")[0];
+            tags +=",";
+        });
+        // console.log(tags.slice(0, -1))
+         $(".tag_item_count").html("");
+        $.get("/cat/search/attribute?tags=(" + tags.slice(0, -1) + ")", function(data) {
+            // console.log(data)
+            data = JSON.parse(data)
+
+            if($(".__active").attr('id')=='list_view'){
+            var html_to_add = "";
+            var item_details_card_html = ""
+            $("#retrieved_item_count").html("&nbsp;| &nbsp;Items retrieved : <span style='color:red'>"+data.length+"</span>");
+            for (var i = data.length - 1; i >= 0; i--) {
+                html_to_add += 
+  `            <div class="col-md-12 grid-margin stretch-card">
+              <div class="card">
+                <div class="card-body">
+                  <div class="d-flex align-items-top mb-2">
+                    <img src="https://image.flaticon.com/icons/svg/1481/1481951.svg" class="img-sm rounded-circle mr-3" alt="image">
+                    <div class="mb-0 flex-grow">
+                      <h5 class="mr-2 mb-0 text-info">` + data[i]['NAME'] + `</h5>
+                      <p class="mb-0 font-weight-light">` + data[i]['itemDescription'] + ` &nbsp;&nbsp;&nbsp;<br><label class="badge"  style="background-color:`+getColorOf(getIndexOf(data[i]['accessInformation'][0]['accessVariables']['resourceClass']))+`">` + data[i]['accessInformation'][0]['accessVariables']['resourceClass'] + `</label></p>
+                    </div>
+                     <button type="button" class="btn btn-outline-success btn-fw btn-detail" onclick="show_details_of(this,'` + i + `')">Details</button>
+                    <!-- &nbsp;<button type="button" class="btn btn-outline-info btn-fw" onclick="show_latest_data('` + i + `','` + data[i]['latestResourceData'] + `')">Latest Data</button> -->
+                  </div>
+                  
+                   <pre id="json-renderer-` + i + `" class="id_row"  style="height: 450px; display:none;">` + jsonPrettyHighlightToId(data[i]) + `</pre>
+                  
+                  <!--<iframe id="iframe-` + i + `" width="100%" height="100%" src="` + data[i]['latestResourceData'] + `" style="display:none">
+                      <p>Your browser does not support iframes.</p> -->
+                  </iframe>
+                </div>
+              </div>
+            </div>`
+
+
+            }
+            $("#searched_items").html(html_to_add)
+            $("#item_details_card").html(item_details_card_html)
+        }else{
+            // console.log('map2')
+            $("#retrieved_item_count").html("&nbsp;| &nbsp;Items retrieved : <span style='color:red'>"+data.length+"</span>");
+            plot_points_on_map(data);
+        }
+        });
+    }
+
+        //For search bar 
+    function search(tag) {
+        
+            $(".tag_item_count").html("");
+            $.get("/cat/search/attribute?tags=(" + tag + ")", function(data) {
+                // console.log(data)
+                data = JSON.parse(data)
+                if($(".__active").attr('id')=='list_view'){
+                var html_to_add = "";
+                var item_details_card_html = ""
+                $("#retrieved_item_count").html("&nbsp;| &nbsp;Items retrieved : <span style='color:red'>"+data.length+"</span>");
+                for (var i = data.length - 1; i >= 0; i--) {
+                    html_to_add += 
+      `            <div class="col-md-12 grid-margin stretch-card">
+                  <div class="card">
+                    <div class="card-body">
+                      <div class="d-flex align-items-top mb-2">
+                        <img src="https://image.flaticon.com/icons/svg/1481/1481951.svg" class="img-sm rounded-circle mr-3" alt="image">
+                        <div class="mb-0 flex-grow">
+                          <h5 class="mr-2 mb-0 text-info">` + data[i]['NAME'] + `</h5>
+                          <p class="mb-0 font-weight-light">` + data[i]['itemDescription'] + `</p>
+                        </div>
+                         <button type="button" class="btn btn-outline-success btn-fw btn-detail" onclick="show_details_of(this,'` + i + `')">Details</button>
+                        <!-- &nbsp;<button type="button" class="btn btn-outline-info btn-fw" onclick="show_latest_data('` + i + `','` + data[i]['latestResourceData'] + `')">Latest Data</button> -->
+                      </div>
+                      
+                       <pre id="json-renderer-` + i + `" class="id_row"  style="height: 450px; display:none;">` + jsonPrettyHighlightToId(data[i]) + `</pre>
+                      
+                      <!--<iframe id="iframe-` + i + `" width="100%" height="100%" src="` + data[i]['latestResourceData'] + `" style="display:none">
+                          <p>Your browser does not support iframes.</p> -->
+                      </iframe>
+                    </div>
+                  </div>
+                </div>`
+
+
+                }
+                $("#searched_items").html(html_to_add)
+                $("#item_details_card").html(item_details_card_html)
+                }else{
+                // console.log("s",data.length)
+                $("#retrieved_item_count").html("&nbsp;| &nbsp;Items retrieved : <span style='color:red'>"+data.length+"</span>");
+                plot_points_on_map(data);
+                }
+            });
+    }
+
     function show_all_items() {
         // console.log($(".nav-item").hasClass("_active"));
-        console.log($(".__active").attr('id'))
         if(!$(".nav-item").hasClass("_active")){
             $.toast({ 
               text : `Displaying all items. <br> Select tags for filtering`, 
@@ -177,6 +347,7 @@
          
             // console.log(data)
             data = JSON.parse(localStorage.getItem("data"))
+            $("#retrieved_item_count").html("&nbsp;| &nbsp;Items retrieved : <span style='color:red'>"+data.length+"</span>");
             var html_to_add = "";
             var item_details_card_html = ""
             for (var i = data.length - 1; i >= 0; i--) {
@@ -188,7 +359,7 @@
                     <img src="https://image.flaticon.com/icons/svg/1481/1481951.svg" class="img-sm rounded-circle mr-3" alt="image">
                     <div class="mb-0 flex-grow">
                       <h5 class="mr-2 mb-0 text-info">` + data[i]['NAME'] + `</h5>
-                      <p class="mb-0 font-weight-light">` + data[i]['itemDescription'] + `</p>
+                      <p class="mb-0 font-weight-light">` + data[i]['itemDescription'] + ` &nbsp;&nbsp;&nbsp;<br><label class="badge"  style="background-color:`+getColorOf(getIndexOf(data[i]['accessInformation'][0]['accessVariables']['resourceClass']))+`">` + data[i]['accessInformation'][0]['accessVariables']['resourceClass'] + `</label></p>
                     </div>
                      <button type="button" class="btn btn-outline-success btn-fw btn-detail" onclick="show_details_of(this,'` + i + `')">Details</button>
                     <!-- &nbsp;<button type="button" class="btn btn-outline-info btn-fw" onclick="show_latest_data('` + i + `','` + data[i]['latestResourceData'] + `')">Latest Data</button> -->
@@ -209,15 +380,8 @@
             $("#item_details_card").html(item_details_card_html)
         
          }else{
-            //Display all points in map plot_points_on_map([18.51957, 73.85535], "Hello Pop-up");
-            // console.log(data)
-            data = JSON.parse(localStorage.getItem("data"))
-            for (var i =  0; i < data.length; i++) {
-                
-                plot_points_on_map([data[i]['geoJsonLocation']['coordinates'][1],data[i]['geoJsonLocation']['coordinates'][0]],`<h5 class="mr-2 mb-0 text-info"><a href="`+data[i]['latestResourceData']+`" target="_blank">` + data[i]['NAME'] + `</a></h5>
-                      <p class="mb-0 font-weight-light">` + data[i]['itemDescription'] + `</p>`)
-
-            }
+            //Display all points in map plot_point_on_map([18.51957, 73.85535], "Hello Pop-up");
+            plot_points_on_map(JSON.parse(localStorage.getItem("data")));
          }
 
         }else{
@@ -226,6 +390,7 @@
             // console.log(data)
             data = JSON.parse(data)
             if($(".__active").attr('id')=='list_view'){
+                // console.log('list')
                 var html_to_add = "";
                 var item_details_card_html = ""
 
@@ -238,7 +403,7 @@
                     <img src="https://image.flaticon.com/icons/svg/1481/1481951.svg" class="img-sm rounded-circle mr-3" alt="image">
                     <div class="mb-0 flex-grow">
                       <h5 class="mr-2 mb-0 text-info">` + data[i]['NAME'] + `</h5>
-                      <p class="mb-0 font-weight-light">` + data[i]['itemDescription'] + `</p>
+                      <p class="mb-0 font-weight-light">` + data[i]['itemDescription'] + ` &nbsp;&nbsp;&nbsp;<br><label class="badge"  style="background-color:`+getColorOf(getIndexOf(data[i]['accessInformation'][0]['accessVariables']['resourceClass']))+`">` + data[i]['accessInformation'][0]['accessVariables']['resourceClass'] + `</label></p>
                     </div>
                      <button type="button" class="btn btn-outline-success btn-fw btn-detail" onclick="show_details_of(this,'` + i + `')">Details</button>
                     <!-- &nbsp;<button type="button" class="btn btn-outline-info btn-fw" onclick="show_latest_data('` + i + `','` + data[i]['latestResourceData'] + `')">Latest Data</button> -->
@@ -259,6 +424,8 @@
                 $("#item_details_card").html(item_details_card_html)
             }else{
                 //Display points related to one tag
+                // console.log('map')
+                plot_points_on_map(data);
             }
         });
         }
@@ -334,7 +501,7 @@
                 })
                 // $.toast("No new updates found")
             } else {
-                localStorage.setItem("data", data);
+                performLocalStorage(data);
                 populate_side_bar();
                 $.toast({ 
                   text : "Tags Updated.", 
@@ -352,6 +519,19 @@
     }
 
     // console.log("l",localStorage.getItem("data"))
+
+    function style(feature) {
+        return {
+            weight: 1.5,
+            opacity: 1,
+            fillOpacity: 1,
+            radius: 6,
+            fillColor: getColorOf(feature.properties.TypeOfIssue),
+            color: "grey"
+
+        };
+    }
+
 
     var map;
 
@@ -372,7 +552,32 @@
             var osm = new L.TileLayer(osmUrl, {minZoom: 12, maxZoom: 100, attribution: osmAttrib,opacity:0.5});  
             map.setView(new L.LatLng(18.51957, 73.85535),12);
             map.addLayer(osm);
-            plot_points_on_map([18.51957, 73.85535], "Hello Pop-up");
+            L.marker([18.51957, 73.85535]).addTo(map).bindPopup('Pune');
+            layerGroup = L.layerGroup().addTo(map);
+            // plot_point_on_map([18.51957, 73.85535], "Pune");
+
+
+            var legend = L.control({position: 'bottomright'});
+            legend.onAdd = function (map) {
+
+            var div = L.DomUtil.create('div', 'info legend');
+            labels = ['<strong>Categories</strong>'],
+            categories = localStorage.getItem("resourceClass").split(',')
+            // console.log(categories)
+            var colors = localStorage.getItem("resourceClassColors").split(',');
+            for (var i = 0; i < categories.length; i++) {
+
+                    div.innerHTML += 
+                    labels.push(
+                        '<span class="dots" style="background:' + colors[i] + '"></span> ' +
+                    (categories[i] ? categories[i] : '+'));
+
+                }
+                div.innerHTML = labels.join('<br>');
+            return div;
+            };
+            legend.addTo(map);
+            // console.log("Added legends")
             }
         show_all_items();
     }
