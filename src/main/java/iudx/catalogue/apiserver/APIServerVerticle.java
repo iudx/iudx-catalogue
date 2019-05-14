@@ -113,7 +113,7 @@ public class APIServerVerticle extends AbstractVerticle {
     router.get("/count/catalogue/attribute").handler(this::count);
     router.post("/create/catalogue/:itemtype").handler(this::create);
     router.put("/update/catalogue/:itemtype/:id").handler(this::update);
-    router.delete("remove/catalogue/:itemtype/:id").handler(this::delete);
+    router.delete("/remove/catalogue/:itemtype/:id").handler(this::delete);
 
     router.route("/assets/*").handler(StaticHandler.create("ui/assets"));
     return router;
