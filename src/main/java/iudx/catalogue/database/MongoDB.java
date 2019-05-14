@@ -62,7 +62,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   private void mongoFind(JsonObject query, JsonObject attributeFilter, Message<Object> message) {
 
     attributeFilter.put("_id", 0);
-    attributeFilter.put("Status", "Live");
+    query.put("Status", "Live");
 
     String[] hiddenFields = {"_tags"};
 
@@ -84,7 +84,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
                 }
               }
               for (String key : j.fieldNames()) {
-                if (key.substring(0, 3).equals("_$_")) {
+                if (key.length() >= 3 && key.substring(0, 3).equals("_$_")) {
                   Object value = j.getValue(key);
                   j.remove(key);
                   key = "$" + key.substring(3);
@@ -314,6 +314,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     if (query == null) {
       message.fail(0, "Bad query");
     } else {
+      query.put("Status", "Live");
       mongo.count(
           COLLECTION,
           query,
