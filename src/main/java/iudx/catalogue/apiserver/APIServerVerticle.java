@@ -442,8 +442,9 @@ public class APIServerVerticle extends AbstractVerticle {
                     handle201(routingContext, id);
                     break;
                   case "update":
-                    String id2 = database_reply.result().body().toString();
-                    handle201(routingContext, id2);
+                    String status = database_reply.result().body().toString();
+                    JsonObject s = new JsonObject().put("status", status);
+                    handle200(routingContext, s);
                     break;
                     
                 }
