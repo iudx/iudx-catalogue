@@ -64,6 +64,7 @@ public class APIServerVerticle extends AbstractVerticle {
   }
 
   private void populateItemTypes() {
+    itemTypes = new ArrayList<String>();
     itemTypes.add("resource-item");
     itemTypes.add("data-model");
     itemTypes.add("access-object");
@@ -113,7 +114,7 @@ public class APIServerVerticle extends AbstractVerticle {
     router.get("/count/catalogue/attribute").handler(this::count);
     router.post("/create/catalogue/:itemtype").handler(this::create);
     router.put("/update/catalogue/:itemtype/:id").handler(this::update);
-    router.delete("remove/catalogue/:itemtype/:id").handler(this::delete);
+    router.delete("/remove/catalogue/:itemtype/:id").handler(this::delete);
 
     router.route("/assets/*").handler(StaticHandler.create("ui/assets"));
     return router;
@@ -442,8 +443,9 @@ public class APIServerVerticle extends AbstractVerticle {
                     handle201(routingContext, id);
                     break;
                   case "update":
-                    String id2 = database_reply.result().body().toString();
-                    handle201(routingContext, id2);
+                    String status = database_reply.result().body().toString();
+                    JsonObject s = new JsonObject().put("status", status);
+                    handle200(routingContext, s);
                     break;
                     
                 }
