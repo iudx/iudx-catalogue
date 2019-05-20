@@ -108,6 +108,14 @@ public class APIServerVerticle extends AbstractVerticle {
               response.sendFile("ui/search/index.html");
             });
 
+    router
+        .route("/dashboard")
+        .handler(
+            routingContext -> {
+              HttpServerResponse response = routingContext.response();
+              response.sendFile("ui/dashboard/index.html");
+            });
+
     // NEW APIs
     router.get("/list/catalogue/:itemtype").handler(this::list);
     router.get("/search/catalogue/attribute").handler(this::searchAttribute);
