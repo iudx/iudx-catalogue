@@ -243,8 +243,8 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
           key = "_tags";
           JsonArray tags = attributeValues.getJsonArray(i);
           value = new JsonArray();
-          for (int j = 0; j < tags.size(); j++) {
-            value.add(tags.getString(i).toLowerCase());
+          for (Object tag : tags) {
+            value.add(((String) tag).toLowerCase());
           }
           updateNoOfHits(value);
         } else if (key.equalsIgnoreCase("location")) {
@@ -265,12 +265,15 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
         expressions.add(q);
       }
       query.put("$and", expressions);
-    } else if (!requestBody.containsKey("attribute-name")
+    } else if (requestBody.containsKey("attribute-name")
         && !requestBody.containsKey("attribute-value")) {
       query = null;
     } else if (!requestBody.containsKey("attribute-name")
-        && !requestBody.containsKey("attribute-value")) {
+        && requestBody.containsKey("attribute-value")) {
       query = null;
+
+    } else {
+      query = new JsonObject();
     }
 
     return query;
@@ -298,7 +301,6 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     JsonObject request_body = (JsonObject) message.body();
     JsonObject query = decodeQuery(request_body);
     JsonObject fields = decodeFields(request_body);
-
     if (query == null) {
       message.fail(0, "Bad query");
     } else {
@@ -586,4 +588,6 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
           }
         });
   }
+
+
 }
