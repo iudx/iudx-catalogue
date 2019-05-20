@@ -23,12 +23,10 @@ public interface DatabaseInterface {
    *     attributeFilter. The result is replied to this message.
    */
   public void searchAttribute(Message<Object> message);
-  
-  public void list(Message<Object> message);
-  
-  
-  public void listTags(Message<Object> message);
 
+  public void list(Message<Object> message);
+
+  public void listTags(Message<Object> message);
 
   /**
    * Inserts the item into the database.
@@ -37,7 +35,6 @@ public interface DatabaseInterface {
    *     is replied to this message.
    */
   public void create(Message<Object> message);
-
 
   /**
    * Updates the item in the database
@@ -53,7 +50,12 @@ public interface DatabaseInterface {
    * @param message The message from APIServerVerticle which contains the id of the item.
    */
   public void delete(Message<Object> message);
-  
+
   public void count(Message<Object> message);
 
+  public void bulkUpdate(Message<Object> message);
+
+  public void bulkDelete(Message<Object> message);
+
+  public void bulkCreate(Message<Object> message);
 }
