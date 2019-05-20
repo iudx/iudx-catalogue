@@ -11,7 +11,7 @@ public class DatabaseVerticle extends AbstractVerticle {
   private static final Logger logger = Logger.getLogger(DatabaseVerticle.class.getName());
   private DatabaseInterface db;
   private static final String database_name = "catalogue";
-  
+
   /**
    * Constructor for DatabaseVerticle
    *
@@ -20,14 +20,14 @@ public class DatabaseVerticle extends AbstractVerticle {
   public DatabaseVerticle(String which_database) {
 
     if ("mongo".equals(which_database)) {
-      db = new MongoDB("items", "schemas","tags");
+      db = new MongoDB();
     }
   }
 
   @Override
   public void start(Future<Void> startFuture) {
-	JsonObject mongoconfig;
-	String database_uri;
+    JsonObject mongoconfig;
+    String database_uri;
 
     logger.info("Database Verticle started!");
     vertx
@@ -63,51 +63,33 @@ public class DatabaseVerticle extends AbstractVerticle {
     String action = (String) message.headers().get("action");
 
     switch (action) {
-      case "read-item":
+      case "list":
         {
-          db.readItem(message);
+          db.list(message);
           break;
         }
 
-      case "read-schema":
+      case "get-tags":
         {
-          db.readSchema(message);
+          db.listTags(message);
           break;
         }
 
-      case "write-item":
+      case "create":
         {
-          db.writeItem(message);
+          db.create(message);
           break;
         }
 
-      case "write-schema":
+      case "update":
         {
-          db.writeSchema(message);
+          db.update(message);
           break;
         }
 
-      case "update-item":
+      case "delete":
         {
-          db.updateItem(message);
-          break;
-        }
-
-      case "update-schema":
-        {
-          db.updateSchema(message);
-          break;
-        }
-
-      case "delete-item":
-        {
-          db.deleteItem(message);
-          break;
-        }
-
-      case "delete-schema":
-        {
-          db.deleteSchema(message);
+          db.delete(message);
           break;
         }
 
@@ -116,10 +98,15 @@ public class DatabaseVerticle extends AbstractVerticle {
           db.searchAttribute(message);
           break;
         }
-      default : 
+      case "count":
       {
+    	  db.count(message);
     	  break;
       }
+      default:
+        {
+          break;
+        }
     }
   }
 }
