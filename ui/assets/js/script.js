@@ -59,7 +59,7 @@
         localStorage.setItem("data", _data);
         var rc = getUniqueResourceClass(_data);
         localStorage.setItem("resourceClass", rc);
-        localStorage.setItem("resourceClassColors", randomColor({'luminosity':'light', 'count': rc.length}));
+        localStorage.setItem("resourceClassColors", randomColor({'luminosity':'dark', 'count': rc.length}));
     }
 
     function cache_cat() {
