@@ -67,7 +67,7 @@
             // resourceClass =  $.unique(data.map(function (d) {
             //         return d.accessInformation[0].accessVariables.resourceClass
             //     }));
-             $.get("/cat/search", function(data) {
+             $.get("list/catalogue/catalogue-item", function(data) {
                 performLocalStorage(data)
                 resolve(data);
             });
@@ -82,7 +82,7 @@
     //         for (var tag_item_index = 0; tag_item_index < data[item_index]['tags'].length - 1; tag_item_index++) {
     //             if (!seen_tags_set.includes(data[item_index]['tags'][tag_item_index])) {
     //                 seen_tags_set.push(data[item_index]['tags'][tag_item_index])
-    //                 tag_cloud_html.push(`<a href="/cat/search/attribute?tags=(` + data[item_index]['tags'][tag_item_index] + `)" target="_blank"><button style="margin:10px;" type="button" class="btn btn-default">` + data[item_index]['tags'][tag_item_index] + `</button></a>`)
+    //                 tag_cloud_html.push(`<a href="/search/catalogue/attribute?attribute-name=(tags)&attribute-value=((` + data[item_index]['tags'][tag_item_index] + `)" target="_blank"><button style="margin:10px;" type="button" class="btn btn-default">` + data[item_index]['tags'][tag_item_index] + `</button></a>`)
     //             }
     //         }
     //     }
@@ -185,7 +185,7 @@
         $(".nav-item").removeClass("_active");
         $(e).addClass("_active");
          $(".tag_item_count").html("");
-        $.get("/cat/search/attribute?tags=(" + tag + ")", function(data) {
+        $.get("/search/catalogue/attribute?attribute-name=(tags)&attribute-value=((" + tag + "))", function(data) {
             // console.log(data)
             data = JSON.parse(data)
             var html_to_add = "";
@@ -237,7 +237,7 @@
         });
         // console.log(tags.slice(0, -1))
          $(".tag_item_count").html("");
-        $.get("/cat/search/attribute?tags=(" + tags.slice(0, -1) + ")", function(data) {
+        $.get("/search/catalogue/attribute?attribute-name=(tags)&attribute-value=((" + tags.slice(0, -1) + "))", function(data) {
             // console.log(data)
             data = JSON.parse(data)
 
@@ -285,7 +285,7 @@
     function search(tag) {
         
             $(".tag_item_count").html("");
-            $.get("/cat/search/attribute?tags=(" + tag + ")", function(data) {
+            $.get("/search/catalogue/attribute?attribute-name=(tags)&attribute-value=((" + tag + "))", function(data) {
                 // console.log(data)
                 data = JSON.parse(data)
                 if($(".__active").attr('id')=='list_view'){
@@ -386,7 +386,7 @@
 
         }else{
 
-            $.get("/cat/search/attribute?tags=(" + ($("._active > .nav-link").html()).split(" &nbsp")[0] + ")", function(data) {
+            $.get("/search/catalogue/attribute?attribute-name=(tags)&attribute-value=((" + ($("._active > .nav-link").html()).split(" &nbsp")[0] + ")", function(data) {
             // console.log(data)
             data = JSON.parse(data)
             if($(".__active").attr('id')=='list_view'){
@@ -486,7 +486,7 @@
     }
 
     function refresh_tags() {
-        $.get("/cat/search", function(data) {
+        $.get("list/catalogue/catalogue-item", function(data) {
             if (localStorage.getItem("data") == data) {
                 $.toast({ 
                   text : `No updates found`, 
