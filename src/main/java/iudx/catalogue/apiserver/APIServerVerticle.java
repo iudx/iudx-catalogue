@@ -116,6 +116,10 @@ public class APIServerVerticle extends AbstractVerticle {
     router.put("/update/catalogue/:itemtype/:id").handler(this::update);
     router.delete("/remove/catalogue/:itemtype/:id").handler(this::delete);
 
+    router.post("/create/catalogue/resource-item/bulk/:bulkId").handler(this::bulkCreate);
+    router.patch("/update/catalogue/resource-item/bulk/:bulkId").handler(this::bulkUpdate);
+    router.delete("/remove/catalogue/resource-item/bulk/:bulkId").handler(this::bulkDelete);
+
     router.route("/assets/*").handler(StaticHandler.create("ui/assets"));
     return router;
   }
@@ -301,6 +305,31 @@ public class APIServerVerticle extends AbstractVerticle {
     }
   }
 
+  private void bulkCreate(RoutingContext routingContext) {
+    HttpServerRequest request = routingContext.request();
+
+    if (decodeCertificate(routingContext)) {
+      if (authenticateRequest(routingContext, "user.list")) {
+        try {
+          String bulkId = request.getParam("bulkId");
+          JsonArray request_body = routingContext.getBodyAsJsonArray();
+          JsonObject request_json_object = new JsonObject();
+          request_json_object.put("items", request_body);
+          request_json_object.put("bulk-id", bulkId);
+
+          databaseHandler("bulkcreate", routingContext, request_json_object);
+
+        } catch (Exception e) {
+          handle400(routingContext, "Invalid item: Not a Json Object");
+        }
+      } else {
+        handle401(routingContext, "Unauthorised");
+      }
+    } else {
+      handle400(routingContext, "Certificate 'authenticaton' error");
+    }
+  }
+
   private JsonObject prepareQuery(String query) {
     JsonObject request_body = new JsonObject();
     if (!query.equals("") && query != null) {
@@ -382,6 +411,25 @@ public class APIServerVerticle extends AbstractVerticle {
       handle400(routingContext, "Certificate 'authenticaton' error");
     }
   }
+
+  private void bulkDelete(RoutingContext routingContext) {
+    HttpServerRequest request = routingContext.request();
+
+    if (decodeCertificate(routingContext)) {
+      if (authenticateRequest(routingContext, "user.list")) {
+        JsonObject request_body = new JsonObject();
+
+        String bulkId = request.getParam("bulkId");
+        request_body.put("bulk-id", bulkId);
+
+        databaseHandler("bulkdelete", routingContext, request_body);
+      } else {
+        handle401(routingContext, "Unauthorised");
+      }
+    } else {
+      handle400(routingContext, "Certificate 'authenticaton' error");
+    }
+  }
   /**
    * Updates the item from the database
    *
@@ -401,6 +449,27 @@ public class APIServerVerticle extends AbstractVerticle {
           } else {
             handle400(routingContext, "Ids provided in the URI and object does not match");
           }
+        } catch (Exception e) {
+          handle400(routingContext, "Invalid item: Not a Json Object");
+        }
+      } else {
+        handle401(routingContext, "Unauthorised");
+      }
+    } else {
+      handle400(routingContext, "Certificate 'authenticaton' error");
+    }
+  }
+
+  private void bulkUpdate(RoutingContext routingContext) {
+    HttpServerRequest request = routingContext.request();
+    if (decodeCertificate(routingContext)) {
+      if (authenticateRequest(routingContext, "user.list")) {
+        try {
+          JsonObject request_body = routingContext.getBodyAsJson();
+          String bulkId = request.getParam("bulkId");
+          request_body.put("bulk-id", bulkId);
+          databaseHandler("bulkupdate", routingContext, request_body);
+
         } catch (Exception e) {
           handle400(routingContext, "Invalid item: Not a Json Object");
         }
@@ -433,7 +502,7 @@ public class APIServerVerticle extends AbstractVerticle {
                     handle200(routingContext, (JsonArray) database_reply.result().body());
                     break;
                   case "count":
-                    handle200(routingContext, (JsonObject)database_reply.result().body());
+                    handle200(routingContext, (JsonObject) database_reply.result().body());
                     break;
                   case "delete":
                     handle204(routingContext);
@@ -447,7 +516,17 @@ public class APIServerVerticle extends AbstractVerticle {
                     JsonObject s = new JsonObject().put("status", status);
                     handle200(routingContext, s);
                     break;
-                    
+                  case "bulkcreate":
+                    JsonObject reply = (JsonObject) database_reply.result().body();
+                    handle200(routingContext, reply);
+                    break;
+                  case "bulkdelete":
+                    handle204(routingContext);
+                    break;
+                  case "bulkupdate":
+                    JsonObject rep = (JsonObject) database_reply.result().body();
+                    handle200(routingContext, rep);
+                    break;
                 }
               } else {
                 handle500(routingContext);
