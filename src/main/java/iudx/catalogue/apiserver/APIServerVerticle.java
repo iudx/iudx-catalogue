@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 
 import javax.net.ssl.SSLPeerUnverifiedException;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import io.vertx.core.AbstractVerticle;
@@ -26,9 +27,12 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.StaticHandler;
+import io.vertx.groovy.ext.web.handler.StaticHandler_GroovyExtension;
+
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Properties;
+import static org.apache.commons.codec.digest.MessageDigestAlgorithms.SHA_1;
 
 public class APIServerVerticle extends AbstractVerticle {
 
@@ -215,12 +219,71 @@ public class APIServerVerticle extends AbstractVerticle {
     boolean status = false;
 
     try {
-      Principal cn = routingContext.request().connection().sslSession().getPeerPrincipal();
-      String providerCN[] = cn.getName().split("=");
-      String provider = providerCN[1];
+    
+      Principal _PeerPrincipal = routingContext.request().connection().sslSession().getPeerPrincipal();
+      String PeerPrincipal = _PeerPrincipal.toString();
+      String[] PeerPrincipalArray = PeerPrincipal.split(",");
+      String PeerPrincipal_OID = PeerPrincipalArray[0];
+      String PeerPrincipal_T = PeerPrincipalArray[1];
+      String PeerPrincipal_SURNAME = PeerPrincipalArray[2];
+      String PeerPrincipal_GIVENNAME = PeerPrincipalArray[3];
+      String PeerPrincipal_ST = PeerPrincipalArray[4];
+      String PeerPrincipal_C = PeerPrincipalArray[5];
+      String PeerPrincipal_OU = PeerPrincipalArray[6];
+      String PeerPrincipal_O = PeerPrincipalArray[7];
+      String PeerPrincipal_EMAILADDRESS = PeerPrincipalArray[8];
 
-      logger.info("Provider Name as per Certificate is " + provider);
-      status = true;
+      logger.info("getPeerPrincipal is " + PeerPrincipal);
+      logger.info("PeerPrincipal_OID is " + PeerPrincipal_OID);
+      logger.info("PeerPrincipal_T is " + PeerPrincipal_T);
+      logger.info("PeerPrincipal_SURNAME is " + PeerPrincipal_SURNAME);
+      logger.info("PeerPrincipal_GIVENNAME is " + PeerPrincipal_GIVENNAME);
+      logger.info("PeerPrincipal_ST is " + PeerPrincipal_ST);
+      logger.info("PeerPrincipal_C is " + PeerPrincipal_C);
+      logger.info("PeerPrincipal_OU is " + PeerPrincipal_OU);
+      logger.info("PeerPrincipal_O is " + PeerPrincipal_O);
+      logger.info("PeerPrincipal_EMAILADDRESS is " + PeerPrincipal_EMAILADDRESS);
+      
+      Principal _LocalPrincipal = routingContext.request().connection().sslSession().getLocalPrincipal();
+      String LocalPrincipal = _LocalPrincipal.toString();
+      String[] LocalPrincipalArray = LocalPrincipal.split(",");
+      String LocalPrincipal_CN = LocalPrincipalArray[0];
+      String LocalPrincipal_OU = LocalPrincipalArray[1];
+      String LocalPrincipal_O = LocalPrincipalArray[2];
+      String LocalPrincipal_L = LocalPrincipalArray[3];
+      String LocalPrincipal_ST = PeerPrincipalArray[4];
+      String LocalPrincipal_C = PeerPrincipalArray[5];      
+      
+      logger.info("getLocalPrincipal is " + LocalPrincipal);
+      logger.info("LocalPrincipal_CN is " + LocalPrincipal_CN);
+      logger.info("LocalPrincipal_OU is " + LocalPrincipal_OU);
+      logger.info("LocalPrincipal_O is " + LocalPrincipal_O);
+      logger.info("LocalPrincipal_L is " + LocalPrincipal_L);
+      logger.info("LocalPrincipal_ST is " + LocalPrincipal_ST);
+      logger.info("LocalPrincipal_C is " + LocalPrincipal_C);
+                 
+      String[] email = PeerPrincipal_EMAILADDRESS.split("=");
+      String[] emailID = email[1].split("@");
+      String userName = emailID[0];
+      String domain = emailID[1];
+      logger.info("PeerPrincipal_EMAILADDRESS is " + emailID);
+      logger.info("userName is " + userName);
+      logger.info("domain is " + domain);
+      
+      String userName_SHA_1 = new DigestUtils(SHA_1).digestAsHex(userName);
+      logger.info("userName in SHA-1 is "+ userName_SHA_1);
+      String emailID_SHA_1 = userName_SHA_1+"@"+domain;
+      logger.info("emailID in SHA-1 is "+ emailID_SHA_1);
+
+			if (PeerPrincipal_OID.contains("class:3") || PeerPrincipal_OID.contains("class:4")
+					|| PeerPrincipal_OID.contains("class:5")) {
+				status = true;
+				logger.info("Valid Certificate");
+			} else {
+				status = false;
+				logger.info("Invalid Certificate");
+			}
+			
     } catch (SSLPeerUnverifiedException e) {
       status = false;
     }
@@ -262,6 +325,7 @@ public class APIServerVerticle extends AbstractVerticle {
       if (authenticateRequest(routingContext, "user.list")) {
         try {
           JsonObject request_body = routingContext.getBodyAsJson();
+          request_body.put("id", "");
           DeliveryOptions validator_action = new DeliveryOptions();
           validator_action.addHeader("action", "validate-item");
 
