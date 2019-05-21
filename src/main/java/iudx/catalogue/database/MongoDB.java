@@ -589,5 +589,147 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
         });
   }
 
+  @Override
+  public void bulkCreate(Message<Object> message) {
+    // TODO Auto-generated method stub
+    JsonObject request_body = (JsonObject) message.body();
+    JsonArray items = request_body.getJsonArray("items");
+    String bulkId = request_body.getString("bulk-id");
+    JsonArray itemIds = new JsonArray();
+    List<BulkOperation> bulk_create = new ArrayList<BulkOperation>();
+    for (int i = 0; i < items.size(); i++) {
+      JsonObject item = items.getJsonObject(i);
+      JsonObject itemWithAttr = addNewAttributes(item, 1, true, bulkId);
+      itemIds.add(itemWithAttr.getString("id"));
+      if (itemWithAttr.containsKey("_tags")) {
+        writeTags(itemWithAttr.getJsonArray("_tags"));
+      }
+      bulk_create.add(BulkOperation.createInsert(itemWithAttr));
+    }
+    if (!bulk_create.isEmpty()) {
+      mongo.bulkWrite(
+          COLLECTION,
+          bulk_create,
+          bulkWrite -> {
+            if (bulkWrite.succeeded()) {
+              JsonObject reply = new JsonObject();
+              reply.put("bulk-id", bulkId);
+              reply.put("items", itemIds);
+              message.reply(reply);
+            } else {
+              message.fail(0, "Failure");
+            }
+          });
+    }
+  }
 
+  @Override
+  public void bulkDelete(Message<Object> message) {
+    // TODO Auto-generated method stub
+    JsonObject request_body = (JsonObject) message.body();
+    String bulkId = request_body.getString("bulk-id");
+    JsonObject query = new JsonObject();
+    query.put("bulk-id", bulkId);
+    query.put("item-type", "resource-item");
+    mongo.find(
+        COLLECTION,
+        query,
+        documents -> {
+          if (documents.succeeded()) {
+            List<JsonObject> items = documents.result();
+            if (items.size() == 0) {
+              message.fail(0, "No such bulk-id");
+            } else {
+              for (JsonObject item : items) {
+                if (item.containsKey("_tags")) {
+                  JsonArray tags = item.getJsonArray("_tags");
+                  deleteTags(tags);
+                }
+              }
+              mongo.removeDocuments(
+                  COLLECTION,
+                  query,
+                  deleteItems -> {
+                    if (deleteItems.succeeded()) {
+                      JsonObject reply = new JsonObject();
+                      reply.put("bulk-id", bulkId);
+                      reply.put("status", "success");
+                      message.reply(reply);
+                    } else {
+                      message.fail(0, "Failure");
+                    }
+                  });
+            }
+          } else {
+            message.fail(0, "Failure");
+          }
+        });
+  }
+
+  @Override
+  public void bulkUpdate(Message<Object> message) {
+    // TODO Auto-generated method stub
+    JsonObject requestBody = (JsonObject) message.body();
+    String bulkId = requestBody.getString("bulk-id");
+    JsonObject query = new JsonObject();
+    query.put("item-type", "resource-item");
+    query.put("bulk-id", bulkId);
+    mongo.find(
+        COLLECTION,
+        query,
+        itemsToUpdate -> {
+          if (itemsToUpdate.succeeded()) {
+            if (itemsToUpdate.result().size() != 0) {
+
+              boolean tagsPresent = false;
+              if (requestBody.containsKey("tags")) {
+                System.out.println("Yes");
+                tagsPresent = true;
+              }
+              if (tagsPresent) {
+                JsonArray tagsInLowerCase = new JsonArray();
+                JsonArray tags = requestBody.getJsonArray("tags");
+
+                for (Object i : tags) {
+                  tagsInLowerCase.add(((String) i).toLowerCase());
+                }
+                requestBody.put("_tags", tagsInLowerCase);
+                for (JsonObject item : itemsToUpdate.result()) {
+                  if (item.containsKey("_tags")) {
+                    JsonArray oldTags = item.getJsonArray("_tags");
+                    updateTags(oldTags, tagsInLowerCase);
+                  } else {
+                    writeTags(tagsInLowerCase);
+                  }
+                }
+              }
+              requestBody.put("Last modified on", new java.util.Date().toString());
+              JsonObject update = new JsonObject().put("$set", requestBody);
+              UpdateOptions options = new UpdateOptions();
+              options.setMulti(true);
+              mongo.updateCollectionWithOptions(
+                  COLLECTION,
+                  query,
+                  update,
+                  options,
+                  updateResult -> {
+                    if (updateResult.succeeded()) {
+                      System.out.println("Should have worked");
+                      JsonObject reply = new JsonObject();
+                      reply.put("bulk-id", bulkId);
+                      reply.put("status", "Success");
+                      message.reply(reply);
+                    } else {
+                      message.fail(0, "Failure");
+                    }
+                  });
+
+            } else {
+              message.fail(0, "No such bulk-id");
+            }
+          } else {
+            message.fail(0, "Failure");
+          }
+        });
+  }
 }
