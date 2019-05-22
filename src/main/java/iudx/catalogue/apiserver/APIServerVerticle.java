@@ -112,6 +112,7 @@ public class APIServerVerticle extends AbstractVerticle {
         .route("/dashboard")
         .handler(
             routingContext -> {
+              //TO-DO: Check for a valid certificate and set session id as CN
               HttpServerResponse response = routingContext.response();
               response.sendFile("ui/dashboard/index.html");
             });

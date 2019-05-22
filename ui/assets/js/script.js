@@ -1,3 +1,5 @@
+/******************************** Public view functions ************************************/
+
     // Disable ctrl+s to prevent downloading source code 
     $(document).bind('keydown', function(e) {
         if (e.ctrlKey && (e.which == 83)) {
@@ -581,3 +583,75 @@
             }
         show_all_items();
     }
+
+
+
+
+
+
+
+
+
+
+
+
+/******************************** Admin Dashboard functions ************************************/
+
+function log(msg){
+    var print = false;
+    if(print){
+        console.log(msg);
+    }
+}
+
+function loader(e){
+    e.html(`
+        <div class="loader-demo-box">
+                          <div class="square-box-loader">
+                            <div class="square-box-loader-container">
+                              <div class="square-box-loader-corner-top"></div>
+                              <div class="square-box-loader-corner-bottom"></div>
+                            </div>
+                            <div class="square-box-loader-square"></div>
+                          </div>
+                        </div>
+        `)
+}
+
+function read_item(e){
+    if($(e).hasClass("active")){
+        log("ALREADY ACTIVE")
+        showSwal('auto-close-2')
+        return;
+    }
+    $(".sidebar-nav-link").removeClass("active");
+    $(e).addClass("active");
+    $(".content-wrapper").html(`<div class="page-header">
+              <h3 class="page-title"> Read Item </h3>
+              <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                  <li class="breadcrumb-item"><a href="#">CRUD Operations</a></li>
+                  <li class="breadcrumb-item active" aria-current="page">Read Item</li>
+                </ol>
+              </nav>
+            </div>
+            <div class="col-12 grid-margin">
+                <div class="card">
+                  <div class="card-body">
+                    <h4 class="card-title">Catalogue items</h4>
+                    <div class="row">
+                      <div id="read_items" class="col-md-12 grid-margin">
+                        
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>`);
+    loader($("#read_items"));
+    $.get("https://10.156.14.149:8443/search/catalogue/attribute?", function(data) {
+        $("#read_items").html(`<pre>`+jsonPrettyHighlightToId(JSON.parse(data))+`</pre>`)
+    });
+}
+
+
+
