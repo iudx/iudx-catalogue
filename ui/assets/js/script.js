@@ -239,7 +239,7 @@
         });
         // console.log(tags.slice(0, -1))
          $(".tag_item_count").html("");
-        $.get("/search/catalogue/attribute?attribute-name=(tags)&attribute-value=((" + tags.slice(0, -1) + ")", function(data) {
+        $.get("/search/catalogue/attribute?attribute-name=(tags)&attribute-value=((" + tags.slice(0, -1) + "))", function(data) {
             // console.log(data)
             data = JSON.parse(data)
 

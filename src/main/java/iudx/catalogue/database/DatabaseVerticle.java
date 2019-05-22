@@ -103,6 +103,21 @@ public class DatabaseVerticle extends AbstractVerticle {
     	  db.count(message);
     	  break;
       }
+      case "bulkcreate":
+      {
+    	  db.bulkCreate(message);
+    	  break;
+      }
+      case "bulkupdate":
+      {
+    	  db.bulkUpdate(message);
+    	  break;
+      }
+      case "bulkdelete":
+      {
+    	  db.bulkDelete(message);
+    	  break;
+      }
       default:
         {
           break;
