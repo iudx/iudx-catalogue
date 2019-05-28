@@ -2,6 +2,7 @@ package iudx.catalogue.database;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.Message;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.AbstractVerticle;
@@ -59,6 +60,31 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
    * @param options Options specify the fields that will (not) be displayed
    * @param message The message to which the result will be replied to
    */
+  private JsonObject addFieldsWithDOll(JsonObject res) {
+    JsonObject temp = new JsonObject();
+    Set<String> keysWithDoll = new HashSet<String>();
+    for (String key : res.fieldNames()) {
+      Object value = res.getValue(key);
+      if (key.length() >= 3 && key.substring(0, 3).equals("_$_")) {
+        keysWithDoll.add(key);
+        key = "$" + key.substring(3);
+        temp.put(key, value);
+      }
+      if (value.getClass() == JsonObject.class) {
+        JsonObject newVal = addFieldsWithDOll((JsonObject) value);
+        keysWithDoll.add(key);
+        temp.put(key, newVal);
+      }
+    }
+    for (String key : keysWithDoll) {
+      res.remove(key);
+    }
+    for (String key : temp.fieldNames()) {
+      res.put(key, temp.getValue(key));
+    }
+    return res;
+  }
+
   private void mongoFind(JsonObject query, JsonObject attributeFilter, Message<Object> message) {
 
     attributeFilter.put("_id", 0);
@@ -83,15 +109,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
                   j.remove(hidden);
                 }
               }
-              for (String key : j.fieldNames()) {
-                if (key.length() >= 3 && key.substring(0, 3).equals("_$_")) {
-                  Object value = j.getValue(key);
-                  j.remove(key);
-                  key = "$" + key.substring(3);
-                  j.put(key, value);
-                }
-              }
-
+              j = addFieldsWithDOll(j);
               rep.add(j);
             }
             message.reply(rep);
@@ -402,13 +420,27 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   }
 
   private JsonObject removeDollar(JsonObject item) {
+    Set<String> keysWithDol = new HashSet<String>();
+    JsonObject temp = new JsonObject();
+
     for (String key : item.fieldNames()) {
+      Object value = item.getValue(key);
       if (key.charAt(0) == '$') {
-        Object value = item.getValue(key);
-        item.remove(key);
+        keysWithDol.add(key);
         key = "_$_" + key.substring(1);
-        item.put(key, value);
+        temp.put(key, value);
       }
+      if (value.getClass() == JsonObject.class) {
+        JsonObject newVal = removeDollar((JsonObject) value);
+        keysWithDol.add(key);
+        temp.put(key, newVal);
+      }
+    }
+    for (String key : keysWithDol) {
+      item.remove(key);
+    }
+    for (String key : temp.fieldNames()) {
+      item.put(key, temp.getValue(key));
     }
     return item;
   }
@@ -599,6 +631,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     List<BulkOperation> bulk_create = new ArrayList<BulkOperation>();
     for (int i = 0; i < items.size(); i++) {
       JsonObject item = items.getJsonObject(i);
+      item = removeDollar(item);
       JsonObject itemWithAttr = addNewAttributes(item, 1, true, bulkId);
       itemIds.add(itemWithAttr.getString("id"));
       if (itemWithAttr.containsKey("_tags")) {
