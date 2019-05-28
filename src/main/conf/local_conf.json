@@ -1,0 +1,8 @@
+{
+    "http.port" : 8443,
+    "mongo_port" : 27017,
+    "keystore" : "my-keystore.jks",
+    "keystorePassword" : "password",
+    "truststore" : "my-keystore.jks",
+    "truststorePassword" : "password"
+}
