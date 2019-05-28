@@ -114,6 +114,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
             }
             message.reply(rep);
           } else {
+            System.out.println(res.cause());
             message.fail(0, "failure");
           }
         });
@@ -267,13 +268,23 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
           updateNoOfHits(value);
         } else if (key.equalsIgnoreCase("location")) {
           JsonObject location = new JsonObject();
-          location.put("bounding-type", value.getString(0));
-          location.put("lat", Double.parseDouble(value.getString(1)));
-          location.put("long", Double.parseDouble(value.getString(2)));
-          location.put("radius", Double.parseDouble(value.getString(3)));
+          for (Object param : value) {
+            String k = ((String) param).split(":")[0];
+            String v = ((String) param).split(":")[1];
+            System.out.println(k + " " + v);
+            if (k.equalsIgnoreCase("bounding-type")) {
+              location.put(k, v);
+            } else {
+              location.put(k, Double.parseDouble(v));
+            }
+          }
 
           key = "geoJsonLocation";
-          value = new JsonArray().add(geo_search_query(location));
+          JsonObject value2 = geo_search_query(location);
+          JsonObject q = new JsonObject();
+          q.put(key, value2);
+          expressions.add(q);
+          continue;
         } else if (key.charAt(0) == '$') {
           key = "_$_" + key.substring(1);
         }
@@ -322,6 +333,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     if (query == null) {
       message.fail(0, "Bad query");
     } else {
+      System.out.println(query.encodePrettily());
       mongoFind(query, fields, message);
     }
   }
