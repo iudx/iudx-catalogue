@@ -223,8 +223,9 @@ public class APIServerVerticle extends AbstractVerticle {
     boolean status = false;
 
     try {
-    
-      Principal _PeerPrincipal = routingContext.request().connection().sslSession().getPeerPrincipal();
+
+      Principal _PeerPrincipal =
+          routingContext.request().connection().sslSession().getPeerPrincipal();
       String PeerPrincipal = _PeerPrincipal.toString();
       String[] PeerPrincipalArray = PeerPrincipal.split(",");
       String PeerPrincipal_OID = PeerPrincipalArray[0];
@@ -247,8 +248,9 @@ public class APIServerVerticle extends AbstractVerticle {
       logger.info("PeerPrincipal_OU is " + PeerPrincipal_OU);
       logger.info("PeerPrincipal_O is " + PeerPrincipal_O);
       logger.info("PeerPrincipal_EMAILADDRESS is " + PeerPrincipal_EMAILADDRESS);
-      
-      Principal _LocalPrincipal = routingContext.request().connection().sslSession().getLocalPrincipal();
+
+      Principal _LocalPrincipal =
+          routingContext.request().connection().sslSession().getLocalPrincipal();
       String LocalPrincipal = _LocalPrincipal.toString();
       String[] LocalPrincipalArray = LocalPrincipal.split(",");
       String LocalPrincipal_CN = LocalPrincipalArray[0];
@@ -256,8 +258,8 @@ public class APIServerVerticle extends AbstractVerticle {
       String LocalPrincipal_O = LocalPrincipalArray[2];
       String LocalPrincipal_L = LocalPrincipalArray[3];
       String LocalPrincipal_ST = PeerPrincipalArray[4];
-      String LocalPrincipal_C = PeerPrincipalArray[5];      
-      
+      String LocalPrincipal_C = PeerPrincipalArray[5];
+
       logger.info("getLocalPrincipal is " + LocalPrincipal);
       logger.info("LocalPrincipal_CN is " + LocalPrincipal_CN);
       logger.info("LocalPrincipal_OU is " + LocalPrincipal_OU);
@@ -265,7 +267,7 @@ public class APIServerVerticle extends AbstractVerticle {
       logger.info("LocalPrincipal_L is " + LocalPrincipal_L);
       logger.info("LocalPrincipal_ST is " + LocalPrincipal_ST);
       logger.info("LocalPrincipal_C is " + LocalPrincipal_C);
-                 
+
       String[] email = PeerPrincipal_EMAILADDRESS.split("=");
       String[] emailID = email[1].split("@");
       String userName = emailID[0];
@@ -273,21 +275,22 @@ public class APIServerVerticle extends AbstractVerticle {
       logger.info("PeerPrincipal_EMAILADDRESS is " + emailID);
       logger.info("userName is " + userName);
       logger.info("domain is " + domain);
-      
-      String userName_SHA_1 = new DigestUtils(SHA_1).digestAsHex(userName);
-      logger.info("userName in SHA-1 is "+ userName_SHA_1);
-      String emailID_SHA_1 = userName_SHA_1+"@"+domain;
-      logger.info("emailID in SHA-1 is "+ emailID_SHA_1);
 
-			if (PeerPrincipal_OID.contains("class:3") || PeerPrincipal_OID.contains("class:4")
-					|| PeerPrincipal_OID.contains("class:5")) {
-				status = true;
-				logger.info("Valid Certificate");
-			} else {
-				status = false;
-				logger.info("Invalid Certificate");
-			}
-			
+      String userName_SHA_1 = new DigestUtils(SHA_1).digestAsHex(userName);
+      logger.info("userName in SHA-1 is " + userName_SHA_1);
+      String emailID_SHA_1 = userName_SHA_1 + "@" + domain;
+      logger.info("emailID in SHA-1 is " + emailID_SHA_1);
+
+      if (PeerPrincipal_OID.contains("class:3")
+          || PeerPrincipal_OID.contains("class:4")
+          || PeerPrincipal_OID.contains("class:5")) {
+        status = true;
+        logger.info("Valid Certificate");
+      } else {
+        status = false;
+        logger.info("Invalid Certificate");
+      }
+
     } catch (SSLPeerUnverifiedException e) {
       status = false;
     }
@@ -323,7 +326,10 @@ public class APIServerVerticle extends AbstractVerticle {
    */
   private void create(RoutingContext routingContext) {
     HttpServerRequest request = routingContext.request();
-    String skip_validation = request.getHeader("skip_validation").toLowerCase();
+    String skip_validation = "false";
+    if (request.headers().contains("skip_validation")) {
+      skip_validation = request.getHeader("skip_validation").toLowerCase();
+    }
 
     if (decodeCertificate(routingContext)) {
       if (authenticateRequest(routingContext, "user.list")) {
@@ -352,7 +358,11 @@ public class APIServerVerticle extends AbstractVerticle {
                     if (validator_reply.succeeded()) {
                       String itemType = request.getParam("itemtype");
                       request_body.put("item-type", itemType);
-                      databaseHandler("create", routingContext, request_body);
+                      if (itemTypes.contains(itemType)) {
+                        handle400(routingContext, "No such item-type exists");
+                      } else {
+                        databaseHandler("create", routingContext, request_body);
+                      }
                     } else {
                       handle500(routingContext);
                     }
@@ -467,7 +477,11 @@ public class APIServerVerticle extends AbstractVerticle {
         request_body.put("id", id);
         request_body.put("item-type", itemType);
 
-        databaseHandler("delete", routingContext, request_body);
+        if (!itemTypes.contains(itemType)) {
+          handle400(routingContext, "No such item-type exists!");
+        } else {
+          databaseHandler("delete", routingContext, request_body);
+        }
       } else {
         handle401(routingContext, "Unauthorised");
       }
@@ -593,7 +607,11 @@ public class APIServerVerticle extends AbstractVerticle {
                     break;
                 }
               } else {
-                handle500(routingContext);
+                if (database_reply.cause().getMessage().equalsIgnoreCase("Failure")) {
+                  handle500(routingContext);
+                } else {
+                  handle400(routingContext, database_reply.cause().getMessage());
+                }
               }
             });
   }

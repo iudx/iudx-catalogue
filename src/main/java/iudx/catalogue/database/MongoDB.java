@@ -331,9 +331,8 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     JsonObject query = decodeQuery(request_body);
     JsonObject fields = decodeFields(request_body);
     if (query == null) {
-      message.fail(0, "Bad query");
+      message.fail(0, "Bad query: Number of attributes is not equal to number of number of values");
     } else {
-      System.out.println(query.encodePrettily());
       mongoFind(query, fields, message);
     }
   }
@@ -344,7 +343,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     JsonObject query = decodeQuery(request_body);
 
     if (query == null) {
-      message.fail(0, "Bad query");
+      message.fail(0, "Bad query: Number of attributes is not equal to number of number of values");
     } else {
       query.put("Status", "Live");
       mongo.count(
