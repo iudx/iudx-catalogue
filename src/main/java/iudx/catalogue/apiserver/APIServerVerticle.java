@@ -359,9 +359,9 @@ public class APIServerVerticle extends AbstractVerticle {
                       String itemType = request.getParam("itemtype");
                       request_body.put("item-type", itemType);
                       if (itemTypes.contains(itemType)) {
-                        handle400(routingContext, "No such item-type exists");
+                    	  databaseHandler("create", routingContext, request_body);
                       } else {
-                        databaseHandler("create", routingContext, request_body);
+                    	  handle400(routingContext, "No such item-type exists");
                       }
                     } else {
                       handle500(routingContext);
