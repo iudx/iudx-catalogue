@@ -11,7 +11,7 @@ class MyRestIT {
   @BeforeAll
   public static void configureRestAssured() {
     RestAssured.baseURI = "https://localhost";
-    RestAssured.port = Integer.getInteger("http.port", 8443);
+    RestAssured.port = Integer.getInteger("http.port", 18443);
     RestAssured.useRelaxedHTTPSValidation();
   }
 
