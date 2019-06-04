@@ -1,0 +1,10 @@
+{
+    "http.port" : 8443,
+    "mongo_host" : "catalogue-database-mongodb",
+    "mongo_port" : 27017,
+    "keystore" : "/iudx-catalogue/my-keystore.jks",
+    "keystorePassword" : "password",
+    "truststore" : "/iudx-catalogue/my-keystore.jks",
+    "truststorePassword" : "password"
+}
+

@@ -1,0 +1,40 @@
+version: "3"
+
+networks:
+  iudx-net:
+    driver: bridge
+
+volumes:
+    mongodb.dev:
+    mongodb-data.dev:
+
+services:
+
+   mongodb.dev:
+    image: vasanthrajaraman/catalogue-database-mongodb
+    container_name: catalogue-database-mongodb.dev
+    hostname: catalogue-database-mongodb.dev
+    restart: always
+    ports:
+      - "17017:27017"
+      - "18017:28017"
+    networks:
+      - iudx-net
+    volumes:
+      - mongodb.dev:/var/lib/mongodb/
+      - mongodb-data.dev:/data/db/ 
+      - ../setup/mongodb:/scripts/  
+
+   apiserver.dev:
+    image: vasanthrajaraman/catalogue-apiserver
+    container_name: catalogue-apiserver.dev
+    hostname: catalogue-apiserver.dev
+    restart: always
+    ports:
+      - "18443:8443"
+    networks:
+      - iudx-net
+    cap_add:
+      - ALL
+    volumes:
+      - ../../iudx-catalogue:/iudx-catalogue/

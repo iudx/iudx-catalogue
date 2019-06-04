@@ -2,6 +2,8 @@
 
 cd ..
 
+cp docker_conf.production.json src/main/conf/docker_conf.json
+
 mvn clean package -DskipTests
 
 cp target/catalogue-apiserver-0.0.1-fat.jar .
@@ -9,10 +11,10 @@ cp target/catalogue-apiserver-0.0.1-fat.jar .
 cd docker
 
 echo "Stopping Containers"
-docker-compose down -v
+docker-compose -f docker-compose.production.yml down -v
 
 echo "Starting Containers"
-docker-compose up -d
+docker-compose -f docker-compose.production.yml up -d
 
 echo "Configuring Catalogue API Server"
 
