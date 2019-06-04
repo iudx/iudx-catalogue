@@ -22,10 +22,18 @@ Quickstart
     cd docker
     sh install
     
-Catalogue will be up in <https://localhost:8443/>
+Catalogue will be up in production mode at <https://localhost:8443/>
 
 #. Re-install::
 
     cd docker
     sh re-install apiserver (To re-install apiserver)
     sh re-install mongodb (To re-install mongodb)
+
+#. Start the test suite::
+
+    cd docker
+    sh test
+
+Catalogue will be up in development mode at <https://localhost:18443/>. REST Assured testing will be performed. Development mode Catalogue containers will be deleted after testing.  
+
