@@ -144,58 +144,6 @@
 					</execution>
 				</executions>
 			</plugin>
-
-			<!-- We use the maven-antrun-plugin to start the application before the 
-				integration tests and stop them afterward -->
-			<plugin>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<version>1.8</version>
-				<executions>
-					<execution>
-						<id>start-vertx-app</id>
-						<phase>pre-integration-test</phase>
-						<goals>
-							<goal>run</goal>
-						</goals>
-						<configuration>
-							<target>
-								<!-- Launch the application as in 'production' using the fatjar. 
-									We pass the generated configuration, configuring the http port to the picked 
-									one -->
-								<exec executable="${java.home}/bin/java"
-									dir="${project.build.directory}" spawn="true">
-									<arg value="-jar" />
-									<arg
-										value="${project.artifactId}-${project.version}-fat.jar" />
-									<arg value="-conf" />
-									<arg
-										value="${project.build.directory}/test-classes/IT_conf.json" />
-								</exec>
-							</target>
-						</configuration>
-					</execution>
-					<execution>
-						<id>stop-vertx-app</id>
-						<phase>post-integration-test</phase>
-						<goals>
-							<goal>run</goal>
-						</goals>
-						<configuration>
-							<!-- Kill the started process. Finding the right process is a bit 
-								tricky. Windows command in in the windows profile (below) -->
-
-							<target>
-								<exec executable="bash" dir="${project.build.directory}"
-									spawn="false">
-									<arg value="-c" />
-									<arg
-										value="ps ax | grep -e '-conf' | grep -e 'IT_conf.json' | awk 'NR==1{print $1}' | xargs kill -SIGTERM " />
-								</exec>
-							</target>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
