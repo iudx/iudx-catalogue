@@ -1,0 +1,67 @@
+#!bin/bash
+
+cd ..
+
+cp docker_conf.development.json src/main/conf/docker_conf.json
+
+mvn clean package -DskipTests
+
+cp target/catalogue-apiserver-0.0.1-fat.jar .
+
+cd docker
+
+echo "Building Development Containers"
+
+docker-compose -f docker-compose.development.yml up -d
+
+echo "Configuring Catalogue API Server"
+
+echo "Catalogue API Server is UP!"
+
+until nc -z localhost 17017
+echo "Checking MondoDB status"
+
+do
+    sleep 1
+    echo "Waiting to boot..."
+done
+
+echo "MongoDB is up at PORT 17017"
+
+echo "Configuring Catalogue"
+sleep 5
+
+until nc -z localhost 17017
+do
+    sleep 1
+    echo "Waiting to boot..."
+done
+
+docker exec catalogue-database-mongodb.dev ./scripts/mongodb_setup.sh
+
+echo "Catalogue Setup - Created Database (catalogue)"
+
+echo "Catalogue Setup - Created Collections (items and schemas)"
+
+echo "Catalogue Setup Completed"
+
+echo "Starting Functional test-cases"
+
+cd ..
+
+mvn verify integration-test
+
+echo "Removing test instance"
+
+docker rm -f catalogue-apiserver.dev
+
+echo "Removed catalogue-apiserver.dev container"
+
+docker rm -f catalogue-database-mongodb.dev
+
+echo "Removed catalogue-database-mongodb.dev container"
+
+echo "Done"
+
+echo "Testing Completed"
+
