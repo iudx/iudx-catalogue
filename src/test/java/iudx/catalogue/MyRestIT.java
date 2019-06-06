@@ -11,8 +11,9 @@ class MyRestIT {
   @BeforeAll
   public static void configureRestAssured() {
     RestAssured.baseURI = "https://localhost";
-    RestAssured.port = Integer.getInteger("http.port", 18443);
+    RestAssured.port = 18443;
     RestAssured.useRelaxedHTTPSValidation();
+    
   }
 
   @AfterAll
@@ -23,5 +24,10 @@ class MyRestIT {
   @Test
   public void test() {
     given().when().get("/list/catalogue/item-types").then().assertThat().statusCode(200);
+  }
+  
+  @Test
+  public void postTest() {
+    
   }
 }
