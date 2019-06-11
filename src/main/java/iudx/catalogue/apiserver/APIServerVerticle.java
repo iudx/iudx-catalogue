@@ -27,7 +27,6 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.StaticHandler;
-import io.vertx.groovy.ext.web.handler.StaticHandler_GroovyExtension;
 
 import java.util.ArrayList;
 import java.util.Base64;
@@ -58,7 +57,7 @@ public class APIServerVerticle extends AbstractVerticle {
 
     HttpServer server = createServer();
 
-    int port = config().getInteger("http.port", 8443);
+    int port = 8443; // config().getInteger("http.port", 18443);
 
     server.requestHandler(router::accept).listen(port);
 
@@ -88,6 +87,7 @@ public class APIServerVerticle extends AbstractVerticle {
             new HttpServerOptions()
                 .setSsl(true)
                 .setClientAuth(clientAuth)
+                .setTrustStoreOptions(new JksOptions().setPath(keystore).setPassword(keystorePassword))
                 .setKeyStoreOptions(
                     new JksOptions().setPath(keystore).setPassword(keystorePassword)));
     return server;
@@ -221,6 +221,8 @@ public class APIServerVerticle extends AbstractVerticle {
   private boolean decodeCertificate(RoutingContext routingContext) {
 
     boolean status = false;
+    
+    System.out.println("In decodeCertificate ");
 
     try {
 
