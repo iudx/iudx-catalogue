@@ -12,8 +12,6 @@ cd docker
 
 echo "Building Development Containers"
 
-# docker-compose -f docker-compose.development.yml down -v
-
 docker-compose -f docker-compose.development.yml up -d
 
 echo "Configuring Catalogue API Server"
@@ -51,7 +49,7 @@ echo "Starting Functional test-cases"
 
 cd ..
 
-mvn clean integration-test
+mvn verify integration-test
 
 echo "Removing test instance"
 

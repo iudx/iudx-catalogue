@@ -1,8 +1,6 @@
 {
-    "http.port": ${http.port},
-    "mongo_port" : 27017,
-    "keystore" : "../my-keystore.jks",
-    "keystorePassword" : "password",
-    "truststore" : "../my-keystore.jks",
-    "truststorePassword" : "password"
+    "server_URI": "https://localhost",
+	"server_port": 8443,
+    "client_keystore_password" : "password",
+	"client_basic_authorization" : "YXJ1bjphcnVucmJjY3Bz"
 }
