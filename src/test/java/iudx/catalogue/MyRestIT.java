@@ -19,13 +19,13 @@ import io.restassured.response.Response;
 
 class MyRestIT {
 
-	static File clientCertificateDirectory;
-	static File resourcesDirectory;
-	static File clientConfiguration;
-	static String server_URI;
-	static long server_port;
-	static String client_keystore_password;
-	static String client_basic_auth;
+	private static File clientCertificateDirectory;
+	private static File resourcesDirectory;
+	private static File clientConfiguration;
+	private static String server_URI;
+	private static long server_port;
+	private static String client_keystore_password;
+	private static String client_basic_auth;
 
 	@BeforeAll
 	public static void configureRestAssured() {
@@ -63,7 +63,7 @@ class MyRestIT {
 	@Test
 	public void test() {
 
-		Response response = given().when().get("/list/catalogue/item-types").then().extract().response();
+		given().when().get("/list/catalogue/item-types").then().extract().response();
 
 	}
 
@@ -85,7 +85,7 @@ class MyRestIT {
 			e.printStackTrace();
 		}
 
-		Response response = given().contentType(ContentType.JSON).header("skip_validation", "true")
+		given().contentType(ContentType.JSON).header("skip_validation", "true")
 				.header("authorization", "Basic " + client_basic_auth).body(payload.toJSONString())
 				.post("/create/catalogue/resource-item").then().extract().response();
 
