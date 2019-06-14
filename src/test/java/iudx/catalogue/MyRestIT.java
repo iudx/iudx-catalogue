@@ -6,18 +6,19 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.testng.Assert;
+import org.testng.annotations.AfterSuite;
+import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.Test;
 
 import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 
-class MyRestIT {
+public class MyRestIT {
 
 	private static File clientCertificateDirectory;
 	private static File resourcesDirectory;
@@ -27,7 +28,7 @@ class MyRestIT {
 	private static String client_keystore_password;
 	private static String client_basic_auth;
 
-	@BeforeAll
+	@BeforeSuite
 	public static void configureRestAssured() {
 
 		clientCertificateDirectory = new File("client.jks");
@@ -62,9 +63,12 @@ class MyRestIT {
 
 	@Test
 	public void test() {
-
-		given().when().get("/list/catalogue/item-types").then().extract().response();
-
+		ExtentTestManager.startTest("List item-types", "GET to /list/catalogue/item-types");
+		Response response = given().when().get("/list/catalogue/item-types").then().extract().response();
+		
+		int statusCode = response.getStatusCode();
+		// Assert that correct status code is returned.
+		Assert.assertEquals(statusCode /* actual value */, 200 /* expected value */, "Correct status code returned");
 	}
 
 	@Test
@@ -84,16 +88,21 @@ class MyRestIT {
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
+		ExtentTestManager.startTest("Create resource-item", "POST to /create/catalogue/resource-item");
 
-		given().contentType(ContentType.JSON).header("skip_validation", "true")
+		Response response = given().header("skip_validation", "true")
 				.header("authorization", "Basic " + client_basic_auth).body(payload.toJSONString())
 				.post("/create/catalogue/resource-item").then().extract().response();
 
+		int statusCode = response.getStatusCode();
+		// Assert that correct status code is returned.
+		Assert.assertEquals(statusCode /* actual value */, 201 /* expected value */, "Correct status code returned");
+
 	}
 
-	  @AfterAll
-	  public static void unconfigureRestAssured() {
-	    RestAssured.reset();
-	  }
+	@AfterSuite
+	public static void unconfigureRestAssured() {
+		RestAssured.reset();
+	}
 
 }
