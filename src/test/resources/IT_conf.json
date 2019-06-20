@@ -1,6 +1,6 @@
 {
     "server_URI": "https://localhost",
-	"server_port": 8443,
+	"server_port": 18443,
     "client_keystore_password" : "password",
 	"client_basic_authorization" : "YXJ1bjphcnVucmJjY3Bz"
 }
