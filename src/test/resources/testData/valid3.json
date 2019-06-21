@@ -1,0 +1,68 @@
+{
+    "DEVICEID": "2922b6ff-0271-cde4-9378-bd00f1a6ea3c", 
+    "NAME": "Swargate ST Stand_13", 
+    "__createdAt": "Wed Mar 27 13:41:30 UTC 2019", 
+    "__itemStatus": "active", 
+    "__itemType": "resource-item", 
+    "__onboardedBy": "iudx-provider", 
+    "__updatedAt": "Wed Mar 27 13:41:30 UTC 2019", 
+    "__version": 1, 
+    "accessInformation": [
+        {
+            "accessSchema": "https://raw.githubusercontent.com/rbccps-iisc/iudx-schemas/master/data_models/environment/airQuality/examples/exApiObject_env_aqm_climoPune_0.json", 
+            "accessSchemaType": "openAPI", 
+            "accessVariables": {
+                "resourceClass": "aqm-bosch-climo", 
+                "resourceId": "Swargate ST Stand_13", 
+                "resourceServerId": "https://pune.iudx.org.in:443"
+            }
+        }
+    ], 
+    "deviceModelInfo": {
+        "brand": {
+            "name": "Bosch-Climo", 
+            "url": "http://www.boschclimo.com/"
+        }
+    }, 
+    "geoJsonLocation": {
+        "coordinates": [
+            73.858028, 
+            18.498686
+        ], 
+        "type": "Point"
+    }, 
+    "id": "07e9cdb1-59fb-49f4-8cfc-bed2830c478a", 
+    "itemDescription": "Description for Bosch-Climo AQM resource", 
+    "latestResourceData": "https://pune.iudx.org.in/api/1.0.0/resource/latest/aqm-bosch-climo/Swargate%20ST%20Stand_13", 
+    "location": {
+        "latitude": 18.498686, 
+        "longitude": 73.858028
+    }, 
+    "provider": {
+        "entityId": "PSCDCL", 
+        "entityIdentityProviderURL": "https://ca.iudx.org.in", 
+        "entityIdentityType": "X509", 
+        "entityURL": "https://punesmartcity.in/"
+    }, 
+    "refBaseSchema": "https://raw.githubusercontent.com/rbccps-iisc/iudx-schemas/master/base_schemas/v0.0.0/iudx_data_item_schema.json", 
+    "refBaseSchemaRelease": "v0.0.0", 
+    "refDataModel": "https://raw.githubusercontent.com/rbccps-iisc/iudx-schemas/master/data_models/environment/airQuality/examples/exdataModel_env_aqm_climoPune_0.json#/dataModelSchema", 
+    "tags": [
+        "air", 
+        "pollution", 
+        "SO2", 
+        "CO2", 
+        "CO", 
+        "NO", 
+        "NO2", 
+        "PM2.5", 
+        "PM10", 
+        "Humidity", 
+        "Temperature", 
+        "Ozone", 
+        "O", 
+        "Noise", 
+        "Light", 
+        "UV"
+    ]
+}

@@ -1,0 +1,51 @@
+{
+    "HOTSPOT_ID": "160", 
+    "NAME": "Mundhawa Police Station", 
+    "__createdAt": "Wed Mar 27 13:44:53 UTC 2019", 
+    "__itemStatus": "active", 
+    "__itemType": "resource-item", 
+    "__onboardedBy": "iudx-provider", 
+    "__updatedAt": "Wed Mar 27 13:44:53 UTC 2019", 
+    "__version": 1, 
+    "accessInformation": [
+        {
+            "accessSchema": "https://raw.githubusercontent.com/rbccps-iisc/iudx-schemas/master/data_models/WiFi/hotspot/examples/exApiObject_wifi_hotspot_Pune_0.json", 
+            "accessSchemaType": "openAPI", 
+            "accessVariables": {
+                "resourceClass": "wifi-hotspot", 
+                "resourceId": "Mundhawa Police Station", 
+                "resourceServerId": "https://pune.iudx.org.in:443"
+            }
+        }
+    ], 
+    "geoJsonLocation": {
+        "coordinates": [
+            73.9276201, 
+            18.5343899
+        ], 
+        "type": "Point"
+    }, 
+    "id": "97c4cdec-8702-4304-a8cd-3de5467a6879", 
+    "itemDescription": "WiFi HotSpot", 
+    "latestResourceData": "https://pune.iudx.org.in/api/1.0.0/resource/latest/wifi-hotspot/Mundhawa%20Police%20Station", 
+    "location": {
+        "latitude": 18.5343899, 
+        "longitude": 73.9276201
+    }, 
+    "provider": {
+        "entityId": "PSCDCL", 
+        "entityIdentityProviderURL": "https://ca.iudx.org.in", 
+        "entityIdentityType": "X509", 
+        "entityURL": "https://punesmartcity.in/"
+    }, 
+    "refBaseSchema": "https://raw.githubusercontent.com/rbccps-iisc/iudx-schemas/master/base_schemas/v0.0.0/iudx_data_item_schema.json", 
+    "refBaseSchemaRelease": "v0.0.0", 
+    "refDataModel": "https://raw.githubusercontent.com/rbccps-iisc/iudx-schemas/master/data_models/WiFi/hotspot/wifi_hotspot_Pune_0.json", 
+    "tags": [
+        "wifi", 
+        "hotspot", 
+        "download", 
+        "upload", 
+        "user counts"
+    ]
+}
