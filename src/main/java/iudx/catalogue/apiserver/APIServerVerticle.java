@@ -58,6 +58,7 @@ public class APIServerVerticle extends AbstractVerticle {
     HttpServer server = createServer();
 
     int port = config().getInteger("http.port", 8443);
+    System.out.println(port);
 
     server.requestHandler(router::accept).listen(port);
 
@@ -359,9 +360,9 @@ public class APIServerVerticle extends AbstractVerticle {
                       String itemType = request.getParam("itemtype");
                       request_body.put("item-type", itemType);
                       if (itemTypes.contains(itemType)) {
-                    	  databaseHandler("create", routingContext, request_body);
+                        databaseHandler("create", routingContext, request_body);
                       } else {
-                    	  handle400(routingContext, "No such item-type exists");
+                        handle400(routingContext, "No such item-type exists");
                       }
                     } else {
                       handle500(routingContext);
@@ -647,19 +648,28 @@ public class APIServerVerticle extends AbstractVerticle {
   private void handle200(RoutingContext routingContext, JsonArray reply) {
     HttpServerResponse response = routingContext.response();
 
-    response.setStatusCode(HTTP_STATUS_OK).end(reply.encodePrettily());
+    response
+        .putHeader("content-type", "application/json; charset=utf-8")
+        .setStatusCode(HTTP_STATUS_OK)
+        .end(reply.encodePrettily());
   }
 
   private void handle200(RoutingContext routingContext, JsonObject reply) {
     HttpServerResponse response = routingContext.response();
 
-    response.setStatusCode(HTTP_STATUS_OK).end(reply.encodePrettily());
+    response
+        .putHeader("content-type", "application/json; charset=utf-8")
+        .setStatusCode(HTTP_STATUS_OK)
+        .end(reply.encodePrettily());
   }
 
   private void handle204(RoutingContext routingContext) {
     HttpServerResponse response = routingContext.response();
 
-    response.setStatusCode(HTTP_STATUS_DELETED).end();
+    response
+        .putHeader("content-type", "application/json; charset=utf-8")
+        .setStatusCode(HTTP_STATUS_DELETED)
+        .end();
   }
 
   private void handle201(RoutingContext routingContext, String id) {
@@ -667,6 +677,9 @@ public class APIServerVerticle extends AbstractVerticle {
 
     String JsonId = (new JsonObject().put("id", id)).encodePrettily();
 
-    response.setStatusCode(HTTP_STATUS_CREATED).end(JsonId);
+    response
+        .putHeader("content-type", "application/json; charset=utf-8")
+        .setStatusCode(HTTP_STATUS_CREATED)
+        .end(JsonId);
   }
 }
