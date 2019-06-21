@@ -1,0 +1,51 @@
+{
+    "HOTSPOT_ID": "24", 
+    "NAME": "Late. Mamasaheb Badade", 
+    "__createdAt": "Wed Mar 27 13:44:48 UTC 2019", 
+    "__itemStatus": "active", 
+    "__itemType": "resource-item", 
+    "__onboardedBy": "iudx-provider", 
+    "__updatedAt": "Wed Mar 27 13:44:48 UTC 2019", 
+    "__version": 1, 
+    "accessInformation": [
+        {
+            "accessSchema": "https://raw.githubusercontent.com/rbccps-iisc/iudx-schemas/master/data_models/WiFi/hotspot/examples/exApiObject_wifi_hotspot_Pune_0.json", 
+            "accessSchemaType": "openAPI", 
+            "accessVariables": {
+                "resourceClass": "wifi-hotspot", 
+                "resourceId": "Late. Mamasaheb Badade", 
+                "resourceServerId": "https://pune.iudx.org.in:443"
+            }
+        }
+    ], 
+    "geoJsonLocation": {
+        "coordinates": [
+            73.8676801, 
+            18.51554
+        ], 
+        "type": "Point"
+    }, 
+    "id": "f73155a2-0895-43a8-b731-c44580a6b96c", 
+    "itemDescription": "WiFi HotSpot", 
+    "latestResourceData": "https://pune.iudx.org.in/api/1.0.0/resource/latest/wifi-hotspot/Late.%20Mamasaheb%20Badade", 
+    "location": {
+        "latitude": 18.51554, 
+        "longitude": 73.8676801
+    }, 
+    "provider": {
+        "entityId": "PSCDCL", 
+        "entityIdentityProviderURL": "https://ca.iudx.org.in", 
+        "entityIdentityType": "X509", 
+        "entityURL": "https://punesmartcity.in/"
+    }, 
+    "refBaseSchema": "https://raw.githubusercontent.com/rbccps-iisc/iudx-schemas/master/base_schemas/v0.0.0/iudx_data_item_schema.json", 
+    "refBaseSchemaRelease": "v0.0.0", 
+    "refDataModel": "https://raw.githubusercontent.com/rbccps-iisc/iudx-schemas/master/data_models/WiFi/hotspot/wifi_hotspot_Pune_0.json", 
+    "tags": [
+        "wifi", 
+        "hotspot", 
+        "download", 
+        "upload", 
+        "user counts"
+    ]
+}

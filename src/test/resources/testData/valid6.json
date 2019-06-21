@@ -1,0 +1,51 @@
+{
+    "NAME": "SANGAM HOUSING", 
+    "PANEL_ID": "28583", 
+    "PANEL_NAME": "HD-7", 
+    "__createdAt": "Wed Mar 27 13:46:35 UTC 2019", 
+    "__itemStatus": "active", 
+    "__itemType": "resource-item", 
+    "__onboardedBy": "iudx-provider", 
+    "__updatedAt": "Wed Mar 27 13:46:35 UTC 2019", 
+    "__version": 1, 
+    "accessInformation": [
+        {
+            "accessSchema": "https://raw.githubusercontent.com/rbccps-iisc/iudx-schemas/master/data_models/power/feeder/examples/exApiObject_pwr_feeder_slfeederShree_0.json", 
+            "accessSchemaType": "openAPI", 
+            "accessVariables": {
+                "resourceClass": "streetlight-feeder-sree", 
+                "resourceId": "SANGAM HOUSING", 
+                "resourceServerId": "https://pune.iudx.org.in:443"
+            }
+        }
+    ], 
+    "geoJsonLocation": {
+        "coordinates": [
+            73.92732, 
+            18.4997501
+        ], 
+        "type": "Point"
+    }, 
+    "id": "d6c945e1-5dac-4806-8e19-99e17e0980be", 
+    "itemDescription": "Streetlight Feeder Item", 
+    "latestResourceData": "https://pune.iudx.org.in/api/1.0.0/resource/latest/streetlight-feeder-sree/SANGAM%20HOUSING", 
+    "location": {
+        "latitude": 18.4997501, 
+        "longitude": 73.92732
+    }, 
+    "provider": {
+        "entityId": "PSCDCL", 
+        "entityIdentityProviderURL": "https://ca.iudx.org.in", 
+        "entityIdentityType": "X509", 
+        "entityURL": "https://punesmartcity.in/"
+    }, 
+    "refBaseSchema": "https://raw.githubusercontent.com/rbccps-iisc/iudx-schemas/master/base_schemas/v0.0.0/iudx_data_item_schema.json", 
+    "refBaseSchemaRelease": "v0.0.0", 
+    "refDataModel": "https://raw.githubusercontent.com/rbccps-iisc/iudx-schemas/master/data_models/power/feeder/examples/exdataModel_pwr_feeder_slfeederShree_0.json#/dataModelSchema", 
+    "tags": [
+        "streetlighting", 
+        "streetlight", 
+        "feeder", 
+        "power"
+    ]
+}
