@@ -276,7 +276,7 @@ public class APIServerVerticle extends AbstractVerticle {
       logger.info("userName is " + userName);
       logger.info("domain is " + domain);
 
-      String userName_SHA_1 = new DigestUtils(SHA_1).digestAsHex(userName);
+      String userName_SHA_1 = new DigestUtils(SHA_1).digestAsHex(emailID);
       logger.info("userName in SHA-1 is " + userName_SHA_1);
       String emailID_SHA_1 = userName_SHA_1 + "@" + domain;
       logger.info("emailID in SHA-1 is " + emailID_SHA_1);
