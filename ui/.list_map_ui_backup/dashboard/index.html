@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> -->
+  <title>
+      IUDX Catalogue | Indian Urban Data Exchange Catalogue
+  </title>
+  <!--meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" /-->
+  <meta name="description" content="This is the catalogue for IUDX - Indian Urban Data Exchange">
+  <meta name="organization" content="RBCCPS, IISc Bangalore">
+  <meta name="keywords" content="IUDX, CATALOGUE, RBCCPS, IISc BANGALORE">
+  <meta name="author" content="Jishnu Jaykumar P (https://jishnujayakumar.github.io)">
+  <link rel="shortcut icon" href="../../assets/img/logo/iudx-min.png" />
+  <link href="../../assets/dist/jsoneditor.css" rel="stylesheet" type="text/css">
+  <script src="../../assets/dist/jsoneditor.js"></script>
+  <link rel="stylesheet" href="../../assets/vendors/iconfonts/mdi/css/materialdesignicons.min.css">
+  <link rel="stylesheet" href="../../assets/vendors/css/vendor.bundle.base.css">
+  <link rel="stylesheet" href="../../assets/vendors/css/vendor.bundle.addons.css">
+  <!-- endinject -->
+  <!-- plugin css for this page -->
+  <!-- End plugin css for this page -->
+  <!-- inject:css -->
+  <link rel="stylesheet" href="../../assets/css/style.css">
+  <link rel="stylesheet" href="../../assets/css/styles.css">
+
+<body data-gr-c-s-loaded="true">
+    <div class="container-scroller">
+      <!-- partial:../../assets/partials/_navbar.html -->
+      <nav class="navbar default-layout-navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
+        <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-center">
+          <a class="navbar-brand brand-logo" href="#"><img src="../../assets/img/logo/iudx-max.png" alt="logo"></a>
+          <a class="navbar-brand brand-logo-mini" href="#"><img src="../../assets/img/logo/iudx-min.png" alt="logo"></a>
+        </div>
+        <div class="navbar-menu-wrapper d-flex align-items-stretch">
+          <button class="navbar-toggler navbar-toggler align-self-center" type="button" data-toggle="minimize">
+            <span class="mdi mdi-menu"></span>
+          </button>
+          <div class="search-field d-none d-md-block">
+          <form class="d-flex align-items-center h-100" action="#">
+            <div class="input-group"  style="border:1px solid #DCDCDC;">
+              <input id="tags" type="text" class="form-control bg-transparent border-0" placeholder="Search tags">
+               <div class="input-group-prepend bg-transparent" style="background-color: #047edf !important" onclick='search($("#tags").val())'>
+                  <i class="input-group-text border-0 mdi mdi-magnify" style="color: white"></i>                
+              </div>
+            </div>
+          </form>
+
+
+        </div>
+          <ul class="navbar-nav navbar-nav-right">
+            <li class="nav-item d-none d-lg-block full-screen-link">
+              <a class="nav-link">
+                <i class="mdi mdi-fullscreen" id="fullscreen-button"></i>
+              </a>
+            </li>
+            <li class="nav-item nav-profile dropdown">
+              <a class="nav-link" id="profileDropdown" href="#" data-toggle="dropdown" aria-expanded="false">
+                <div class="nav-profile-text">
+                  <p class="mb-1 text-black">{{UserName}}</p>
+                </div>
+              </a>
+            </li>
+            <li class="nav-item nav-logout">
+            <a class="nav-link" href="#" onclick="refresh_tags()">
+              <i class="mdi mdi-refresh"></i>
+            </a>
+            </li>
+            <li class="nav-item nav-logout d-lg-block">
+              <a class="nav-link" href="/">
+                <i class="mdi mdi-power"></i>
+              </a>
+            </li>
+            
+          </ul>
+          <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button" data-toggle="offcanvas">
+            <span class="mdi mdi-menu"></span>
+          </button>
+        </div>
+      </nav>
+      <!-- partial -->
+      <div class="container-fluid page-body-wrapper">
+        <!-- partial:../../assets/partials/_settings-panel.html -->
+      
+        <!-- partial -->
+        <!-- partial:../../assets/partials/_sidebar.html -->
+        <nav class="sidebar sidebar-offcanvas" id="sidebar">
+          <ul class="nav">
+            <!-- <li class="nav-item">
+              <a class="nav-link" href="../../assets/index.html">
+                <span class="menu-title">Dashboard</span>
+                <i class="mdi mdi-home menu-icon"></i>
+              </a>
+            </li> -->
+            <li class="nav-item">
+              <a class="nav-link" data-toggle="collapse" href="#page-layouts" aria-expanded="false" aria-controls="page-layouts">
+                <span class="menu-title">CRUD Operations</span>
+                <i class="menu-arrow"></i>
+                <i class="mdi mdi-apps menu-icon"></i>
+              </a>
+              <div class="collapse" id="page-layouts">
+                <ul class="nav flex-column sub-menu">
+                  <li class="nav-item"> <a class="nav-link sidebar-nav-link" href="#" onclick="create_item(this)">Create Item</a></li>
+                  <li class="nav-item"> <a class="nav-link sidebar-nav-link" href="#" onclick="read_item(this)">Read Item</a></li>
+                  <!-- <li class="nav-item"> <a class="nav-link sidebar-nav-link" href="#">Update Item</a></li> -->
+                  <!-- <li class="nav-item"> <a class="nav-link sidebar-nav-link" href="#">Delete Item</a></li> -->
+                </ul>
+              </div>
+            </li>
+           
+          </ul>
+        </nav>
+        <!-- partial -->
+        <div class="main-panel">
+          <div class="content-wrapper">
+
+          </div>
+          <!-- content-wrapper ends -->
+          <!-- partial:../../assets/partials/_footer.html -->
+          <footer class="footer">
+          <div class="d-sm-flex justify-content-center justify-content-sm-between">
+            <span class="text-muted text-center text-sm-left d-block d-sm-inline-block"> <!--Copyright © 2017 --> <a id="location" href="#" ></a><!-- . All rights reserved. --></span>
+            <span class="float-none float-sm-right d-block mt-1 mt-sm-0 text-center">Version 2.0
+            <br>Icons made by <a href="https://flat-icons.com/">Flat-Icons</a> from <a href="www.flaticon.com ">flaticon.com </a>
+            </span>
+            <!-- <span id="location"></span> -->
+          </div>
+        </footer>
+          <!-- partial -->
+        </div>
+        <!-- main-panel ends -->
+      </div>
+      <!-- page-body-wrapper ends -->
+    </div>
+    <!-- container-scroller -->
+    <!-- plugins:js -->
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+    </script>
+    <script src="../../assets/vendors/js/vendor.bundle.base.js"></script>
+    <script src="../../assets/vendors/js/vendor.bundle.addons.js"></script>
+    <!-- endinject -->
+    <!-- Plugin js for this page-->
+    <!-- End plugin js for this page-->
+    <!-- inject:js -->
+    <script src="../../assets/js/off-canvas.js"></script>
+    <script src="../../assets/js/hoverable-collapse.js"></script>
+    <script src="../../assets/js/misc.js"></script>
+    <script src="../../assets/js/settings.js"></script>
+    <script src="../../assets/js/todolist.js"></script>
+    <script src="../../assets/js/dashboard.js"></script>
+    <script src="../../assets/js/randomColor.js"></script>
+    <script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js"
+     integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA=="
+ crossorigin=""></script>
+    <script src="../../assets/js/alerts.js"></script>
+    <script src="../../assets/js/jquery-file-upload.js"></script>
+    <!-- <script src="../../assets/js/codeEditor.js"></script> -->
+    <script src="../../assets/js/script.js"></script>
+    <!-- endinject -->
+    <!-- Custom js for this page-->
+    <!-- End custom js for this page-->
+    <script type="text/javascript">
+      $(document).bind('keydown', function(e) {
+        if(e.ctrlKey && (e.which == 83)) {
+          e.preventDefault();
+          return false;
+        }
+      });
+      get_location();
+      $(document).ready(function() {
+        if (localStorage.getItem("data") == null) {
+            cache_cat();
+        }
+      });
+      
+    </script>
+  
+</body>
+
+</html>

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> -->
+  <title>
+      IUDX Catalogue | Indian Urban Data Exchange Catalogue
+  </title>
+  <!--meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" /-->
+  <meta name="description" content="This is the catalogue for IUDX - Indian Urban Data Exchange">
+  <meta name="organization" content="RBCCPS, IISc Bangalore">
+  <meta name="keywords" content="IUDX, CATALOGUE, RBCCPS, IISc BANGALORE">
+  <meta name="author" content="Jishnu Jaykumar P (https://jishnujayakumar.github.io)">
+  <!-- plugins:css -->
+  <link rel="stylesheet" href="../../assets/vendors/iconfonts/mdi/css/materialdesignicons.min.css">
+  <link rel="stylesheet" href="../../assets/vendors/css/vendor.bundle.base.css">
+  <!-- endinject -->
+  <!-- inject:css -->
+  <link rel="stylesheet" href="../../assets/css/style.css">
+  <link rel="stylesheet" href="../../assets/css/jquery.toast.css">
+  <!-- <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"> -->
+  <!-- endinject -->
+  <link rel="shortcut icon" href="../../assets/img/logo/iudx-min.png" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css"
+   integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
+   crossorigin=""/>
+  <link rel="stylesheet" href="../../assets/css/leaflet-beautify-marker-icon.css">
+  <link rel="stylesheet" href="../../assets/css/styles.css">
+   <!-- <link href="style.css" type="text/css" rel=stylesheet> -->
+
+</head>
+<body oncontextmenu="return false">
+  <div class="container-scroller">
+    <!-- partial:partials/_navbar.html -->
+    <nav class="navbar default-layout-navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
+      <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-center">
+        <a class="navbar-brand brand-logo" href="#">IUDX Catalogue</a>
+        <!-- <a class="navbar-brand brand-logo" href="#"><img src="../../assets/img/logo/iudx.png" alt="logo"/></a> -->
+        <a class="navbar-brand brand-logo-mini" href="#"><img src="../../assets/img/logo/iudx.png" alt="logo"/></a>
+      </div>
+      <div class="navbar-menu-wrapper d-flex align-items-stretch">
+        <div class="search-field d-none d-md-block">
+          <form class="d-flex align-items-center h-100" action="#">
+            <div class="input-group"  style="border:1px solid #DCDCDC;">
+              <input id="tags" type="text" class="form-control bg-transparent border-0" placeholder="Search tags">
+               <div class="input-group-prepend bg-transparent" style="background-color: #047edf !important" onclick='search($("#tags").val())'>
+                  <i class="input-group-text border-0 mdi mdi-magnify" style="color: white"></i>                
+              </div>
+            </div>
+          </form>
+
+
+        </div>
+<!--         &nbsp;&nbsp;&nbsp;
+        <div class="search-field d-none d-md-block">
+          <form class="d-flex align-items-center h-100" action="#">
+            <div class="input-group"  style="border:1px solid #DCDCDC;">
+      <label class="form-control bg-transparent border-0" for="sel1">Select Filter: </label>
+      <select class="bg-transparent border-0" id="sel1" name="sellist1">
+        <option>Tags</option>
+        <option>Services</option>
+        <option>Providers</option>
+        <option>Attributes</option>
+        <option>Catalogues</option>
+        <option>Data-Models</option>
+        <option>Base-Schemas</option>
+        <option>Access-Schemas</option>
+        <option>Resource-Items</option>
+        <option>Resource-Groups</option>
+        <option>Resource-Servers</option>
+      </select>
+            </div>
+
+          </form>
+
+        </div> -->
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <ul class="navbar-nav navbar-nav-right">
+         <li class="nav-item nav-profile dropdown show">
+            <a class="nav-link dropdown-toggle" id="profileDropdown" href="#" data-toggle="dropdown" aria-expanded="true">
+              <div class="nav-profile-img">
+                <!-- <img src="../../images/faces/face1.jpg" alt="image"> -->
+                <!-- <span class="availability-status online"></span>              -->
+              </div>
+              <div class="nav-profile-text">
+                <p class="mb-1 text-black">Change view</p>
+              </div>
+            </a>
+            <div class="dropdown-menu navbar-dropdown show" aria-labelledby="profileDropdown">
+              <a id="list_view" class="dropdown-item" href="#" onclick="changeView('list_view')">
+                <i class="mdi mdi-format-list-bulleted mr-2 text-success"></i>
+                List View
+              </a>
+              <div class="dropdown-divider"></div>
+              <a id="map_view" class="dropdown-item" href="#" onclick="changeView('map_view')">
+                <i class="mdi mdi-map-marker-circle mr-2 text-primary"></i>
+                Map View
+              </a>
+            </div>
+          </li>       
+
+          <li class="nav-item d-none d-lg-block full-screen-link">
+            <a class="nav-link">
+              <i class="mdi mdi-fullscreen" id="fullscreen-button"></i>
+            </a>
+          </li>
+     
+          <li class="nav-item nav-logout">
+            <a class="nav-link" href="#" onclick="refresh_tags()">
+              <i class="mdi mdi-refresh"></i>
+            </a>
+          </li>
+
+          <li class="nav-item nav-logout">
+            <a class="nav-link" href="/dashboard" style="color:black"> Dashboard
+            </a>
+          </li>
+        </ul>
+        <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button" data-toggle="offcanvas">
+          <span class="mdi mdi-menu"></span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- partial -->
+    <div class="container-fluid page-body-wrapper">
+      <!-- partial:partials/_sidebar.html -->
+      <nav class="sidebar sidebar-offcanvas" id="sidebar">
+        <ul id="tags_side_bar" class="nav">
+          <!-- your sidebar with tags will be populated here -->
+        </ul>
+      </nav>
+      <!-- partial -->
+      <div class="main-panel">
+        <div class="content-wrapper">
+          <div class="row">
+            <div class="col-12">
+              <span class="d-flex align-items-center purchase-popup">
+                <p id="item_result_count"></p> &nbsp; <p id="retrieved_item_count"> </p>
+                <!-- <a href="#" target="_blank" class="btn ml-auto purchase-button">Development under progress</a> -->
+                <a href="#" class="btn ml-auto purchase-button">Version 2.0</a>
+                <!-- <i class="mdi mdi-close popup-dismiss"></i> -->
+              </span>
+
+            </div>
+          </div>
+
+<!--           <div class="row">
+            <div class="col-md-4 stretch-card grid-margin">
+              <div class="card bg-gradient-danger card-img-holder text-white">
+                <div class="card-body">
+                  <img src="../../assets/images/dashboard/circle.svg" class="card-img-absolute" alt="circle-image"/>
+                  <h4 class="font-weight-normal mb-3">Item Count
+                    <i class="mdi mdi-chart-line mdi-24px float-right"></i>
+                  </h4>
+                  <h2 class="mb-5">15,0000</h2>
+                  <h6 class="card-text">Increased by 60%</h6>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4 stretch-card grid-margin">
+              <div class="card bg-gradient-info card-img-holder text-white">
+                <div class="card-body">
+                  <img src="../../assets/images/dashboard/circle.svg" class="card-img-absolute" alt="circle-image"/>                  
+                  <h4 class="font-weight-normal mb-3">Tag Count
+                    <i class="mdi mdi-bookmark-outline mdi-24px float-right"></i>
+                  </h4>
+                  <h2 class="mb-5">45,6334</h2>
+                  <h6 class="card-text">Decreased by 10%</h6>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4 stretch-card grid-margin">
+              <div class="card bg-gradient-success card-img-holder text-white">
+                <div class="card-body">
+                  <img src="../../assets/images/dashboard/circle.svg" class="card-img-absolute" alt="circle-image"/>                                    
+                  <h4 class="font-weight-normal mb-3">Visitors Online
+                    <i class="mdi mdi-diamond mdi-24px float-right"></i>
+                  </h4>
+                  <h2 class="mb-5">95,5741</h2>
+                  <h6 class="card-text">Increased by 5%</h6>
+                </div>
+              </div>
+            </div>
+          </div> -->
+          <div id="searched_items" class="row">
+                   
+          </div>
+        <!-- content-wrapper ends -->
+        <!-- partial:partials/_footer.html -->
+        <footer class="footer">
+          <div class="d-sm-flex justify-content-center justify-content-sm-between">
+            <span class="text-muted text-center text-sm-left d-block d-sm-inline-block"> <!--Copyright © 2017 --> <a id="location" href="#" ></a><!-- . All rights reserved. --></span>
+            <span class="float-none float-sm-right d-block mt-1 mt-sm-0 text-center">
+            Icons made by <a href="https://flat-icons.com/">Flat-Icons</a> from <a href="www.flaticon.com ">flaticon.com </a>
+            </span>
+            <!-- <span id="location"></span> -->
+          </div>
+        </footer>
+        <!-- partial -->
+      </div>
+      <!-- main-panel ends -->
+    </div>
+    <!-- page-body-wrapper ends -->
+  </div>
+  <!-- container-scroller -->
+
+  <!-- plugins:js -->
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+
+  <script src="../../assets/vendors/js/vendor.bundle.base.js"></script>
+  <script src="../../assets/vendors/js/vendor.bundle.addons.js"></script>
+  <!-- endinject -->
+  <!-- Plugin js for this page-->
+  <!-- End plugin js for this page-->
+  <!-- inject:js -->
+  <script src="../../assets/js/off-canvas.js"></script>
+  <script src="../../assets/js/misc.js"></script>
+  <!-- endinject -->
+  <!-- Custom js for this page-->
+  <script src="../../assets/js/dashboard.js"></script>
+  <script src="../../assets/js/randomColor.js"></script>
+  <script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js"
+   integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA=="
+   crossorigin=""></script>
+  <script src="../../assets/js/leaflet-beautify-marker-icon.js"></script>
+  <script src="../../assets/js/alerts.js"></script>
+  <script src="../../assets/js/script.js"></script>
+  <script src="../../assets/js/jquery.toast.js"></script>
+  <script src="../../assets/js/jquery-ui.js"></script>
+
+
+  <script type="text/javascript">
+    $(document).bind('keydown', function(e) {
+      if(e.ctrlKey && (e.which == 83)) {
+        e.preventDefault();
+        return false;
+      }
+    });
+    get_location();
+    $(document).ready(function() {
+        var data = JSON.parse(localStorage.getItem("data"));
+        populate_side_bar().then(function(data) {
+          $( "#tags" ).autocomplete({
+            source: data
+          });
+        });        
+    });
+
+    if($(".__active").attr('id')==undefined){
+      $("#list_view").addClass('__active')
+      $.toast({ 
+              text : `By default List view activated. For view change, use Change view feature`, 
+              showHideTransition : 'fade',  // It can be plain, fade or slide
+              bgColor : '#07cdae',              // Background color for toast
+              textColor : '#000',            // text color
+              allowToastClose : false,       // Show the close button or not
+              hideAfter : 3500,              // `false` to make it sticky or time in miliseconds to hide after
+              stack : 5,                     // `fakse` to show one stack at a time count showing the number of toasts that can be shown at once
+              textAlign : 'center',            // Alignment of text i.e. left, right, center
+              position : 'mid-center'       // bottom-left or bottom-right or bottom-center or top-left or top-right or top-center or mid-center or an object representing the left, right, top, bottom values to position the toast on page
+            })
+      $.toast({ 
+              text : `Displaying all items. <br> Select tags for filtering`, 
+              showHideTransition : 'fade',  // It can be plain, fade or slide
+              bgColor : '#07cdae',              // Background color for toast
+              textColor : '#000',            // text color
+              allowToastClose : false,       // Show the close button or not
+              hideAfter : 5000,              // `false` to make it sticky or time in miliseconds to hide after
+              stack : 5,                     // `fakse` to show one stack at a time count showing the number of toasts that can be shown at once
+              textAlign : 'center',            // Alignment of text i.e. left, right, center
+              position : 'mid-center'       // bottom-left or bottom-right or bottom-center or top-left or top-right or top-center or mid-center or an object representing the left, right, top, bottom values to position the toast on page
+            })
+    }
+  </script>
+  <!-- End custom js for this page-->
+</body>
+
+</html>

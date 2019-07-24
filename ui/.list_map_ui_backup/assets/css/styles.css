@@ -1,0 +1,127 @@
+    ._active{
+      background: linear-gradient(to right, #da8cff, #9a55ff) !important;
+      border-radius: 10px;
+      color: #fff !important;
+      text-align: center !important;
+    }
+
+    ._active > .nav-link > .tag_item_count{
+      color: #fff !important;
+    }
+
+    ._active > .nav-link{
+      color: #fff !important; 
+    }
+
+    .ui-menu {
+            list-style:none;
+            padding: 10px;
+            margin: 0px;
+            display:block;
+            width:227px;
+            background-color: white;
+    }
+
+    .ui-menu .ui-menu {
+            /*margin-top: -3px;*/
+    }
+    
+    .ui-menu .ui-menu-item {
+            margin:0;
+            padding: 2px;
+            /*margin: 2px;*/
+            width: 200px;
+            color: #07cdae;
+    }
+    
+    .ui-menu .ui-menu-item a {
+            text-decoration:none;
+            display:block;
+            padding:.2em .4em;
+            line-height:1.5;
+            zoom:1;
+    }
+    
+    .ui-menu .ui-menu-item a.ui-state-hover,
+    .ui-menu .ui-menu-item a.ui-state-active {
+            /*margin: -1px;*/
+    }
+
+    #tags_side_bar {
+      width: 260px;
+      background: #fff;
+      position: fixed;
+      height: 100%;
+      overflow-y: auto !important;
+      transition: all 0.4s ease 0s;
+    }
+
+    /* width */
+    ::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    /* Track */
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1; 
+    }
+     
+    /* Handle */
+    ::-webkit-scrollbar-thumb {
+      background: #84d9d2; 
+    }
+
+    /* Handle on hover */
+    ::-webkit-scrollbar-thumb:hover {
+      background: #555; 
+    }
+
+    #mapid { height: 600px; }
+
+    .legend{
+      border: 1px solid black;
+      background-color: white;
+      padding: 10px;
+    }
+
+    .dots{
+      width:10px; 
+      height:10px;
+      border-radius: 25%;
+      display: inline-block;
+    }
+
+    label.badge{
+      color: white !important;
+    }
+
+    .mr{
+    	margin-right: 10px;
+    }
+
+   /* .jsoneditor {
+      width: 500px;
+      height: 500px;
+    }
+
+     custom bold styling for non-default JSON schema values 
+    .jsoneditor-is-not-default {
+      font-weight: bold;
+    }*/
+
+
+    .pico-content .jsoneditor-modal .jsoneditor-modal-transform{
+    	/*position: absolute !important;*/
+    	display: none !important; 
+    	/*z-index: 10001; 
+    	left: 50%; 
+    	top: 38.1966%; 
+    	max-height: 90%; 
+    	box-sizing: border-box; 
+    	width: auto; 
+    	transform: translate(-50%, -38.1966%); 
+    	overflow: auto; 
+    	background-color: white; 
+    	padding: 20px; 
+    	border-radius: 5px;*/
+    }
