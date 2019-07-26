@@ -124,6 +124,7 @@ public class APIServerVerticle extends AbstractVerticle {
     router.patch("/update/catalogue/resource-item/bulk/:bulkId").handler(this::bulkUpdate);
     router.delete("/remove/catalogue/resource-item/bulk/:bulkId").handler(this::bulkDelete);
 
+    router.route("/ui/*").handler(StaticHandler.create("ui/pages"));
     router.route("/assets/*").handler(StaticHandler.create("ui/assets"));
     return router;
   }
@@ -276,7 +277,7 @@ public class APIServerVerticle extends AbstractVerticle {
       logger.info("userName is " + userName);
       logger.info("domain is " + domain);
 
-      String userName_SHA_1 = new DigestUtils(SHA_1).digestAsHex(emailID);
+      String userName_SHA_1 = new DigestUtils(SHA_1).digestAsHex(userName);
       logger.info("userName in SHA-1 is " + userName_SHA_1);
       String emailID_SHA_1 = userName_SHA_1 + "@" + domain;
       logger.info("emailID in SHA-1 is " + emailID_SHA_1);
