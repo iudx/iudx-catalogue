@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="IUDX | Indian Urban Data Exchange">
+  <meta name="organization" content="RBCCPS, IISc Bangalore">
+  <meta name="keywords" content="IUDX, CATALOGUE, RBCCPS, IISc BANGALORE">
+  <meta name="author" content="Jishnu Jaykumar P (http://jishnujayakumar.github.io), Rohina Naaz, Harshubh Meherishi">
+  <title>
+    PSCDCL IUDX | Indian Urban Data Exchange Catalogue 
+  </title>
+  <link rel="stylesheet" type="text/css" href="../assets/css/bootstrap.min.css">
+  <link href="../assets/css/mdb.min.css" rel="stylesheet">
+  <link href="../assets/css/list_style.css" rel="stylesheet">
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+</head>
+<body>
+    <!-- <div class="container-fluid"> -->
+        <!-- ***** Header Area Start ***** -->
+        <header>
+            <div class="container">
+                <div class="row justify-content-around">
+                    <div class="col-xl-6 col-lg-6 col-md-6 col-6 align-self-center">
+                        <a href="home/">
+                            <img src="../assets/img/iudx_pscdcl.png" class="img-fluid">
+                        </a>
+                    </div>
+                    <div class="col-xl-6 col-lg-6 col-md-6 col-6 text-right align-self-center">
+                        <img src="../assets/img/sc_iisc.png" class="img-fluid">
+                    </div>
+                </div>
+            </div>
+        </header>
+    <!-- ***** Header Area End ***** -->
+
+    <hr>
+
+        <section id="landing_section" class="container">
+        <div class="row style_list">
+          <div class="col-lg-12 justify-content-around">
+              <h1 class="heading text-white">
+                Discover 1256 resource-items by 51 providers <!-- grouped in a 25 resource groups -->
+              </h1>
+          
+            <br>
+
+              <p class="lead text-muted text-white">
+                   Welcome to the IUDX complaint Catalogue of PSCDCL    
+              </p>
+
+            <br>
+
+
+          <!-- <p>
+            <a href="#" class="btn btn-primary my-2">Main call to action</a>
+            <a href="#" class="btn btn-secondary my-2">Secondary action</a>
+          </p> -->
+          <div class="row">
+              <div class="col-lg-4">
+                <!-- <label for="attribute">Attributes</label> -->
+                <select class="custom-select d-block w-100" id="attribute" required="">
+                  <option value="">Choose Attribute</option>
+                  <option>Tags</option>
+                  <!-- <option>Some attribute</option>
+                  <option>Some attribute</option>
+                  <option>Some attribute</option>
+                  <option>Some attribute</option>
+                  <option>Some attribute</option>
+                  <option>Some attribute</option>
+                  <option>Some attribute</option>
+                  <option>Some attribute</option>
+                  <option>Some attribute</option> -->
+                </select>
+                <!-- <div class="invalid-feedback">
+                  Please select a valid country.
+                </div> -->
+              </div>
+          
+          
+              <div class="col-lg-4">
+                <!-- <label for="value">Value</label> -->
+                <input type="text" class="form-control" id="value" placeholder="attribute-value" required="">
+                <!-- <div class="invalid-feedback">
+                  Zip code required.
+                </div> -->
+              </div>
+            
+            
+              <div class="col-lg-4">
+                <!-- <label for="state">State</label> -->
+                <button class="btn btn-primary btn-block" type="submit" onclick="display_search_section()">Search Catalogue</button>
+                <!-- <div class="invalid-feedback">
+                  Please provide a valid state.
+                </div> -->
+              </div>
+
+            </div>
+     
+            <br>
+            <br>
+            <br>
+
+           <p class="lead text-muted text-white">
+                   Also checkout the <a href="/ui/map" style="color:#dddddd; text-decoration: underline">Geo Query Interface</a>.
+           </p>
+        
+          
+          </div>
+          </div>
+          <!-- <footer class="text-muted landing_footer"> -->
+          <div id="landing_footer" class="container landing_footer">
+          </div>
+    <!-- </footer> -->
+        </section>
+
+
+        <section id="search_section" class="container">
+                      <div class="row">
+              <div class="col-lg-4">
+                <!-- <label for="attribute">Attributes</label> -->
+                <select class="custom-select d-block w-100" id="_attribute" required="">
+                  <option value="">Choose Attribute</option>
+                  <option>Tags</option>
+                  <!-- <option>Some attribute</option>
+                  <option>Some attribute</option>
+                  <option>Some attribute</option>
+                  <option>Some attribute</option>
+                  <option>Some attribute</option>
+                  <option>Some attribute</option>
+                  <option>Some attribute</option>
+                  <option>Some attribute</option>
+                  <option>Some attribute</option> -->
+                </select>
+                <!-- <div class="invalid-feedback">
+                  Please select a valid country.
+                </div> -->
+              </div>
+          
+          
+              <div class="col-lg-4">
+                <!-- <label for="value">Value</label> -->
+                <input type="text" class="form-control" id="_value" placeholder="attribute-value" required>
+                <!-- <div class="invalid-feedback">
+                  Zip code required.
+                </div> -->
+              </div>
+            
+            
+              <div class="col-lg-4">
+                <!-- <label for="state">State</label> -->
+                <button class="btn btn-primary btn-block" type="submit" onclick="get_items()">Search Catalogue</button>
+                <!-- <div class="invalid-feedback">
+                  Please provide a valid state.
+                </div> -->
+              </div>
+            
+        
+            </div>
+             <div id="searched_items" class="row">
+                   
+            </div>
+            <!-- <p>search_section</p> -->
+
+            <div id="normal_footer" class="normal_footer">
+            </div>
+
+        </section>
+
+    <!-- </div> -->
+
+</body>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+<script type="text/javascript" src="../assets/js/bootstrap.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script type="text/javascript" src="../assets/js/list_script.js"></script>
+</html>
