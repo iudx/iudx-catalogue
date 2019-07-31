@@ -90,7 +90,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     attributeFilter.put("_id", 0);
     // query.put("Status", "Live");
 
-    String[] hiddenFields = {"_tags","__uuid"};
+    String[] hiddenFields = {"_tags","__uuid", "geoJsonLocation"};
 
     FindOptions options = new FindOptions();
     options.setFields(attributeFilter);
@@ -392,14 +392,29 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   private JsonObject addNewAttributes(JsonObject doc, int version, boolean addId, String bulkId) {
 
     JsonObject updated = doc.copy();
-    String id, sha1, resourceServer, resourceServerGroup, provider, resourceId;
+    JsonObject geometry;
+    JsonArray geometry_array;
+    String id, sha1, resourceServer, resourceServerGroup, provider, resourceId, geometry_type, longitude, latitude;
     
     sha1 = updated.getString("sha_1_id");
     resourceServer = updated.getJsonObject("resourceServer").getString("value"); 
     resourceServerGroup = updated.getJsonObject("resourceServerGroup").getString("value"); 
     provider = updated.getJsonObject("provider").getString("value"); 
     resourceId = updated.getJsonObject("resourceId").getString("value");
+    geometry = updated.getJsonObject("location").getJsonObject("value").getJsonObject("geometry");
+    geometry_type = updated.getJsonObject("location").getJsonObject("value").getJsonObject("geometry").getString("type");
+    geometry_array = updated.getJsonObject("location").getJsonObject("value").getJsonObject("geometry").getJsonArray("coordinates");
     
+    System.out.println(geometry);
+    System.out.println(geometry_type);
+    System.out.println(geometry_array);
+    
+		if (geometry_type == "Point") {
+			latitude = geometry_array.getString(0);
+			longitude = geometry_array.getString(1);
+		}
+	
+	updated.put("geoJsonLocation", geometry);	
     updated.remove("sha_1_id");
 	updated.put("createdAt", new JsonObject().put("type", "TimeProperty").put("value", new java.util.Date().toString()));
 	updated.put("updatedAt", new JsonObject().put("type", "TimeProperty").put("value", new java.util.Date().toString()));

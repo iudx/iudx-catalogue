@@ -113,6 +113,9 @@ public class APIServerVerticle extends AbstractVerticle {
               response.sendFile("ui/search/index.html");
             });
 
+    // IUDX v1 APIs
+    router.post("/catalogue/v1/items").handler(this::create);
+    
     // NEW APIs
     router.get("/list/catalogue/:itemtype").handler(this::list);
     router.get("/search/catalogue/attribute").handler(this::searchAttribute);
@@ -289,6 +292,9 @@ public class APIServerVerticle extends AbstractVerticle {
    */
   private void create(RoutingContext routingContext) {
     HttpServerRequest request = routingContext.request();
+    String query_params = request.query();
+    String itemType = query_params.split("=")[1];
+ 
     String skip_validation = "false";
     if (request.headers().contains("skip_validation")) {
       skip_validation = request.getHeader("skip_validation").toLowerCase();
@@ -319,7 +325,6 @@ public class APIServerVerticle extends AbstractVerticle {
                   validator_action,
                   validator_reply -> {
                     if (validator_reply.succeeded()) {
-                      String itemType = request.getParam("itemtype");
                       if (itemTypes.contains(itemType)) {
                     	  databaseHandler("create", routingContext, request_body);
                       } else {
