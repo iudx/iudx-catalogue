@@ -13,6 +13,8 @@ if [ "$@" = "apiserver" ]; then
 
 	cd ..
 
+	cp docker_conf.production.json src/main/conf/docker_conf.json
+
 	mvn clean package -DskipTests
 
 	cp target/catalogue-apiserver-0.0.1-fat.jar .
@@ -20,7 +22,7 @@ if [ "$@" = "apiserver" ]; then
 	cd docker
 
 	echo "Starting Containers"
-	docker-compose up -d apiserver
+	docker-compose -f docker-compose.production.yml up -d apiserver
 	echo "Started Catalogue API Server"
 
 elif [ "$@" = "mongodb" ]; then
