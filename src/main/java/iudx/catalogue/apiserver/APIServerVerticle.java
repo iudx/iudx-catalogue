@@ -69,7 +69,7 @@ public class APIServerVerticle extends AbstractVerticle {
 
   private void populateItemTypes() {
     itemTypes = new ArrayList<String>();
-    itemTypes.add("resource-item");
+    itemTypes.add("resourceItem");
     itemTypes.add("data-model");
     itemTypes.add("access-object");
     itemTypes.add("resource-server");
@@ -320,7 +320,6 @@ public class APIServerVerticle extends AbstractVerticle {
                   validator_reply -> {
                     if (validator_reply.succeeded()) {
                       String itemType = request.getParam("itemtype");
-                      request_body.put("item-type", itemType);
                       if (itemTypes.contains(itemType)) {
                     	  databaseHandler("create", routingContext, request_body);
                       } else {

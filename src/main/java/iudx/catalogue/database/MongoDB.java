@@ -90,11 +90,11 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     attributeFilter.put("_id", 0);
     // query.put("Status", "Live");
 
-    String[] hiddenFields = {"_tags"};
+    String[] hiddenFields = {"_tags","__uuid"};
 
     FindOptions options = new FindOptions();
     options.setFields(attributeFilter);
-
+    System.out.println(query);
     mongo.findWithOptions(
         COLLECTION,
         query,
@@ -123,8 +123,12 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   public void list(Message<Object> message) {
     JsonObject request_body = (JsonObject) message.body();
     String itemType = request_body.getString("item-type");
+    System.out.print(itemType);
+    JsonObject searchitemType = new JsonObject();
+    searchitemType.put("type", "Property");
+    searchitemType.put("value", itemType);
     JsonObject query = new JsonObject();
-    query.put("item-type", itemType);
+    query.put("itemType", searchitemType);
 
     mongoFind(query, new JsonObject(), message);
   }
@@ -266,6 +270,10 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
             value.add(((String) tag).toLowerCase());
           }
           updateNoOfHits(value);
+          JsonObject q = new JsonObject();
+
+          q.put(key, new JsonObject().put("$in", value));
+          expressions.add(q);
         } else if (key.equalsIgnoreCase("location")) {
           JsonObject location = new JsonObject();
           for (Object param : value) {
@@ -283,15 +291,27 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
           JsonObject value2 = geo_search_query(location);
           JsonObject q = new JsonObject();
           q.put(key, value2);
+
+          q.put(key, new JsonObject().put("$in", value));
           expressions.add(q);
+          
+          // expressions.add(q);
           continue;
         } else if (key.charAt(0) == '$') {
           key = "_$_" + key.substring(1);
-        }
-        JsonObject q = new JsonObject();
+          JsonObject q = new JsonObject();
 
-        q.put(key, new JsonObject().put("$in", value));
-        expressions.add(q);
+          q.put(key, new JsonObject().put("$in", value));
+          expressions.add(q);
+        } else {
+        	JsonObject q = new JsonObject();
+        	JsonObject v = new JsonObject();
+        	v.put("type","Property");
+        	v.put("value", value.getString(0));
+        	
+            q.put(key, v);
+            expressions.add(q);	
+        }
       }
       query.put("$and", expressions);
     } else if (requestBody.containsKey("attribute-name")
