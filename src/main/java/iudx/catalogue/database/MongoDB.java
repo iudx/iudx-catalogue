@@ -88,13 +88,13 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   private void mongoFind(JsonObject query, JsonObject attributeFilter, Message<Object> message) {
 
     attributeFilter.put("_id", 0);
-    query.put("Status", "Live");
+    // query.put("Status", "Live");
 
-    String[] hiddenFields = {"_tags"};
+    String[] hiddenFields = {"_tags","__uuid", "geoJsonLocation"};
 
     FindOptions options = new FindOptions();
     options.setFields(attributeFilter);
-
+    System.out.println(query);
     mongo.findWithOptions(
         COLLECTION,
         query,
@@ -123,8 +123,12 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   public void list(Message<Object> message) {
     JsonObject request_body = (JsonObject) message.body();
     String itemType = request_body.getString("item-type");
+    System.out.print(itemType);
+    JsonObject searchitemType = new JsonObject();
+    searchitemType.put("type", "Property");
+    searchitemType.put("value", itemType);
     JsonObject query = new JsonObject();
-    query.put("item-type", itemType);
+    query.put("itemType", searchitemType);
 
     mongoFind(query, new JsonObject(), message);
   }
@@ -266,6 +270,10 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
             value.add(((String) tag).toLowerCase());
           }
           updateNoOfHits(value);
+          JsonObject q = new JsonObject();
+
+          q.put(key, new JsonObject().put("$in", value));
+          expressions.add(q);
         } else if (key.equalsIgnoreCase("location")) {
           JsonObject location = new JsonObject();
           for (Object param : value) {
@@ -283,15 +291,27 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
           JsonObject value2 = geo_search_query(location);
           JsonObject q = new JsonObject();
           q.put(key, value2);
+
+          q.put(key, new JsonObject().put("$in", value));
           expressions.add(q);
+          
+          // expressions.add(q);
           continue;
         } else if (key.charAt(0) == '$') {
           key = "_$_" + key.substring(1);
-        }
-        JsonObject q = new JsonObject();
+          JsonObject q = new JsonObject();
 
-        q.put(key, new JsonObject().put("$in", value));
-        expressions.add(q);
+          q.put(key, new JsonObject().put("$in", value));
+          expressions.add(q);
+        } else {
+        	JsonObject q = new JsonObject();
+        	JsonObject v = new JsonObject();
+        	v.put("type","Property");
+        	v.put("value", value.getString(0));
+        	
+            q.put(key, v);
+            expressions.add(q);	
+        }
       }
       query.put("$and", expressions);
     } else if (requestBody.containsKey("attribute-name")
@@ -372,13 +392,35 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   private JsonObject addNewAttributes(JsonObject doc, int version, boolean addId, String bulkId) {
 
     JsonObject updated = doc.copy();
-    updated.put("Created", new java.util.Date().toString());
-    updated.put("Last modified on", new java.util.Date().toString());
-    updated.put("Status", "Live");
-    updated.put("Version", version);
-    updated.put("Provider", "iudx-provider");
+    JsonObject geometry;
+    JsonArray geometry_array;
+    String id, sha1, resourceServer, resourceServerGroup, provider, resourceId, geometry_type, longitude, latitude;
+    
+    sha1 = updated.getString("sha_1_id");
+    resourceServer = updated.getJsonObject("resourceServer").getString("value"); 
+    resourceServerGroup = updated.getJsonObject("resourceServerGroup").getString("value"); 
+    provider = updated.getJsonObject("provider").getString("value"); 
+    resourceId = updated.getJsonObject("resourceId").getString("value");
+    geometry = updated.getJsonObject("location").getJsonObject("value").getJsonObject("geometry");
+    geometry_type = updated.getJsonObject("location").getJsonObject("value").getJsonObject("geometry").getString("type");
+    geometry_array = updated.getJsonObject("location").getJsonObject("value").getJsonObject("geometry").getJsonArray("coordinates");
+    
+    System.out.println(geometry);
+    System.out.println(geometry_type);
+    System.out.println(geometry_array);
+    
+		if (geometry_type == "Point") {
+			latitude = geometry_array.getString(0);
+			longitude = geometry_array.getString(1);
+		}
+	
+	updated.put("geoJsonLocation", geometry);	
+    updated.remove("sha_1_id");
+	updated.put("createdAt", new JsonObject().put("type", "TimeProperty").put("value", new java.util.Date().toString()));
+	updated.put("updatedAt", new JsonObject().put("type", "TimeProperty").put("value", new java.util.Date().toString()));
+	
     if (addId) {
-      updated.put("id", UUID.randomUUID().toString());
+      updated.put("__uuid", UUID.randomUUID().toString());
     }
     if (bulkId != null) {
       updated.put("bulk-id", bulkId);
@@ -386,13 +428,15 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 
     if (updated.containsKey("tags")) {
       JsonArray tagsInLowerCase = new JsonArray();
-      JsonArray tags = updated.getJsonArray("tags");
+      JsonArray tags = updated.getJsonObject("tags").getJsonArray("value");      
 
       for (Object i : tags) {
         tagsInLowerCase.add(((String) i).toLowerCase());
       }
       updated.put("_tags", tagsInLowerCase);
     }
+    id = sha1 + "/" + resourceServer + "/" + resourceServerGroup + "/" + resourceId;
+    updated.put("id", new JsonObject().put("type", "Property").put("value", id));
 
     return updated;
   }
@@ -471,7 +515,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
             if (updated_item.containsKey("_tags")) {
               writeTags(updated_item.getJsonArray("_tags"));
             }
-            message.reply(updated_item.getString("id"));
+            message.reply(updated_item.getJsonObject("id").getString("value"));
           } else {
             message.fail(0, "failure");
           }

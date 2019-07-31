@@ -44,6 +44,7 @@ public class APIServerVerticle extends AbstractVerticle {
   static final int HTTP_STATUS_NOT_FOUND = 404;
   static final int HTTP_STATUS_INTERNAL_SERVER_ERROR = 500;
   static final int HTTP_STATUS_UNAUTHORIZED = 401;
+  static String emailID_SHA_1;
   private ArrayList<String> itemTypes;
 
   @Override
@@ -68,7 +69,7 @@ public class APIServerVerticle extends AbstractVerticle {
 
   private void populateItemTypes() {
     itemTypes = new ArrayList<String>();
-    itemTypes.add("resource-item");
+    itemTypes.add("resourceItem");
     itemTypes.add("data-model");
     itemTypes.add("access-object");
     itemTypes.add("resource-server");
@@ -112,6 +113,9 @@ public class APIServerVerticle extends AbstractVerticle {
               response.sendFile("ui/search/index.html");
             });
 
+    // IUDX v1 APIs
+    router.post("/catalogue/v1/items").handler(this::create);
+    
     // NEW APIs
     router.get("/list/catalogue/:itemtype").handler(this::list);
     router.get("/search/catalogue/attribute").handler(this::searchAttribute);
@@ -219,85 +223,47 @@ public class APIServerVerticle extends AbstractVerticle {
     return allowed;
   }
 
-  private boolean decodeCertificate(RoutingContext routingContext) {
+	private boolean decodeCertificate(RoutingContext routingContext) {
 
-    boolean status = false;
-    
-    try {
+		boolean status = false;
 
-      Principal _PeerPrincipal =
-          routingContext.request().connection().sslSession().getPeerPrincipal();
-      String PeerPrincipal = _PeerPrincipal.toString();
-      String[] PeerPrincipalArray = PeerPrincipal.split(",");
-      String PeerPrincipal_OID = PeerPrincipalArray[0];
-      String PeerPrincipal_T = PeerPrincipalArray[1];
-      String PeerPrincipal_SURNAME = PeerPrincipalArray[2];
-      String PeerPrincipal_GIVENNAME = PeerPrincipalArray[3];
-      String PeerPrincipal_ST = PeerPrincipalArray[4];
-      String PeerPrincipal_C = PeerPrincipalArray[5];
-      String PeerPrincipal_OU = PeerPrincipalArray[6];
-      String PeerPrincipal_O = PeerPrincipalArray[7];
-      String PeerPrincipal_EMAILADDRESS = PeerPrincipalArray[8];
+		try {
+			Principal cn = routingContext.request().connection().sslSession().getPeerPrincipal();
 
-      logger.info("getPeerPrincipal is " + PeerPrincipal);
-      logger.info("PeerPrincipal_OID is " + PeerPrincipal_OID);
-      logger.info("PeerPrincipal_T is " + PeerPrincipal_T);
-      logger.info("PeerPrincipal_SURNAME is " + PeerPrincipal_SURNAME);
-      logger.info("PeerPrincipal_GIVENNAME is " + PeerPrincipal_GIVENNAME);
-      logger.info("PeerPrincipal_ST is " + PeerPrincipal_ST);
-      logger.info("PeerPrincipal_C is " + PeerPrincipal_C);
-      logger.info("PeerPrincipal_OU is " + PeerPrincipal_OU);
-      logger.info("PeerPrincipal_O is " + PeerPrincipal_O);
-      logger.info("PeerPrincipal_EMAILADDRESS is " + PeerPrincipal_EMAILADDRESS);
+			String certificate_class[] = cn.toString().split(",");
 
-      Principal _LocalPrincipal =
-          routingContext.request().connection().sslSession().getLocalPrincipal();
-      String LocalPrincipal = _LocalPrincipal.toString();
-      String[] LocalPrincipalArray = LocalPrincipal.split(",");
-      String LocalPrincipal_CN = LocalPrincipalArray[0];
-      String LocalPrincipal_OU = LocalPrincipalArray[1];
-      String LocalPrincipal_O = LocalPrincipalArray[2];
-      String LocalPrincipal_L = LocalPrincipalArray[3];
-      String LocalPrincipal_ST = PeerPrincipalArray[4];
-      String LocalPrincipal_C = PeerPrincipalArray[5];
+			String class_level = certificate_class[0];
+			String email_id = certificate_class[1];
+			String user_level = certificate_class[2];
 
-      logger.info("getLocalPrincipal is " + LocalPrincipal);
-      logger.info("LocalPrincipal_CN is " + LocalPrincipal_CN);
-      logger.info("LocalPrincipal_OU is " + LocalPrincipal_OU);
-      logger.info("LocalPrincipal_O is " + LocalPrincipal_O);
-      logger.info("LocalPrincipal_L is " + LocalPrincipal_L);
-      logger.info("LocalPrincipal_ST is " + LocalPrincipal_ST);
-      logger.info("LocalPrincipal_C is " + LocalPrincipal_C);
+			String[] oid_class = class_level.split("=");
+			String level = oid_class[1];
 
-      String[] email = PeerPrincipal_EMAILADDRESS.split("=");
-      String[] emailID = email[1].split("@");
-      String userName = emailID[0];
-      String domain = emailID[1];
-      logger.info("PeerPrincipal_EMAILADDRESS is " + emailID);
-      logger.info("userName is " + userName);
-      logger.info("domain is " + domain);
+			String[] email = email_id.split("=");
+			String[] emailID = email[1].split("@");
+			String userName = emailID[0];
+			String domain = emailID[1];
 
-      String userName_SHA_1 = new DigestUtils(SHA_1).digestAsHex(userName);
-      logger.info("userName in SHA-1 is " + userName_SHA_1);
-      String emailID_SHA_1 = userName_SHA_1 + "@" + domain;
-      logger.info("emailID in SHA-1 is " + emailID_SHA_1);
+			String userName_SHA_1 = new DigestUtils(SHA_1).digestAsHex(userName);
+			logger.info("userName in SHA-1 is " + userName_SHA_1);
+			emailID_SHA_1 = userName_SHA_1 + "@" + domain;
+			logger.info("emailID in SHA-1 is " + emailID_SHA_1);
 
-      if (PeerPrincipal_OID.contains("class:3")
-          || PeerPrincipal_OID.contains("class:4")
-          || PeerPrincipal_OID.contains("class:5")) {
-        status = true;
-        logger.info("Valid Certificate");
-      } else {
-        status = false;
-        logger.info("Invalid Certificate");
-      }
+			if (level.contains("class:2") || level.contains("class:3") || level.contains("class:4")
+					|| level.contains("class:5")) {
+				status = true;
+				logger.info("Valid Certificate");
+			} else {
+				status = false;
+				logger.info("Invalid Certificate");
+			}
 
-    } catch (SSLPeerUnverifiedException e) {
-      status = false;
-    }
+		} catch (SSLPeerUnverifiedException e) {
+			status = false;
+		}
 
-    return status;
-  }
+		return status;
+	}
 
   private void list(RoutingContext routingContext) {
     String currentType = routingContext.request().getParam("itemtype");
@@ -327,6 +293,9 @@ public class APIServerVerticle extends AbstractVerticle {
    */
   private void create(RoutingContext routingContext) {
     HttpServerRequest request = routingContext.request();
+    String query_params = request.query();
+    String itemType = query_params.split("=")[1];
+ 
     String skip_validation = "false";
     if (request.headers().contains("skip_validation")) {
       skip_validation = request.getHeader("skip_validation").toLowerCase();
@@ -336,7 +305,7 @@ public class APIServerVerticle extends AbstractVerticle {
       if (authenticateRequest(routingContext, "user.list")) {
         try {
           JsonObject request_body = routingContext.getBodyAsJson();
-          request_body.put("id", "");
+          request_body.put("sha_1_id", emailID_SHA_1);
           DeliveryOptions validator_action = new DeliveryOptions();
           validator_action.addHeader("action", "validate-item");
 
@@ -357,8 +326,6 @@ public class APIServerVerticle extends AbstractVerticle {
                   validator_action,
                   validator_reply -> {
                     if (validator_reply.succeeded()) {
-                      String itemType = request.getParam("itemtype");
-                      request_body.put("item-type", itemType);
                       if (itemTypes.contains(itemType)) {
                     	  databaseHandler("create", routingContext, request_body);
                       } else {
