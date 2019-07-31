@@ -40,7 +40,7 @@ public class DatabaseVerticle extends AbstractVerticle {
 
     database_uri =
         "mongodb://"
-            + config().getString("mongo_host", "localhost")
+            + config().getString("mongo_host", "catalogue-database-mongodb")
             + ":"
             + config().getInteger("mongo_port", 27017).toString();
 

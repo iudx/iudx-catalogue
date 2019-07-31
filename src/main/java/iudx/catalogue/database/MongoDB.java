@@ -88,7 +88,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   private void mongoFind(JsonObject query, JsonObject attributeFilter, Message<Object> message) {
 
     attributeFilter.put("_id", 0);
-    query.put("Status", "Live");
+    // query.put("Status", "Live");
 
     String[] hiddenFields = {"_tags"};
 
@@ -372,13 +372,20 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   private JsonObject addNewAttributes(JsonObject doc, int version, boolean addId, String bulkId) {
 
     JsonObject updated = doc.copy();
-    updated.put("Created", new java.util.Date().toString());
-    updated.put("Last modified on", new java.util.Date().toString());
-    updated.put("Status", "Live");
-    updated.put("Version", version);
-    updated.put("Provider", "iudx-provider");
+    String id, sha1, resourceServer, resourceServerGroup, provider, resourceId;
+    
+    sha1 = updated.getString("sha_1_id");
+    resourceServer = updated.getJsonObject("resourceServer").getString("value"); 
+    resourceServerGroup = updated.getJsonObject("resourceServerGroup").getString("value"); 
+    provider = updated.getJsonObject("provider").getString("value"); 
+    resourceId = updated.getJsonObject("resourceId").getString("value");
+    
+    updated.remove("sha_1_id");
+	updated.put("createdAt", new JsonObject().put("type", "TimeProperty").put("value", new java.util.Date().toString()));
+	updated.put("updatedAt", new JsonObject().put("type", "TimeProperty").put("value", new java.util.Date().toString()));
+	
     if (addId) {
-      updated.put("id", UUID.randomUUID().toString());
+      updated.put("__uuid", UUID.randomUUID().toString());
     }
     if (bulkId != null) {
       updated.put("bulk-id", bulkId);
@@ -386,13 +393,15 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 
     if (updated.containsKey("tags")) {
       JsonArray tagsInLowerCase = new JsonArray();
-      JsonArray tags = updated.getJsonArray("tags");
+      JsonArray tags = updated.getJsonObject("tags").getJsonArray("value");      
 
       for (Object i : tags) {
         tagsInLowerCase.add(((String) i).toLowerCase());
       }
       updated.put("_tags", tagsInLowerCase);
     }
+    id = sha1 + "/" + resourceServer + "/" + resourceServerGroup + "/" + resourceId;
+    updated.put("id", new JsonObject().put("type", "Property").put("value", id));
 
     return updated;
   }
@@ -471,7 +480,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
             if (updated_item.containsKey("_tags")) {
               writeTags(updated_item.getJsonArray("_tags"));
             }
-            message.reply(updated_item.getString("id"));
+            message.reply(updated_item.getJsonObject("id").getString("value"));
           } else {
             message.fail(0, "failure");
           }
