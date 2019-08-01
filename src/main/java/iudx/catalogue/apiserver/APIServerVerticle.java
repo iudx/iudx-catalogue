@@ -117,11 +117,10 @@ public class APIServerVerticle extends AbstractVerticle {
     router.post("/catalogue/v1/items").handler(this::create);
     router.put("/catalogue/v1/items/:provider/:resourceServer/:resourceCatogery/:name").handler(this::update);
     router.get("/catalogue/v1/search").handler(this::searchAttribute);
-    
+    router.get("/catalogue/v1/count").handler(this::count);
     // NEW APIs
     router.get("/list/catalogue/:itemtype").handler(this::list);
     router.get("/search/catalogue/attribute").handler(this::searchAttribute);
-    router.get("/count/catalogue/attribute").handler(this::count);
     router.post("/create/catalogue/:itemtype").handler(this::create);
     router.put("/update/catalogue/:itemtype/:id").handler(this::update);
     router.delete("/remove/catalogue/:itemtype/:id").handler(this::delete);
