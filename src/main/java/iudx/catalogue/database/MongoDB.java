@@ -177,27 +177,24 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
         });
   }
 
-  private JsonObject geo_search_query(JsonObject location) {
-    JsonObject query = new JsonObject();
+	private JsonObject geo_within_search_query(JsonObject location) {
+		JsonObject query = new JsonObject();
+		double latitude = Double.parseDouble(location.getString("lat"));
+		double longitude = Double.parseDouble(location.getString("lon"));
+		double rad = MetersToDecimalDegrees(Double.parseDouble(location.getString("radius")), latitude);
 
-    if (location.getString("bounding-type").equals("circle")) {
-      double latitude = location.getDouble("lat");
-      double longitude = location.getDouble("long");
-      double rad = location.getDouble("radius", 1.0) * 1000.0;
+		System.out.println(latitude + "----" + longitude + "----" + rad);
 
-      query.put(
-          "$nearSphere",
-          new JsonObject()
-              .put(
-                  "$geometry",
-                  new JsonObject()
-                      .put("type", "Point")
-                      .put("coordinates", new JsonArray("[" + longitude + "," + latitude + "]")))
-              .put("$maxDistance", rad));
-    }
-    return query;
-  }
+		query.put("geoJsonLocation", new JsonObject().put("$geoWithin", new JsonObject().put("$center",
+				new JsonArray().add(new JsonArray().add(longitude).add(latitude)).add(rad))));
+		return query;
+	}
 
+	double MetersToDecimalDegrees(double meters, double latitude) {
+		return meters / (111.32 * 1000 * Math.cos(latitude * (Math.PI / 180)));
+	}
+
+  
   private String extractString(String s, int b) {
     String ans;
     int i;
@@ -242,7 +239,8 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 
   private JsonObject decodeQuery(JsonObject requestBody) {
     JsonObject query = new JsonObject();
-
+    JsonArray expressions = new JsonArray();
+    System.out.println(requestBody);
     if (requestBody.containsKey("attribute-name") && requestBody.containsKey("attribute-value")) {
       JsonArray attributeNames = extractElements(requestBody.getString("attribute-name"));
       JsonArray attributeValues = extractElements(requestBody.getString("attribute-value"));
@@ -251,7 +249,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
         return null;
       }
 
-      JsonArray expressions = new JsonArray();
+      
       for (int i = 0; i < attributeNames.size(); i++) {
         String key = attributeNames.getJsonArray(i).getString(0);
         JsonArray value = attributeValues.getJsonArray(i);
@@ -274,29 +272,6 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 
           q.put(key, new JsonObject().put("$in", value));
           expressions.add(q);
-        } else if (key.equalsIgnoreCase("location")) {
-          JsonObject location = new JsonObject();
-          for (Object param : value) {
-            String k = ((String) param).split(":")[0];
-            String v = ((String) param).split(":")[1];
-            System.out.println(k + " " + v);
-            if (k.equalsIgnoreCase("bounding-type")) {
-              location.put(k, v);
-            } else {
-              location.put(k, Double.parseDouble(v));
-            }
-          }
-
-          key = "geoJsonLocation";
-          JsonObject value2 = geo_search_query(location);
-          JsonObject q = new JsonObject();
-          q.put(key, value2);
-
-          q.put(key, new JsonObject().put("$in", value));
-          expressions.add(q);
-          
-          // expressions.add(q);
-          continue;
         } else if (key.charAt(0) == '$') {
           key = "_$_" + key.substring(1);
           JsonObject q = new JsonObject();
@@ -314,7 +289,11 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
         }
       }
       query.put("$and", expressions);
-    } else if (requestBody.containsKey("attribute-name")
+    } else if(requestBody.containsKey("lat") && requestBody.containsKey("lon") && requestBody.containsKey("radius")) { 
+    	
+    	query = geo_within_search_query(requestBody);
+        
+  	} else if (requestBody.containsKey("attribute-name")
         && !requestBody.containsKey("attribute-value")) {
       query = null;
     } else if (!requestBody.containsKey("attribute-name")
