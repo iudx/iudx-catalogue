@@ -115,6 +115,8 @@ public class APIServerVerticle extends AbstractVerticle {
 
     // IUDX v1 APIs
     router.post("/catalogue/v1/items").handler(this::create);
+    router.put("/catalogue/v1/items/:provider/:resourceServer/:resourceCatogery/:name").handler(this::update);
+    router.get("/catalogue/v1/search").handler(this::searchAttribute);
     
     // NEW APIs
     router.get("/list/catalogue/:itemtype").handler(this::list);
@@ -487,9 +489,25 @@ public class APIServerVerticle extends AbstractVerticle {
       if (authenticateRequest(routingContext, "user.list")) {
         try {
           JsonObject request_body = routingContext.getBodyAsJson();
-          String id = request.getParam("id");
-          if (id.equals(request_body.getString("id"))) {
-            String itemType = request.getParam("itemtype");
+          String query;
+          try {
+            query = URLDecoder.decode(request.query().toString(), "UTF-8");
+          } catch (UnsupportedEncodingException e) {
+            handle400(routingContext, "Bad Query");
+            return;
+          }
+          logger.info(query);
+
+          String provider = request.getParam("provider");
+          String resource_server = request.getParam("resourceServer");
+          String resource_category = request.getParam("resourceCategory");
+          String name = request.getParam("name");
+          String id = provider + "/" + resource_server + "/" + resource_category + "/" + name ;
+          System.out.println(id);
+          System.out.println(request_body.getJsonObject("id").getString("value"));
+          if (id.equals(request_body.getJsonObject("id").getString("value"))) {
+            String itemType = query.split("=")[1];
+            System.out.println(itemType);
             request_body.put("item-type", itemType);
             databaseHandler("update", routingContext, request_body);
           } else {
