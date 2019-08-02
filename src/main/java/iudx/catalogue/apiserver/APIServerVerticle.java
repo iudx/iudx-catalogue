@@ -428,20 +428,30 @@ public class APIServerVerticle extends AbstractVerticle {
   }
 
   private void count(RoutingContext routingContext) {
-    HttpServerRequest request = routingContext.request();
 
-    String query;
-    try {
-      query = URLDecoder.decode(request.query().toString(), "UTF-8");
-    } catch (UnsupportedEncodingException e) {
-      handle400(routingContext, "Bad Query");
-      return;
-    }
-    logger.info(query);
+	    HttpServerRequest request = routingContext.request();
+	    String query = null;
 
-    JsonObject request_body = prepareQuery(query);
+	    System.out.println(routingContext.request().absoluteURI().contains("?"));
+	    
+	    if(routingContext.request().absoluteURI().contains("?")) 
+	    {
+	    
+	    try {
+	      query = URLDecoder.decode(request.query().toString(), "UTF-8");
+	    } catch (UnsupportedEncodingException e) {
+	      handle400(routingContext, "Bad Query");
+	      return;
+	    }
+	    logger.info(query);
 
-    databaseHandler("count", routingContext, request_body);
+				JsonObject request_body = prepareQuery(query);
+				databaseHandler("count", routingContext, request_body);
+	    } else {
+			JsonObject request_body = new JsonObject();
+			request_body.put("item-type", "resourceItem");
+		    databaseHandler("count", routingContext, request_body);
+	    }
   }
 
   /**
