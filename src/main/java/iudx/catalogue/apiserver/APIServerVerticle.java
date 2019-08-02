@@ -403,8 +403,13 @@ public class APIServerVerticle extends AbstractVerticle {
   private void searchAttribute(RoutingContext routingContext) {
 
     HttpServerRequest request = routingContext.request();
+    String query = null;
 
-    String query;
+    System.out.println(routingContext.request().absoluteURI().contains("?"));
+    
+    if(routingContext.request().absoluteURI().contains("?")) 
+    {
+    
     try {
       query = URLDecoder.decode(request.query().toString(), "UTF-8");
     } catch (UnsupportedEncodingException e) {
@@ -413,9 +418,13 @@ public class APIServerVerticle extends AbstractVerticle {
     }
     logger.info(query);
 
-    JsonObject request_body = prepareQuery(query);
-
-    databaseHandler("search-attribute", routingContext, request_body);
+			JsonObject request_body = prepareQuery(query);
+			databaseHandler("search-attribute", routingContext, request_body);
+    } else {
+		JsonObject request_body = new JsonObject();
+		request_body.put("item-type", "resourceItem");
+	    databaseHandler("list", routingContext, request_body);
+    }
   }
 
   private void count(RoutingContext routingContext) {
