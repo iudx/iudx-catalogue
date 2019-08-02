@@ -364,7 +364,6 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     if (query == null) {
       message.fail(0, "Bad query: Number of attributes is not equal to number of number of values");
     } else {
-      query.put("Status", "Live");
       mongo.count(
           COLLECTION,
           query,
