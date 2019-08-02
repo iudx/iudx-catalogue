@@ -115,8 +115,10 @@ public class APIServerVerticle extends AbstractVerticle {
 
     // IUDX v1 APIs
     router.post("/catalogue/v1/items").handler(this::create);
-    router.put("/catalogue/v1/items/:provider/:resourceServer/:resourceCatogery/:name").handler(this::update);
+    router.put("/catalogue/v1/items/:provider/:resourceServer/:resourceCatogery/:resourceId").handler(this::update);
     router.get("/catalogue/v1/search").handler(this::searchAttribute);
+    router.get("/catalogue/v1/count").handler(this::count);
+
     
     // NEW APIs
     router.get("/list/catalogue/:itemtype").handler(this::list);
@@ -501,11 +503,11 @@ public class APIServerVerticle extends AbstractVerticle {
           String provider = request.getParam("provider");
           String resource_server = request.getParam("resourceServer");
           String resource_category = request.getParam("resourceCategory");
-          String name = request.getParam("name");
-          String id = provider + "/" + resource_server + "/" + resource_category + "/" + name ;
+          String resourceId = request.getParam("resourceId");
+          String id = provider + "/" + resource_server + "/" + resource_category + "/" + resourceId ;
           System.out.println(id);
           System.out.println(request_body.getJsonObject("id").getString("value"));
-          if (id.equals(request_body.getJsonObject("id").getString("value"))) {
+          if (id.equals(request_body.getString("id"))) {
             String itemType = query.split("=")[1];
             System.out.println(itemType);
             request_body.put("item-type", itemType);

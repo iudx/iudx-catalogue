@@ -177,6 +177,54 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
         });
   }
 
+	private JsonObject attribute_search_query(JsonObject requestBody) {
+		JsonObject query = new JsonObject();
+		JsonArray expressions = new JsonArray();
+
+		JsonArray attributeNames = extractElements(requestBody.getString("attribute-name"));
+		JsonArray attributeValues = extractElements(requestBody.getString("attribute-value"));
+
+		if (attributeNames.size() != attributeValues.size()) {
+			return null;
+		}
+
+		for (int i = 0; i < attributeNames.size(); i++) {
+			String key = attributeNames.getJsonArray(i).getString(0);
+			JsonArray value = attributeValues.getJsonArray(i);
+
+			if (key.equalsIgnoreCase("tags")) {
+				key = "_tags";
+				JsonArray tags = attributeValues.getJsonArray(i);
+				value = new JsonArray();
+				for (Object tag : tags) {
+					value.add(((String) tag).toLowerCase());
+				}
+				updateNoOfHits(value);
+				JsonObject q = new JsonObject();
+
+				q.put(key, new JsonObject().put("$in", value));
+				expressions.add(q);
+			} else if (key.charAt(0) == '$') {
+				key = "_$_" + key.substring(1);
+				JsonObject q = new JsonObject();
+
+				q.put(key, new JsonObject().put("$in", value));
+				expressions.add(q);
+			} else {
+				JsonObject q = new JsonObject();
+				JsonObject v = new JsonObject();
+				v.put("type", "Property");
+				v.put("value", value.getString(0));
+
+				q.put(key, v);
+				expressions.add(q);
+			}
+		}
+		query.put("$and", expressions);
+
+		return query;
+	}
+
 	private JsonObject geo_within_search_query(JsonObject location) {
 		JsonObject query = new JsonObject();
 		double latitude = Double.parseDouble(location.getString("lat"));
@@ -238,62 +286,34 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   }
 
   private JsonObject decodeQuery(JsonObject requestBody) {
+    JsonObject attribute_query = new JsonObject();
+    JsonObject geo_query = new JsonObject();
     JsonObject query = new JsonObject();
     JsonArray expressions = new JsonArray();
     System.out.println(requestBody);
-    if (requestBody.containsKey("attribute-name") && requestBody.containsKey("attribute-value")) {
-      JsonArray attributeNames = extractElements(requestBody.getString("attribute-name"));
-      JsonArray attributeValues = extractElements(requestBody.getString("attribute-value"));
+		if (requestBody.containsKey("attribute-name") && requestBody.containsKey("attribute-value")
+				&& !requestBody.containsKey("lat") && !requestBody.containsKey("lon")
+				&& !requestBody.containsKey("radius")) {
+		System.out.println("ATTRIBUTE Query");
+		attribute_query = attribute_search_query(requestBody);
+		query = attribute_query;
+		
+		} else if (requestBody.containsKey("lat") && requestBody.containsKey("lon") && requestBody.containsKey("radius")
+				&& ! requestBody.containsKey("attribute-name") && ! requestBody.containsKey("attribute-value")) { 
+		System.out.println("GEO-SPATIAL Query");
+		geo_query = geo_within_search_query(requestBody);
+		query = geo_query;
 
-      if (attributeNames.size() != attributeValues.size()) {
-        return null;
-      }
-
-      
-      for (int i = 0; i < attributeNames.size(); i++) {
-        String key = attributeNames.getJsonArray(i).getString(0);
-        JsonArray value = attributeValues.getJsonArray(i);
-        //        System.out.println(key);
-        //        System.out.println(value.size() );
-        //        for (int j = 0; j < value.size(); j++) {
-        //          System.out.print(value.getString(j) +" "+ value.getString(j).length());
-        //        }
-        //        System.out.println();
-
-        if (key.equalsIgnoreCase("tags")) {
-          key = "_tags";
-          JsonArray tags = attributeValues.getJsonArray(i);
-          value = new JsonArray();
-          for (Object tag : tags) {
-            value.add(((String) tag).toLowerCase());
-          }
-          updateNoOfHits(value);
-          JsonObject q = new JsonObject();
-
-          q.put(key, new JsonObject().put("$in", value));
-          expressions.add(q);
-        } else if (key.charAt(0) == '$') {
-          key = "_$_" + key.substring(1);
-          JsonObject q = new JsonObject();
-
-          q.put(key, new JsonObject().put("$in", value));
-          expressions.add(q);
-        } else {
-        	JsonObject q = new JsonObject();
-        	JsonObject v = new JsonObject();
-        	v.put("type","Property");
-        	v.put("value", value.getString(0));
-        	
-            q.put(key, v);
-            expressions.add(q);	
-        }
-      }
-      query.put("$and", expressions);
-    } else if(requestBody.containsKey("lat") && requestBody.containsKey("lon") && requestBody.containsKey("radius")) { 
-    	
-    	query = geo_within_search_query(requestBody);
-        
-  	} else if (requestBody.containsKey("attribute-name")
+		} else if (requestBody.containsKey("lat") && requestBody.containsKey("lon") && requestBody.containsKey("radius")
+				&& requestBody.containsKey("attribute-name") && requestBody.containsKey("attribute-value")) {
+			System.out.println("GEO-SPATIAL with ATTRIBUTE Query");
+			attribute_query = attribute_search_query(requestBody);
+			expressions.add(attribute_query);
+			geo_query = geo_within_search_query(requestBody);
+			expressions.add(geo_query);
+			query.put("$and", expressions);
+			
+		} else if (requestBody.containsKey("attribute-name")
         && !requestBody.containsKey("attribute-value")) {
       query = null;
     } else if (!requestBody.containsKey("attribute-name")
@@ -415,7 +435,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
       updated.put("_tags", tagsInLowerCase);
     }
     id = sha1 + "/" + resourceServer + "/" + resourceServerGroup + "/" + resourceId;
-    updated.put("id", new JsonObject().put("type", "Property").put("value", id));
+    updated.put("id", id);
 
     return updated;
   }
@@ -494,7 +514,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
             if (updated_item.containsKey("_tags")) {
               writeTags(updated_item.getJsonArray("_tags"));
             }
-            message.reply(updated_item.getJsonObject("id").getString("value"));
+            message.reply(updated_item.getString("id"));
           } else {
             message.fail(0, "failure");
           }
@@ -530,12 +550,13 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     String id = request_body.getString("id");
     String itemType = request_body.getString("item-type");
     query.put("id", id);
-    query.put("item-type", itemType);
+    query.put("itemType", new JsonObject().put("type", "Property").put("value", itemType));
     // Get its version and tags
     JsonObject fields = new JsonObject();
-    fields.put("Version", 1);
+    // fields.put("Version", 1);
     fields.put("_tags", 1);
     FindOptions options = new FindOptions().setFields(fields);
+    
     mongo.findWithOptions(
         COLLECTION,
         query,
@@ -547,6 +568,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
               System.out.println("Does not exist");
               message.fail(0, "Error: The item with id: " + id + " does not exist.");
             } else {
+            	System.out.println("HIT !");
               JsonObject old_item = res.result().get(0);
               version = old_item.getInteger("Version");
               // Populate update fields
