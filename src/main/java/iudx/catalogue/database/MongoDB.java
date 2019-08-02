@@ -242,6 +242,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 		return meters / (111.32 * 1000 * Math.cos(latitude * (Math.PI / 180)));
 	}
 
+
   
   private String extractString(String s, int b) {
     String ans;
@@ -291,6 +292,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     JsonObject query = new JsonObject();
     JsonArray expressions = new JsonArray();
     System.out.println(requestBody);
+
 		if (requestBody.containsKey("attribute-name") && requestBody.containsKey("attribute-value")
 				&& !requestBody.containsKey("lat") && !requestBody.containsKey("lon")
 				&& !requestBody.containsKey("radius")) {
