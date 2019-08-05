@@ -503,26 +503,34 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   @Override
   public void create(Message<Object> message) {
 
-    JsonObject request_body = (JsonObject) message.body();
-    JsonObject itemWithoutDol = removeDollar(request_body);
-    JsonObject updated_item = addNewAttributes(itemWithoutDol, 1, true, null);
+		JsonObject request_body = (JsonObject) message.body();
+		JsonObject itemWithoutDol = removeDollar(request_body);
+		JsonObject updated_item = addNewAttributes(itemWithoutDol, 1, true, null);
 
-    mongo.insert(
-        COLLECTION,
-        updated_item,
-        res -> {
-          if (res.succeeded()) {
-            if (updated_item.containsKey("_tags")) {
-              writeTags(updated_item.getJsonArray("_tags"));
-            }
-            message.reply(updated_item.getString("id"));
-          } else {
-            message.fail(0, "failure");
-          }
-        });
+		String item_id = request_body.getString("id");
+		JsonObject query = new JsonObject();
+		JsonArray expressions = new JsonArray();
+		query.put("$and", expressions);
+		query.put("id", item_id);
+		mongo.count(COLLECTION, query, res -> {
+			if (res.succeeded()) {
+				mongo.insert(COLLECTION, updated_item, resp -> {
+					if (resp.succeeded()) {
+						if (updated_item.containsKey("_tags")) {
+							writeTags(updated_item.getJsonArray("_tags"));
+						}
+						message.reply(updated_item.getString("id"));
+					} else {
+						message.fail(0, "failure");
+					}
+				});
+			} else {
+				message.reply("conflict");
+			}
+		});
   }
-
-  private void updateTags(JsonArray old_tags, JsonArray new_tags) {
+ 
+private void updateTags(JsonArray old_tags, JsonArray new_tags) {
     JsonArray toDelete = new JsonArray();
     for (Object t : old_tags) {
       if (new_tags.contains(((String) t))) {
