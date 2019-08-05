@@ -44,6 +44,7 @@ public class APIServerVerticle extends AbstractVerticle {
   static final int HTTP_STATUS_NOT_FOUND = 404;
   static final int HTTP_STATUS_INTERNAL_SERVER_ERROR = 500;
   static final int HTTP_STATUS_UNAUTHORIZED = 401;
+  static final int HTTP_STATUS_CONFLICT = 409;
   static String emailID_SHA_1;
   private ArrayList<String> itemTypes;
 
@@ -119,11 +120,7 @@ public class APIServerVerticle extends AbstractVerticle {
     router.put("/catalogue/v1/items/:provider/:resourceServer/:resourceCatogery/:resourceId").handler(this::update);
     router.get("/catalogue/v1/search").handler(this::searchAttribute);
     router.get("/catalogue/v1/count").handler(this::count);
-
-    router.put("/catalogue/v1/items/:provider/:resourceServer/:resourceCatogery/:name").handler(this::update);
-    router.get("/catalogue/v1/search").handler(this::searchAttribute);
-    router.get("/catalogue/v1/count").handler(this::count);
-
+    
     // NEW APIs
     router.get("/list/catalogue/:itemtype").handler(this::list);
     router.get("/search/catalogue/attribute").handler(this::searchAttribute);
@@ -598,8 +595,12 @@ public class APIServerVerticle extends AbstractVerticle {
                     handle204(routingContext);
                     break;
                   case "create":
-                    String id = database_reply.result().body().toString();
-                    handle201(routingContext, id);
+                    String resp = database_reply.result().body().toString();
+                    if(resp.equals("conflict")) {
+                    	handle409(routingContext);
+                    } else {
+                    	handle201(routingContext, resp);
+                    	}
                     break;
                   case "update":
                     String status = database_reply.result().body().toString();
@@ -681,4 +682,10 @@ public class APIServerVerticle extends AbstractVerticle {
 
     response.setStatusCode(HTTP_STATUS_CREATED).end(JsonId);
   }
+  
+  private void handle409(RoutingContext routingContext) {
+	    HttpServerResponse response = routingContext.response();
+
+	    response.setStatusCode(HTTP_STATUS_CONFLICT).end();
+	  }
 }
