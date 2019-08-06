@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -28,7 +29,8 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 
   private final String TAG_COLLECTION = "tags";
   private final String COLLECTION = "catalogue";
-
+  private static final Logger logger = Logger.getLogger(MongoDB.class.getName());
+  
   /**
    * Constructor for MongoDB
    *
@@ -507,13 +509,18 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 		JsonObject itemWithoutDol = removeDollar(request_body);
 		JsonObject updated_item = addNewAttributes(itemWithoutDol, 1, true, null);
 
-		String item_id = request_body.getString("id");
+		String item_id = updated_item.getString("id");
 		JsonObject query = new JsonObject();
+		JsonObject q = new JsonObject();
 		JsonArray expressions = new JsonArray();
+		q.put("id", item_id);
+		expressions.add(q);
 		query.put("$and", expressions);
-		query.put("id", item_id);
+		
 		mongo.count(COLLECTION, query, res -> {
-			if (res.succeeded()) {
+			logger.info(res.result().toString());
+			
+			if (res.result().intValue() == 0) {		
 				mongo.insert(COLLECTION, updated_item, resp -> {
 					if (resp.succeeded()) {
 						if (updated_item.containsKey("_tags")) {
