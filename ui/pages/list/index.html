@@ -10,10 +10,13 @@
   <title>
     PSCDCL IUDX | Indian Urban Data Exchange Catalogue 
   </title>
-  <link rel="stylesheet" type="text/css" href="../assets/css/bootstrap.min.css">
+  <link href="../assets/css/swagger/swagger-ui.css" rel="stylesheet">
   <link href="../assets/css/mdb.min.css" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="../assets/css/bootstrap.min.css">
   <link href="../assets/css/list_style.css" rel="stylesheet">
   <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <!-- Google Fonts  -->
+  <link href="https://fonts.googleapis.com/css?family=Darker+Grotesque&display=swap" rel="stylesheet">
 </head>
 <body>
     <!-- <div class="container-fluid"> -->
@@ -36,17 +39,17 @@
 
     <hr>
 
-        <section id="landing_section" class="container">
+        <section id="landing_section" class="container section">
         <div class="row style_list">
-          <div class="col-lg-12 justify-content-around">
-              <h1 class="heading text-white">
-                Discover 1256 resource-items by 51 providers <!-- grouped in a 25 resource groups -->
+          <div class="col-lg-12">
+              <h1 class="heading">
+                Discover <span id="resource_item_count"></span> resource-items by 1 provider/s <!-- grouped in a 25 resource groups -->
               </h1>
           
             <br>
 
-              <p class="lead text-muted text-white">
-                   Welcome to the IUDX complaint Catalogue of PSCDCL    
+              <p class="lead text-muted">
+                   Welcome to the IUDX complaint Catalogue of <a href="https://punesmartcity.in/">PSCDCL</a>
               </p>
 
             <br>
@@ -57,11 +60,11 @@
             <a href="#" class="btn btn-secondary my-2">Secondary action</a>
           </p> -->
           <div class="row">
-              <div class="col-lg-4">
+              <div class="col-lg-3">
                 <!-- <label for="attribute">Attributes</label> -->
                 <select class="custom-select d-block w-100" id="attribute" required="">
                   <option value="">Choose Attribute</option>
-                  <option>Tags</option>
+                  <option value="tags">Tags</option>
                   <!-- <option>Some attribute</option>
                   <option>Some attribute</option>
                   <option>Some attribute</option>
@@ -78,7 +81,7 @@
               </div>
           
           
-              <div class="col-lg-4">
+              <div class="col-lg-7">
                 <!-- <label for="value">Value</label> -->
                 <input type="text" class="form-control" id="value" placeholder="attribute-value" required="">
                 <!-- <div class="invalid-feedback">
@@ -87,9 +90,9 @@
               </div>
             
             
-              <div class="col-lg-4">
+              <div class="col-lg-2">
                 <!-- <label for="state">State</label> -->
-                <button class="btn btn-primary btn-block" type="submit" onclick="display_search_section()">Search Catalogue</button>
+                <button class="btn btn-primary btn-block" type="submit" onclick="display_search_section()">Search</button>
                 <!-- <div class="invalid-feedback">
                   Please provide a valid state.
                 </div> -->
@@ -101,27 +104,29 @@
             <br>
             <br>
 
-           <p class="lead text-muted text-white">
-                   Also checkout the <a href="/ui/map" style="color:#dddddd; text-decoration: underline">Geo Query Interface</a>.
+           <p class="lead text-muted">
+                   <!-- Also checkout the <a href="/ui/map" style="color:#dddddd; text-decoration: underline">Geo Query Interface</a>. -->
+                   Also checkout the <a href="/ui/map">Geo Query Interface</a>.
            </p>
         
           
           </div>
           </div>
           <!-- <footer class="text-muted landing_footer"> -->
-          <div id="landing_footer" class="container landing_footer">
+          <!-- <div id="landing_footer" class="container landing_footer"> -->
+          <div id="normal_footer" class="container nromal_footer">
           </div>
     <!-- </footer> -->
         </section>
 
 
-        <section id="search_section" class="container">
-                      <div class="row">
-              <div class="col-lg-4">
+        <section id="search_section" class="container section">
+              <div class="row">
+              <div class="col-lg-3">
                 <!-- <label for="attribute">Attributes</label> -->
                 <select class="custom-select d-block w-100" id="_attribute" required="">
                   <option value="">Choose Attribute</option>
-                  <option>Tags</option>
+                  <option value="tags">Tags</option>
                   <!-- <option>Some attribute</option>
                   <option>Some attribute</option>
                   <option>Some attribute</option>
@@ -137,8 +142,7 @@
                 </div> -->
               </div>
           
-          
-              <div class="col-lg-4">
+              <div class="col-lg-7">
                 <!-- <label for="value">Value</label> -->
                 <input type="text" class="form-control" id="_value" placeholder="attribute-value" required>
                 <!-- <div class="invalid-feedback">
@@ -147,9 +151,9 @@
               </div>
             
             
-              <div class="col-lg-4">
+              <div class="col-lg-2">
                 <!-- <label for="state">State</label> -->
-                <button class="btn btn-primary btn-block" type="submit" onclick="get_items()">Search Catalogue</button>
+                <button class="btn btn-primary btn-block" type="submit" onclick="get_items()">Search</button>
                 <!-- <div class="invalid-feedback">
                   Please provide a valid state.
                 </div> -->
@@ -157,10 +161,26 @@
             
         
             </div>
-             <div id="searched_items" class="row">
-                   
+
+            
+            <div class="row">
+              <div id="retrieved_items_count" class="col-12 card-margin-top"></div>
             </div>
+             
+             <div id="searched_items" class="row"></div>
+
             <!-- <p>search_section</p> -->
+
+            <div id="normal_footer" class="normal_footer">
+            </div>
+
+        </section>
+
+        <section id="swagger_section" class="container section">
+                      
+            <!-- <p>Display OPENAPI JSON as HTML</p> -->
+            <button class="btn btn-primary btn-block" onclick="display_saved_search_section()">Go Back</button> <br>
+            <div id="swagger_ui"></div>
 
             <div id="normal_footer" class="normal_footer">
             </div>
@@ -173,5 +193,8 @@
 <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <script type="text/javascript" src="../assets/js/bootstrap.min.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script type="text/javascript" src="../assets/js/swagger/swagger-ui-bundle.js"></script>
+<script type="text/javascript" src="../assets/js/swagger/swagger-ui-standalone-preset.js"></script>
+<script type="text/javascript" src="../assets/js/swagger_script.js"></script>
 <script type="text/javascript" src="../assets/js/list_script.js"></script>
 </html>

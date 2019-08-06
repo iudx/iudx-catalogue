@@ -25,6 +25,27 @@ var tile_layer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voya
 
 tile_layer.addTo(map);
 
+L.Control.Watermark = L.Control.extend({
+    onAdd: function(map) {
+        var img = L.DomUtil.create('img');
+        
+        img.src = '../assets/img/iudx_pscdcl.png';
+        img.style.width = '250px';
+        
+        return img;
+    },
+    
+    onRemove: function(map) {
+        // Nothing to do here
+    }
+});
+
+L.control.watermark = function(opts) {
+    return new L.Control.Watermark(opts);
+}
+
+L.control.watermark({ position: 'bottomright' }).addTo(map);
+
 // create the sidebar instance and add it to the map
 
 var sidebar = L.control.sidebar('sidebar', {
@@ -113,11 +134,10 @@ map.on('draw:created', async function (e) {
     if (type === 'circle') {
         var center_point = layer.getLatLng();
         var radius = layer.getRadius();
-        console.log(radius)
+        // console.log(radius)
         markersLayer.clearLayers();
-        $.get("/search/catalogue/attribute?location={bounding-type=circle&lat="+ center_point["lat"] +"&long="+ center_point["lng"] +"&radius=1", function(data) {
+        $.get("/search/catalogue/attribute?bounding-type=circle&lat="+ center_point["lat"] +"&long="+ center_point["lng"] +"&radius="+radius, function(data) {
         // $.get("/search/catalogue/attribute?location={bounding-type=circle&lat="+ center_point["lat"] +"&long="+ center_point["lng"] +"radius=1}", function(data) {
-
             data=JSON.parse(data)
             for (var i = data.length - 1; i >= 0; i--) {
                 if(data[i].hasOwnProperty('geoJsonLocation')){
@@ -125,6 +145,7 @@ map.on('draw:created', async function (e) {
                     plotGeoJSONs(data[i]["geoJsonLocation"], jsonPrettyHighlightToId(data[i]));
                 }
             }
+		// console.log(data.length)
             // DATA=data
         });
         // await geoquery_circle(center_point["lat"],center_point["lng"], radius)
@@ -135,7 +156,7 @@ map.on('draw:created', async function (e) {
 
         // here you can get it in geojson format
         var geojson = layer.toGeoJSON();
-        console.log(points, geojson);
+        // console.log(points, geojson);
     }
     //    if (type === 'polygon') {
     //         // structure the geojson object

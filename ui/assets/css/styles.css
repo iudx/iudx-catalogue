@@ -78,6 +78,12 @@
   background-clip: padding-box;
 }
 
+
+.leaflet-sidebar .close{
+  z-index: 800 !important;
+}
+
+
 @media (max-width: 767px) {
   .leaflet-sidebar {
     width: 100%;

@@ -37,7 +37,7 @@ function geoquery_circle(_lat,_lng, _radius) {
         //         return d.accessInformation[0].accessVariables.resourceClass
         //     }));
          // markersLayer.clearLayers();
-         $.get("/search/catalogue/attribute?location={bounding-type=circle&lat="+ _lat +"&long="+ _lng +"&radius="+ _radius +"", function(data) {
+		      $.get("/search/catalogue/attribute?bounding-type=circle&lat="+ _lat +"&long="+ _lng +"&radius="+ _radius, function(data) {
 
             data=JSON.parse(data)
             for (var i = data.length - 1; i >= 0; i--) {
