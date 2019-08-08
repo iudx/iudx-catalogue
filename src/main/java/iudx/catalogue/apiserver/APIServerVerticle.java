@@ -270,7 +270,7 @@ public class APIServerVerticle extends AbstractVerticle {
 	}
 
   private void list(RoutingContext routingContext) {
-    String currentType = routingContext.request().getParam("itemtype");
+    String currentType = routingContext.request().getParam("item-type");
 
     if (currentType.equals("item-types")) {
       JsonArray allTypes = new JsonArray(itemTypes);
@@ -310,6 +310,7 @@ public class APIServerVerticle extends AbstractVerticle {
         try {
           JsonObject request_body = routingContext.getBodyAsJson();
           request_body.put("sha_1_id", emailID_SHA_1);
+          request_body.put("item-type", itemType);
           DeliveryOptions validator_action = new DeliveryOptions();
           validator_action.addHeader("action", "validate-item");
 
