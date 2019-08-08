@@ -92,7 +92,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     attributeFilter.put("_id", 0);
     // query.put("Status", "Live");
 
-    String[] hiddenFields = {"_tags","__uuid", "geoJsonLocation"};
+    String[] hiddenFields = {"_tags","__uuid", "geoJsonLocation", "item-type"};
 
     FindOptions options = new FindOptions();
     options.setFields(attributeFilter);
@@ -407,9 +407,9 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     geometry_type = updated.getJsonObject("location").getJsonObject("value").getJsonObject("geometry").getString("type");
     geometry_array = updated.getJsonObject("location").getJsonObject("value").getJsonObject("geometry").getJsonArray("coordinates");
     
-    System.out.println(geometry);
-    System.out.println(geometry_type);
-    System.out.println(geometry_array);
+    logger.info(geometry.toString());
+    logger.info(geometry_type.toString());
+    logger.info(geometry_array.toString());
     
 		if (geometry_type == "Point") {
 			latitude = geometry_array.getString(0);
@@ -507,16 +507,30 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 
 		JsonObject request_body = (JsonObject) message.body();
 		JsonObject itemWithoutDol = removeDollar(request_body);
-		JsonObject updated_item = addNewAttributes(itemWithoutDol, 1, true, null);
-
-		String item_id = updated_item.getString("id");
+		
 		JsonObject query = new JsonObject();
 		JsonObject q = new JsonObject();
 		JsonArray expressions = new JsonArray();
+
+		String item_type = request_body.getString("item-type");
+		String item_id = null;
+
+		if (item_type.contains("resourceItem")) {
+			request_body = addNewAttributes(itemWithoutDol, 1, true, null);
+			item_id = request_body.getString("id");
+			logger.info("Item ID : " +item_id);
+		} else if (item_type == "resourceServer"){
+			request_body = itemWithoutDol;
+			item_id = request_body.getString("name");
+		}
+		
 		q.put("id", item_id);
+		q.put("item-type", item_type);
 		expressions.add(q);
 		query.put("$and", expressions);
 		
+		JsonObject updated_item = request_body;
+
 		mongo.count(COLLECTION, query, res -> {
 			logger.info(res.result().toString());
 			
@@ -527,6 +541,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 							writeTags(updated_item.getJsonArray("_tags"));
 						}
 						message.reply(updated_item.getString("id"));
+						logger.info("Item Created " + updated_item.getString("id"));
 					} else {
 						message.fail(0, "failure");
 					}
