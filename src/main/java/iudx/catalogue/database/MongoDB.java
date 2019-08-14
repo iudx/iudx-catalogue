@@ -96,7 +96,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 
     FindOptions options = new FindOptions();
     options.setFields(attributeFilter);
-    System.out.println(query);
+    System.out.println(query); 
     mongo.findWithOptions(
         COLLECTION,
         query,
@@ -121,18 +121,23 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
           }
         });
   }
-
+ 
   public void list(Message<Object> message) {
-    JsonObject request_body = (JsonObject) message.body();
-    String itemType = request_body.getString("item-type");
-    System.out.print(itemType);
-    JsonObject searchitemType = new JsonObject();
-    searchitemType.put("type", "Property");
-    searchitemType.put("value", itemType);
-    JsonObject query = new JsonObject();
-    query.put("itemType", searchitemType);
+	    JsonObject request_body = (JsonObject) message.body();
+	    String itemType = request_body.getString("item-type");
+	    System.out.print(itemType);
+	    JsonObject searchitemType = new JsonObject();
+	    searchitemType.put("type", "Property");
+	    searchitemType.put("value", itemType);
+	    JsonObject query = new JsonObject();
+	    query.put("itemType", searchitemType);
 
-    mongoFind(query, new JsonObject(), message);
+	    mongoFind(query, new JsonObject(), message);
+	  }
+  
+  public void getItem(Message<Object> message) {
+    JsonObject request_body = (JsonObject) message.body();
+    mongoFind(request_body, new JsonObject(), message);
   }
 
   public void listTags(Message<Object> message) {
