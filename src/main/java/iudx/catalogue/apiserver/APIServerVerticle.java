@@ -116,7 +116,7 @@ public class APIServerVerticle extends AbstractVerticle {
 
     // IUDX v1 APIs
     router.post("/catalogue/v1/items").handler(this::create);
-
+    router.get("/catalogue/v1/items/:domain/:provider/:resourceServer/:resourceCatogery/:resourceId").handler(this::getItem);
     router.put("/catalogue/v1/items/:provider/:resourceServer/:resourceCatogery/:resourceId").handler(this::update);
     router.get("/catalogue/v1/search").handler(this::searchAttribute);
     router.get("/catalogue/v1/count").handler(this::count);
@@ -267,6 +267,16 @@ public class APIServerVerticle extends AbstractVerticle {
 		}
 
 		return status;
+	}
+
+	private void getItem(RoutingContext routingContext) { // "/catalogue/v1/items/:domain/:provider/:resourceServer/:resourceCatogery/:resourceId
+		String id = routingContext.pathParam("domain") + "/" + routingContext.pathParam("provider") + "/"
+				+ routingContext.pathParam("resourceServer") + "/" + routingContext.pathParam("resourceCatogery") + "/"
+				+ routingContext.pathParam("resourceId");
+		System.out.println(id);
+		JsonObject request_body = new JsonObject();
+		request_body.put("id", id);
+		databaseHandler("getItem", routingContext, request_body);
 	}
 
   private void list(RoutingContext routingContext) {
@@ -581,6 +591,7 @@ public class APIServerVerticle extends AbstractVerticle {
             database_reply -> {
               if (database_reply.succeeded()) {
                 switch (action) {
+                  case "getItem":
                   case "list":
                   case "get-tags":
                   case "search-attribute":

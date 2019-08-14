@@ -24,6 +24,8 @@ public interface DatabaseInterface {
    */
   public void searchAttribute(Message<Object> message);
 
+  public void getItem(Message<Object> message);
+  
   public void list(Message<Object> message);
 
   public void listTags(Message<Object> message);

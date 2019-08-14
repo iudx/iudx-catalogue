@@ -69,6 +69,12 @@ public class DatabaseVerticle extends AbstractVerticle {
           break;
         }
 
+      case "getItem":
+      {
+        db.getItem(message);
+        break;
+      }
+
       case "get-tags":
         {
           db.listTags(message);
