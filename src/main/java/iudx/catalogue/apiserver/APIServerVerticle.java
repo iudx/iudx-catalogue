@@ -248,7 +248,7 @@ public class APIServerVerticle extends AbstractVerticle {
 			String userName = emailID[0];
 			String domain = emailID[1];
 
-			String userName_SHA_1 = new DigestUtils(SHA_1).digestAsHex(userName);
+			String userName_SHA_1 = new DigestUtils(SHA_1).digestAsHex(email[1]);
 			logger.info("userName in SHA-1 is " + userName_SHA_1);
 			emailID_SHA_1 = userName_SHA_1 + "@" + domain;
 			logger.info("emailID in SHA-1 is " + emailID_SHA_1);
@@ -300,57 +300,54 @@ public class APIServerVerticle extends AbstractVerticle {
     String query_params = request.query();
     String itemType = query_params.split("=")[1];
  
-    String skip_validation = "false";
-    if (request.headers().contains("skip_validation")) {
-      skip_validation = request.getHeader("skip_validation").toLowerCase();
-    }
+		if (itemType.contains("resourceItem")) {
 
-    if (decodeCertificate(routingContext)) {
-      if (authenticateRequest(routingContext, "user.list")) {
-        try {
-          JsonObject request_body = routingContext.getBodyAsJson();
-          request_body.put("sha_1_id", emailID_SHA_1);
-          request_body.put("item-type", itemType);
-          DeliveryOptions validator_action = new DeliveryOptions();
-          validator_action.addHeader("action", "validate-item");
+			String skip_validation = "false";
+			if (request.headers().contains("skip_validation")) {
+				skip_validation = request.getHeader("skip_validation").toLowerCase();
+			}
 
-          if (skip_validation != null) {
-            if (!("true".equals(skip_validation)) && !("false".equals(skip_validation))) {
-              handle400(routingContext, "Invalid value: skip_validation is not a boolean");
-              return;
-            } else {
-              validator_action.addHeader("skip_validation", skip_validation);
-            }
-          }
+			if (decodeCertificate(routingContext)) {
+				if (authenticateRequest(routingContext, "user.list")) {
+					try {
+						JsonObject request_body = routingContext.getBodyAsJson();
+						request_body.put("sha_1_id", emailID_SHA_1);
+						request_body.put("item-type", itemType);
+						DeliveryOptions validator_action = new DeliveryOptions();
+						validator_action.addHeader("action", "validate-item");
 
-          vertx
-              .eventBus()
-              .send(
-                  "validator",
-                  request_body,
-                  validator_action,
-                  validator_reply -> {
-                    if (validator_reply.succeeded()) {
-                      if (itemTypes.contains(itemType)) {
-                    	  databaseHandler("create", routingContext, request_body);
-                      } else {
-                    	  handle400(routingContext, "No such item-type exists");
-                      }
-                    } else {
-                      handle500(routingContext);
-                    }
-                  });
+						if (skip_validation != null) {
+							if (!("true".equals(skip_validation)) && !("false".equals(skip_validation))) {
+								handle400(routingContext, "Invalid value: skip_validation is not a boolean");
+								return;
+							} else {
+								validator_action.addHeader("skip_validation", skip_validation);
+							}
+						}
 
-        } catch (Exception e) {
-          handle400(routingContext, "Invalid item: Not a Json Object");
-        }
-      } else {
-        handle401(routingContext, "Unauthorised");
-      }
-    } else {
-      handle400(routingContext, "Certificate 'authenticaton' error");
-    }
-  }
+						vertx.eventBus().send("validator", request_body, validator_action, validator_reply -> {
+							if (validator_reply.succeeded()) {
+								if (itemTypes.contains(itemType)) {
+									databaseHandler("create", routingContext, request_body);
+								} else {
+									handle400(routingContext, "No such item-type exists");
+								}
+							} else {
+								handle500(routingContext);
+							}
+						});
+
+					} catch (Exception e) {
+						handle400(routingContext, "Invalid item: Not a Json Object");
+					}
+				} else {
+					handle401(routingContext, "Unauthorised");
+				}
+			} else {
+				handle400(routingContext, "Certificate 'authenticaton' error");
+			}
+		}
+	 }
 
   private void bulkCreate(RoutingContext routingContext) {
     HttpServerRequest request = routingContext.request();

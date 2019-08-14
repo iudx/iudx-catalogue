@@ -396,9 +396,13 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     JsonObject updated = doc.copy();
     JsonObject geometry;
     JsonArray geometry_array;
-    String id, sha1, resourceServer, resourceServerGroup, provider, resourceId, geometry_type, longitude, latitude;
+    String id, sha1, sha, resourceServer, resourceServerGroup, provider, resourceId, geometry_type, longitude, latitude, domain;
+    String[] emailID;
     
     sha1 = updated.getString("sha_1_id");
+    emailID = sha1.split("@");
+    sha = emailID[0];
+    domain = emailID[1];
     resourceServer = updated.getJsonObject("resourceServer").getString("value"); 
     resourceServerGroup = updated.getJsonObject("resourceServerGroup").getString("value"); 
     provider = updated.getJsonObject("provider").getString("value"); 
@@ -437,9 +441,9 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
       }
       updated.put("_tags", tagsInLowerCase);
     }
-    id = sha1 + "/" + resourceServer + "/" + resourceServerGroup + "/" + resourceId;
+    id = domain + "/" + sha + "/" + resourceServer + "/" + resourceServerGroup + "/" + resourceId;
     updated.put("id", id);
-
+    
     return updated;
   }
 
