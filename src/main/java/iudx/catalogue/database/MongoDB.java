@@ -402,12 +402,12 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     JsonObject geometry;
     JsonArray geometry_array;
     String id, sha1, sha, resourceServer, resourceServerGroup, provider, resourceId, geometry_type, longitude, latitude, domain;
-    String[] emailID;
+    String[] onboardedBy;
     
-    sha1 = updated.getString("sha_1_id");
-    emailID = sha1.split("@");
-    sha = emailID[0];
-    domain = emailID[1];
+    sha1 = updated.getString("onboardedBy");
+    onboardedBy = sha1.split("/");
+    sha = onboardedBy[1];
+    domain = onboardedBy[0];
     resourceServer = updated.getJsonObject("resourceServer").getString("value"); 
     resourceServerGroup = updated.getJsonObject("resourceServerGroup").getString("value"); 
     provider = updated.getJsonObject("provider").getString("value"); 
@@ -698,8 +698,7 @@ private void updateTags(JsonArray old_tags, JsonArray new_tags) {
     // Populate query
     JsonObject query = new JsonObject();
     query.put("id", request_body.getString("id"));
-    query.put("item-type", request_body.getString("item-type"));
-
+    
     mongo.findOneAndDelete(
         COLLECTION,
         query,

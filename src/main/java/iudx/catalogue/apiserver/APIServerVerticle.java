@@ -45,7 +45,7 @@ public class APIServerVerticle extends AbstractVerticle {
   static final int HTTP_STATUS_INTERNAL_SERVER_ERROR = 500;
   static final int HTTP_STATUS_UNAUTHORIZED = 401;
   static final int HTTP_STATUS_CONFLICT = 409;
-  static String emailID_SHA_1;
+  static String emailID_SHA_1, onboardedBy;
   private ArrayList<String> itemTypes;
 
   @Override
@@ -118,6 +118,7 @@ public class APIServerVerticle extends AbstractVerticle {
     router.post("/catalogue/v1/items").handler(this::create);
     router.get("/catalogue/v1/items/:domain/:provider/:resourceServer/:resourceCatogery/:resourceId").handler(this::getItem);
     router.put("/catalogue/v1/items/:provider/:resourceServer/:resourceCatogery/:resourceId").handler(this::update);
+    router.delete("/catalogue/v1/items/:domain/:provider/:resourceServer/:resourceCatogery/:resourceId").handler(this::delete);
     router.get("/catalogue/v1/search").handler(this::searchAttribute);
     router.get("/catalogue/v1/count").handler(this::count);
     
@@ -248,9 +249,9 @@ public class APIServerVerticle extends AbstractVerticle {
 			String userName = emailID[0];
 			String domain = emailID[1];
 
-			String userName_SHA_1 = new DigestUtils(SHA_1).digestAsHex(email[1]);
-			logger.info("userName in SHA-1 is " + userName_SHA_1);
-			emailID_SHA_1 = userName_SHA_1 + "@" + domain;
+			emailID_SHA_1  = new DigestUtils(SHA_1).digestAsHex(email[1]);
+			logger.info("email in SHA-1 is " + emailID_SHA_1);
+			onboardedBy = domain + "/" + emailID_SHA_1;
 			logger.info("emailID in SHA-1 is " + emailID_SHA_1);
 
 			if (level.contains("class:2") || level.contains("class:3") || level.contains("class:4")
@@ -321,7 +322,7 @@ public class APIServerVerticle extends AbstractVerticle {
 				if (authenticateRequest(routingContext, "user.list")) {
 					try {
 						JsonObject request_body = routingContext.getBodyAsJson();
-						request_body.put("sha_1_id", emailID_SHA_1);
+						request_body.put("onboardedBy", onboardedBy);
 						request_body.put("item-type", itemType);
 						DeliveryOptions validator_action = new DeliveryOptions();
 						validator_action.addHeader("action", "validate-item");
@@ -465,29 +466,31 @@ public class APIServerVerticle extends AbstractVerticle {
    * @param event The server request which contains the id of the item.
    */
   private void delete(RoutingContext routingContext) {
-    HttpServerRequest request = routingContext.request();
+		HttpServerRequest request = routingContext.request();
 
-    if (decodeCertificate(routingContext)) {
-      if (authenticateRequest(routingContext, "user.list")) {
-        JsonObject request_body = new JsonObject();
+		if (decodeCertificate(routingContext)) {
+			if (authenticateRequest(routingContext, "user.list")) {
 
-        String id = request.getParam("id");
-        String itemType = request.getParam("itemtype");
-        request_body.put("id", id);
-        request_body.put("item-type", itemType);
+				String id = routingContext.pathParam("domain") + "/" + routingContext.pathParam("provider") + "/"
+						+ routingContext.pathParam("resourceServer") + "/"
+						+ routingContext.pathParam("resourceCatogery") + "/" + routingContext.pathParam("resourceId");
+				System.out.println(id);
 
-        if (!itemTypes.contains(itemType)) {
-          handle400(routingContext, "No such item-type exists!");
-        } else {
-          databaseHandler("delete", routingContext, request_body);
-        }
-      } else {
-        handle401(routingContext, "Unauthorised");
-      }
-    } else {
-      handle400(routingContext, "Certificate 'authenticaton' error");
-    }
-  }
+				if (id.contains(onboardedBy)) {
+
+					JsonObject request_body = new JsonObject();
+					request_body.put("id", id);
+					databaseHandler("delete", routingContext, request_body);
+				} else {
+					handle401(routingContext, "Unauthorised");
+				}
+			} else {
+				handle401(routingContext, "Unauthorised");
+			}
+		} else {
+			handle400(routingContext, "Certificate 'authenticaton' error");
+		}
+	}
 
   private void bulkDelete(RoutingContext routingContext) {
     HttpServerRequest request = routingContext.request();
@@ -527,13 +530,12 @@ public class APIServerVerticle extends AbstractVerticle {
           }
           logger.info(query);
 
-          String provider = request.getParam("provider");
-          String resource_server = request.getParam("resourceServer");
-          String resource_category = request.getParam("resourceCategory");
-
-          String resourceId = request.getParam("resourceId");
-          String id = provider + "/" + resource_server + "/" + resource_category + "/" + resourceId ;
+          String id = routingContext.pathParam("domain") + "/" + routingContext.pathParam("provider") + "/"
+				+ routingContext.pathParam("resourceServer") + "/" + routingContext.pathParam("resourceCatogery") + "/"
+				+ routingContext.pathParam("resourceId");
           System.out.println(id);
+
+          
           System.out.println(request_body.getJsonObject("id").getString("value"));
           if (id.equals(request_body.getString("id"))) {
 
