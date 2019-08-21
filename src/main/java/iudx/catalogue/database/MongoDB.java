@@ -123,16 +123,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   }
  
   public void list(Message<Object> message) {
-	    JsonObject request_body = (JsonObject) message.body();
-	    String itemType = request_body.getString("item-type");
-	    System.out.print(itemType);
-	    JsonObject searchitemType = new JsonObject();
-	    searchitemType.put("type", "Property");
-	    searchitemType.put("value", itemType);
-	    JsonObject query = new JsonObject();
-	    query.put("itemType", searchitemType);
-
-	    mongoFind(query, new JsonObject(), message);
+	    mongoFind(new JsonObject(), new JsonObject(), message);
 	  }
   
   public void getItem(Message<Object> message) {
