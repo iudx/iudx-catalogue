@@ -6,7 +6,7 @@ var map = L.map('map', {
     //... other options
 });
 
-map.setView(getPuneLatLng(), 13);
+map.setView(getPuneLatLng(), 12);
 //add zoom control with your options
 L.control.zoom({
     position: 'topright'
@@ -20,7 +20,7 @@ L.control.zoom({
 var tile_layer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
     attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions">CARTO</a>',
     subdomains: 'abcd',
-    maxZoom: 19
+    maxZoom: 100
 });
 
 tile_layer.addTo(map);
@@ -46,6 +46,27 @@ L.control.watermark = function(opts) {
 
 L.control.watermark({ position: 'bottomright' }).addTo(map);
 
+//Adding Legend to the map
+
+var legend = L.control({position: 'bottomright'});
+
+legend.onAdd = function (map) {
+
+    var div = L.DomUtil.create('div', 'info legend'),
+        grades = ["StreetLight", "AQM","Flood-Sensor","Wifi-Hotspot","ITMS","ChangeBhai","SafetyPin"],
+        labels = ["https://img.icons8.com/color/48/000000/street-light.png","https://img.icons8.com/color/48/000000/air-quality.png","https://img.icons8.com/office/16/000000/sensor.png","https://img.icons8.com/flat_round/64/000000/wi-fi-connected.png","https://img.icons8.com/ultraviolet/40/000000/marker.png","https://img.icons8.com/color/48/000000/marker.png","https://img.icons8.com/flat_round/64/000000/safety-pin--v2.png"];
+
+    // loop through our density intervals and generate a label with a colored square for each interval
+    var heading ='<h4>LEGENDS</h4>'
+    for (var i = 0; i < grades.length; i++) {
+        div.innerHTML +=  
+            (" <img src="+ labels[i] +" height='50' width='50'>") +grades[i] +'<br>';
+    }
+    div.innerHTML = heading+div.innerHTML;
+    return div ;
+};
+
+legend.addTo(map);
 // create the sidebar instance and add it to the map
 
 var sidebar = L.control.sidebar('sidebar', {
@@ -111,8 +132,9 @@ var drawPluginOptions = {
     position: 'topright',
     draw: {
         // disable toolbar item by setting it to false
-        polyline: true,
-        rectangle: true,
+        polygon: false,
+        polyline: false,
+        rectangle: false,
         marker: true,
     },
     edit: {
@@ -126,8 +148,9 @@ map.addControl(drawControl);
 
 map.on('draw:created', async function (e) {
     drawnItems.clearLayers();
-    settimeout(1000);
+    // settimeout(1000);
     var type = e.layerType,
+    
         layer = e.layer;
 
     //drawnItems.addLayer(layer);
@@ -136,13 +159,17 @@ map.on('draw:created', async function (e) {
         var radius = layer.getRadius();
         // console.log(radius)
         markersLayer.clearLayers();
-        $.get("/search/catalogue/attribute?bounding-type=circle&lat="+ center_point["lat"] +"&long="+ center_point["lng"] +"&radius="+radius, function(data) {
-        // $.get("/search/catalogue/attribute?location={bounding-type=circle&lat="+ center_point["lat"] +"&long="+ center_point["lng"] +"radius=1}", function(data) {
-            data=JSON.parse(data)
+
+		$.get("/catalogue/v1/search?lat="+ center_point["lat"] +"&lon="+ center_point["lng"] +"&radius="+radius, function(data) {
+		//$.get("/catalogue/v1/search?lat=12.273737&lon=78.37475&radius=200000", function(data) {
+        //$.get("/search/catalogue/attribute?bounding-type=circle&lat="+ center_point["lat"] +"&long="+ center_point["lng"] +"&radius="+radius, function(data) {
+        	
+            data=JSON.parse(data);
             for (var i = data.length - 1; i >= 0; i--) {
-                if(data[i].hasOwnProperty('geoJsonLocation')){
+                console.log(data[i])
+                if(data[i].hasOwnProperty('location')){
                     // myLayer.addData(data[i]['geoJsonLocation']);
-                    plotGeoJSONs(data[i]["geoJsonLocation"], jsonPrettyHighlightToId(data[i]));
+		    plotGeoJSONs(data[i]["location"]["value"]["geometry"], jsonPrettyHighlightToId(data[i]),data[i]["id"],data[i]["resourceServerGroup"]["value"],data[i]["resourceId"]["value"]);
                 }
             }
 		// console.log(data.length)
@@ -150,6 +177,33 @@ map.on('draw:created', async function (e) {
         });
         // await geoquery_circle(center_point["lat"],center_point["lng"], radius)
     }
+
+    if (type === 'marker') {
+        var center_point = layer.getLatLng();
+        //var radius = layer.getRadius();
+        console.log(layer.getLatLng());
+        // console.log(radius);
+        markersLayer.clearLayers();
+
+		$.get("/catalogue/v1/search?lat="+ center_point["lat"] +"&lon="+ center_point["lng"] +"&radius=100", function(data) {
+		//$.get("/catalogue/v1/search?lat=12.273737&lon=78.37475&radius=200000", function(data) {
+        //$.get("/search/catalogue/attribute?bounding-type=circle&lat="+ center_point["lat"] +"&long="+ center_point["lng"] +"&radius="+radius, function(data) {
+        	
+            data=JSON.parse(data);
+            console.log(data)
+            for (var i = data.length - 1; i >= 0; i--) {
+                console.log(Rohinarrr)
+                if(data[i].hasOwnProperty('location')){
+                    // myLayer.addData(data[i]['geoJsonLocation']);
+		    plotGeoJSONs(data[i]["location"]["value"]["geometry"], jsonPrettyHighlightToId(data[i]),data[i]["id"],data[i]["resourceServerGroup"]["value"],data[i]["resourceId"]["value"]);
+                }
+            }
+		// console.log(data.length)
+            // DATA=data
+        });
+       
+    }
+
     if (type === 'polygon') {
         // here you got the polygon points
         var points = layer._latlngs;
@@ -181,8 +235,6 @@ map.on('draw:created', async function (e) {
     //     }
 
     drawnItems.addLayer(layer);
-    activate_batch_mode();
-
 });
 
 // layer.on('click', function(e){
@@ -210,13 +262,17 @@ map.on('click', function (e) {
 
 
 $( document ).ready(function() {
-    $.get("/list/catalogue/resource-item", function(data, status){
-        // console.log("Data: " + data + "\nStatus: " + status);
+    $.get("/catalogue/v1/search", function(data, status){
+   // $.get("/list/catalogue/resource-item", function(data, status){
+         //console.log("Data: " + data + "\nStatus: " + status);
+//console.log("Rohina");
         data=JSON.parse(data)
         for (var i = data.length - 1; i >= 0; i--) {
-            if(data[i].hasOwnProperty('geoJsonLocation')){
+            // console.log(data[i])
+            // console.log(data[i]["location"]["value"]["geometry"])
+            if(data[i].hasOwnProperty('location')){
                 // myLayer.addData(data[i]['geoJsonLocation']);
-                plotGeoJSONs(data[i]["geoJsonLocation"], jsonPrettyHighlightToId(data[i]));
+                plotGeoJSONs(data[i]["location"]["value"]["geometry"], jsonPrettyHighlightToId(data[i]),data[i]["id"],data[i]["resourceServerGroup"]["value"],data[i]["resourceId"]["value"]);
             }
         }
     });
