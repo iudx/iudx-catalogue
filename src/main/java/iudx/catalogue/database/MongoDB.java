@@ -392,7 +392,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     JsonObject updated = doc.copy();
     JsonObject geometry;
     JsonArray geometry_array;
-    String id, sha1, sha, resourceServer, resourceServerGroup, provider, resourceId, geometry_type, longitude, latitude, domain;
+    String id, sha1, sha, resourceServer, resourceServerGroup, provider, resourceId, geometry_type, longitude, latitude, domain, region = null;
     String[] onboardedBy;
     
     sha1 = updated.getString("onboardedBy");
@@ -403,9 +403,18 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     resourceServerGroup = updated.getJsonObject("resourceServerGroup").getString("value"); 
     provider = updated.getJsonObject("provider").getString("value"); 
     resourceId = updated.getJsonObject("resourceId").getString("value");
-    geometry = updated.getJsonObject("location").getJsonObject("value").getJsonObject("geometry");
-    geometry_type = updated.getJsonObject("location").getJsonObject("value").getJsonObject("geometry").getString("type");
-    geometry_array = updated.getJsonObject("location").getJsonObject("value").getJsonObject("geometry").getJsonArray("coordinates");
+
+		if (updated.containsKey("location")) {
+			region = "location";
+		} else if (updated.containsKey("coverageRegion")) {
+			region = "coverageRegion";
+		}
+
+		geometry = updated.getJsonObject(region).getJsonObject("value").getJsonObject("geometry");
+		geometry_type = updated.getJsonObject(region).getJsonObject("value").getJsonObject("geometry")
+				.getString("type");
+		geometry_array = updated.getJsonObject(region).getJsonObject("value").getJsonObject("geometry")
+				.getJsonArray("coordinates");
     
     logger.info(geometry.toString());
     logger.info(geometry_type.toString());
@@ -414,7 +423,10 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 		if (geometry_type == "Point") {
 			latitude = geometry_array.getString(0);
 			longitude = geometry_array.getString(1);
-		}
+		} else if (geometry_type == "Polygon") {
+			latitude = geometry_array.getString(0);
+			longitude = geometry_array.getString(1);
+		} 
 	
 	updated.put("geoJsonLocation", geometry);	
     updated.remove("sha_1_id");
