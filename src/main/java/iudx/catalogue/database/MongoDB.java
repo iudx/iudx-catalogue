@@ -231,7 +231,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 
 		System.out.println(latitude + "----" + longitude + "----" + rad);
 
-		query.put("geoJsonLocation", new JsonObject().put("$geoWithin", new JsonObject().put("$center",
+		query.put("geoJsonLocation", new JsonObject().put("$geoWithin", new JsonObject().put("$centerSphere",
 				new JsonArray().add(new JsonArray().add(longitude).add(latitude)).add(rad))));
 		return query;
 	}
