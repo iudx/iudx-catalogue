@@ -138,16 +138,16 @@ function set_tags(_tags_set) {
 	}
 }
 
-function show_details(id){
-	$.get("/catalogue/v1/items/" + id , function(data) {
+function show_details(_id){
+	$.get("/catalogue/v1/items/" + _id , function(data) {
 		data=JSON.parse(data)
-		id = resource_id_to_html_id(id)
+		var id = resource_id_to_html_id(_id)
 		//console.log(id);
 		
 		$("#_tbody_"+id).html(`
 			<tr>
-			      <th scope="row">Name</th>
-			      <td>`+ data[0]["NAME"]["value"] +`</td>
+			      <th scope="row">resource-Id</th>
+			      <td>`+ data[0]["resourceId"]["value"] +`</td>
 		    </tr>
 		    <tr>
 			      <th scope="row">Description</th>
@@ -181,7 +181,7 @@ function show_details(id){
 		 //    </tr>
 			$("#details_section_"+id).append(`
 			<p>
-				<a href="https://pune.iudx.org.in/api/1.0.0/resource/latest/`+data[0]["resourceServerGroup"]["value"]+`/`+data[0]["resourceId"]["value"]+`" target="_blank">Latest Data</a>   |  
+				<a href="`+ get_latest_data_url(_id,data[0]["resourceServerGroup"]["value"],data[0]["resourceId"]["value"]) +`" target="_blank">Latest Data</a>   |  
 				<a href="`+data[0]["refBaseSchema"]["object"]+`" target="_blank">Base Schema </a> |
 				<a href="`+data[0]["refDataModel"]["object"]+`" target="_blank">Data Model </a>
 			</p>
@@ -191,11 +191,42 @@ function show_details(id){
 	});
 }
 
+function get_latest_data_url(id, rsg, rid){
+	if(id=="rbccps.org/aa9d66a000d94a78895de8d4c0b3a67f3450e531/pscdcl/crowd-sourced-safetipin/safetipin"){
+		return 'https://pune.iudx.org.in/api/1.0.0/resource/search/safetypin/18.56581555/73.77567708/10'
+	}else{
+		return `https://pune.iudx.org.in/api/1.0.0/resource/latest/`+rsg+`/`+rid
+	}
+}
+
 function resource_id_to_html_id(resource_id){
 	var replace_with = "_";
 	return resource_id.replace(/\/|\.|\@/g,replace_with)
 }
 
+function _get_latest_data(_resource_id, _token){
+	$.ajax({
+	  url: "https://pune.iudx.org.in/api/1.0.0/resource/search/safetypin/18.56581555/73.77567708/10",
+	  type: 'get',
+      headers: {"token": _token},
+	  success: function (data) {
+	  	
+        alert("Success! \n"+data)
+     //    var w = window.open('about:blank');
+    	// w.document.open();
+    	// w.document.write(data);
+         	
+      }
+	});
+}
+
+function _get_security_based_latest_data_link(_resource_id, _resourceServerGroup, _rid, token){
+	if(_resource_id=="rbccps.org/aa9d66a000d94a78895de8d4c0b3a67f3450e531/pscdcl/crowd-sourced-safetipin/safetipin"){
+		return `<button class="btn btn-secondary" onclick="_get_latest_data('`+_resource_id+`','`+token+`')">Get Full Latest Data</button>`
+	}else{
+		return `<a href="`+ get_latest_data_url(_resource_id,_resourceServerGroup,_rid) +`" target="_blank">Get Latest Data</a>`
+	}
+}
 
 function request_access_token(resource_id, resourceServerGroup, rid) {
 	console.log(resource_id)
@@ -209,7 +240,7 @@ function request_access_token(resource_id, resourceServerGroup, rid) {
 	  	// console.log(data.access_token)
 	  	
         // $('#token_section_'+resource_id_to_html_id(resource_id)).html($('#token_section_'+resource_id_to_html_id(resource_id)).html());
-        $('#token_section_'+resource_id_to_html_id(resource_id)).html(`<b>Token</b>: ` + data.access_token + ` | ` + `<a href="https://pune.iudx.org.in/api/1.0.0/resource/latest/`+ resourceServerGroup +`/`+rid+`" target="_blank">Get Latest Data</a>`);
+        $('#token_section_'+resource_id_to_html_id(resource_id)).html(`<b>Token</b>: ` + data.access_token + ` | ` + _get_security_based_latest_data_link(resource_id,resourceServerGroup, rid, data.access_token));
         alert("Success! \nToken received: " + data.access_token)
         $('#token_section_'+resource_id_to_html_id(resource_id)).toggle();
          	
@@ -219,9 +250,10 @@ function request_access_token(resource_id, resourceServerGroup, rid) {
 
 function json_to_htmlcard(json_obj){
 	var openapi_url = json_obj["accessInformation"][0]["accessObject"]["value"]
-	console.log(json_obj)
+	// var openapi_url = json_obj["accessInformation"]["value"][0]["accessObject"]["value"]
+	// console.log(openapi_url)
 	var is_public = (json_obj['secure']||[]).length === 0;
-	var rat_btn_html=`<button class="btn btn-success" onclick="request_access_token('` + json_obj.id + `', '`+ json_obj["resourceServerGroup"]["value"] + `', '`+ json_obj["resourceId"]["value"] + `' style="background-color:green")">Request Access Token</button>`
+	var rat_btn_html=`<button class="btn btn-success" onclick="request_access_token('` + json_obj.id + `', '`+ json_obj["resourceServerGroup"]["value"] + `', '`+ json_obj["resourceId"]["value"] + `')" style="background-color:green">Request Access Token</button>`
 	var s = json_obj["id"].split("/")
 	return `
 		<div class="col-12 card-margin-top">
@@ -236,8 +268,8 @@ function json_to_htmlcard(json_obj){
 		    <button class="btn btn-primary" onclick="show_details('`+ json_obj.id +`')">Details</button>
 		    <button class="btn btn-info" onclick="display_swagger_ui('` + openapi_url + `')">APIs Details</button>
 		    `+ ((is_public)?"":rat_btn_html) +`
+		    <button class="btn btn-secondary"><a href="`+ get_latest_data_url(json_obj["id"],json_obj["resourceServerGroup"]["value"],json_obj["resourceId"]["value"]) +`" target="_blank" style="color:white">Get Latest Data</a></button>
 		    
-		    <button class="btn btn-secondary"><a href="https://pune.iudx.org.in/api/1.0.0/resource/latest/`+ json_obj["resourceServerGroup"]["value"] +`/`+json_obj["resourceId"]["value"]+`" target="_blank" style="color:white">Get Latest Data</a></button>
 		    </div>
 		  </div>
 		  <div id="token_section_`+resource_id_to_html_id(json_obj.id)+`" class="token_section"></div>

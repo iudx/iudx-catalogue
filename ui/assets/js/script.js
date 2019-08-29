@@ -53,8 +53,8 @@ var legend = L.control({position: 'bottomright'});
 legend.onAdd = function (map) {
 
     var div = L.DomUtil.create('div', 'info legend'),
-        grades = ["StreetLight", "AQM","Flood-Sensor","Wifi-Hotspot","ITMS","ChangeBhai","SafetyPin"],
-        labels = ["https://img.icons8.com/color/48/000000/street-light.png","https://img.icons8.com/color/48/000000/air-quality.png","https://img.icons8.com/office/16/000000/sensor.png","https://img.icons8.com/flat_round/64/000000/wi-fi-connected.png","https://img.icons8.com/ultraviolet/40/000000/marker.png","https://img.icons8.com/color/48/000000/marker.png","https://img.icons8.com/flat_round/64/000000/safety-pin--v2.png"];
+        grades = ["StreetLight", "AQM","Flood-Sensor","Wifi-Hotspot","ITMS","ChangeBhai","SafetyPin","TomTom"],
+        labels = ["https://img.icons8.com/color/48/000000/street-light.png","https://img.icons8.com/color/48/000000/air-quality.png","https://img.icons8.com/office/16/000000/sensor.png","https://img.icons8.com/flat_round/64/000000/wi-fi-connected.png","https://img.icons8.com/ultraviolet/40/000000/marker.png","https://img.icons8.com/color/48/000000/marker.png","https://img.icons8.com/flat_round/64/000000/safety-pin--v2.png","https://image.flaticon.com/icons/svg/1167/1167993.svg"];
 
     // loop through our density intervals and generate a label with a colored square for each interval
     var heading ='<h4>LEGENDS</h4>'
@@ -170,12 +170,18 @@ map.on('draw:created', async function (e) {
         //$.get("/search/catalogue/attribute?bounding-type=circle&lat="+ center_point["lat"] +"&long="+ center_point["lng"] +"&radius="+radius, function(data) {
         	
             data=JSON.parse(data);
+            console.log(data)
             for (var i = data.length - 1; i >= 0; i--) {
-                console.log(data[i])
-                if(data[i].hasOwnProperty('location')){
+                // console.log(data[i])
+                           if(data[i].hasOwnProperty('location')){
                     // myLayer.addData(data[i]['geoJsonLocation']);
-		    plotGeoJSONs(data[i]["location"]["value"]["geometry"], jsonPrettyHighlightToId(data[i]),data[i]["id"],data[i]["resourceServerGroup"]["value"],data[i]["resourceId"]["value"]);
-                }
+            plotGeoJSONs(data[i]["location"]["value"]["geometry"], jsonPrettyHighlightToId(data[i]),data[i]["id"],data[i]["resourceServerGroup"]["value"],data[i]["resourceId"]["value"]);
+                }else if(data[i].hasOwnProperty('coverageRegion')){
+                    // myLayer.addData(data[i]['geoJsonLocation']);
+                    console.log("1")
+            plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], jsonPrettyHighlightToId(data[i]),data[i]["id"],data[i]["resourceServerGroup"]["value"],data[i]["resourceId"]["value"]);
+            console.log("2")        
+        }
             }
 		// console.log(data.length)
             // DATA=data
@@ -275,11 +281,20 @@ $( document ).ready(function() {
         for (var i = data.length - 1; i >= 0; i--) {
             // console.log(data[i])
             // console.log(data[i]["location"]["value"]["geometry"])
+            // if(data[i].hasOwnProperty('location')){
+            //     // myLayer.addData(data[i]['geoJsonLocation']);
+            //     plotGeoJSONs(data[i]["location"]["value"]["geometry"], jsonPrettyHighlightToId(data[i]),data[i]["id"],data[i]["resourceServerGroup"]["value"],data[i]["resourceId"]["value"]);
+            // }
             if(data[i].hasOwnProperty('location')){
-                // myLayer.addData(data[i]['geoJsonLocation']);
-                plotGeoJSONs(data[i]["location"]["value"]["geometry"], jsonPrettyHighlightToId(data[i]),data[i]["id"],data[i]["resourceServerGroup"]["value"],data[i]["resourceId"]["value"]);
-            }
+                    // myLayer.addData(data[i]['geoJsonLocation']);
+            plotGeoJSONs(data[i]["location"]["value"]["geometry"], jsonPrettyHighlightToId(data[i]),data[i]["id"],data[i]["resourceServerGroup"]["value"],data[i]["resourceId"]["value"]);
+                }else if(data[i].hasOwnProperty('coverageRegion')){
+                    // myLayer.addData(data[i]['geoJsonLocation']);
+                    console.log("1")
+            plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], jsonPrettyHighlightToId(data[i]),data[i]["id"],data[i]["resourceServerGroup"]["value"],data[i]["resourceId"]["value"]);
+            console.log("2")   
         }
+    }
     });
 });
 

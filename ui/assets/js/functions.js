@@ -65,91 +65,234 @@ function onEachFeature(feature, layer) {
     layer.bindPopup(feature.properties.name);
 }
 
+var colors=["#1abc9c", '#f1c40f']//, '#9b59b6']//, '#e67e22', '#f39c12']
+
+var color_count=-1;
+
+function getRandomColor(){
+ var color =  "#" + (Math.random() * 0xFFFFFF << 0).toString(16);
+ return color;
+}
+
 function plotGeoJSONs(geoJSONObject, _id, plot_id,_resourceServerGroup,_resourceId){
     //console.log(_resourceServerGroup)
     // //console.log("plotting "+ geoJSONObject, _id, _id["id"])
-    L.geoJSON(geoJSONObject, {
-        pointToLayer: function (feature, latlng) {
-                // return L.marker(latlng, {icon: getOfficeIcon()});
-                
-                // <a href='/catalogue/v1/items/"+plot_id+"'>Get Catalogue-item-details</a><br/>
-                var customPopup = "<a href='https://pune.iudx.org.in/api/1.0.0/resource/latest/"+_resourceServerGroup+"/"+_resourceId+"' target='_blank'>Get latest-details</a>";
-                if(_resourceServerGroup==='streetlight-feeder-sree'){
-                    //console.log("street")
-                    var _marker = L.marker(latlng,{icon: getStreetlightIcon()}).addTo(map);
-                    _marker.itemUUID = _id;
-                ////console.log(_marker.itemUUID);
-                _marker.on('click', markerOnClick);
-                _marker.bindPopup(customPopup)
-                return _marker;
-                }
-                if(_resourceServerGroup==='aqm-bosch-climo'){
-                    //console.log("aqm")
-                    var _marker = L.marker(latlng,{icon: getAirQualityIcon()}).addTo(map);
-                    _marker.itemUUID = _id;
-                ////console.log(_marker.itemUUID);
-                _marker.on('click', markerOnClick);
-                _marker.bindPopup(customPopup)
-                return _marker;
-                }
-                if(_resourceServerGroup==='flood-sensor'){
-                    //console.log("flood")
-                    var _marker = L.marker(latlng,{icon: getFloodSensorIcon()}).addTo(map);
-                    _marker.itemUUID = _id;
-                ////console.log(_marker.itemUUID);
-                _marker.on('click', markerOnClick);
-                _marker.bindPopup(customPopup)
-                return _marker;
-                }
-                if(_resourceServerGroup==='wifi-hotspot'){
-                    //console.log("wifi")
-                    var _marker = L.marker(latlng,{icon: getWifiHotspotIcon()}).addTo(map);
-                    _marker.itemUUID = _id;
-                ////console.log(_marker.itemUUID);
-                _marker.on('click', markerOnClick);
-                _marker.bindPopup(customPopup)
-                return _marker;
-                }
-                if(_resourceServerGroup==='itms'){
-                    //console.log("itms")
-                    var _marker = L.marker(latlng,{icon: getITMSIcon()}).addTo(map);
-                    _marker.itemUUID = _id;
-                ////console.log(_marker.itemUUID);
-                _marker.on('click', markerOnClick);
-                _marker.bindPopup(customPopup)
-                return _marker;
-                }
-                if(_resourceServerGroup==='changebhai'){
-                    //console.log("change")
-                    var _marker = L.marker(latlng,{icon: getChangebhaiIcon()}).addTo(map);
-                    _marker.itemUUID = _id;
-                ////console.log(_marker.itemUUID);
-                _marker.on('click', markerOnClick);
-                _marker.bindPopup(customPopup)
-                return _marker;
-                }
-                if(_resourceServerGroup==='safetypin'){
-                    //console.log("safety")
-                    var _marker = L.marker(latlng,{icon: getSafetypinIcon()}).addTo(map);
-                    _marker.itemUUID = _id;
-                ////console.log(_marker.itemUUID);
-                _marker.on('click', markerOnClick);
-                _marker.bindPopup(customPopup)
-                return _marker;
-                }
-                
-                // //console.log(_marker)
-                // ////console.log(_id);
-                // ////console.log(geoJSONObject);
-                // _marker.itemUUID = _id;
-                // ////console.log(_marker.itemUUID);
-                // _marker.on('click', markerOnClick);
-                // _marker.bindPopup(customPopup)
-                // return _marker;
-        },
-        // filter: soffParkingFilter,
-        // onEachFeature: onEachFeature
-    }).addTo(markersLayer);
+    // console.log(geoJSONObject, color_count)
+    
+    if(geoJSONObject["type"]=="Polygon"){
+        color_count=color_count+1
+        var _color=getRandomColor()
+        
+        var div = $('div.info.legend');
+
+        console.log(_resourceServerGroup, div)
+        if(_resourceServerGroup=="crowd-sourced-changebhai"){
+        // loop through our density intervals and generate a label with a colored square for each interval
+
+            div.innerHTML +=  
+            '<span style="background:' + _color + '"></span> ' +
+              'ChangeBhai' + '<br>';
+
+        }else if(_resourceServerGroup=="crowd-sourced-safetipin"){
+            div.innerHTML +=  
+            '<span style="background:' + _color + '"></span> ' +
+              'safetiPin' + '<br>';
+
+        }else if(_resourceServerGroup=="traffic-incidents"){
+            div.innerHTML +=  
+            '<span style="background:' + _color + '"></span> ' +
+              'TomTom' + '<br>';
+        }
+
+
+        L.geoJSON(geoJSONObject, {
+                style: {
+                        // fillColor: colors[color_count],
+                        // fillColor: _color,
+                        fillColor: colors[color_count%3],
+                        weight: 2,
+                        opacity: 1,
+                        // color: 'white',
+                        // dashArray: '3',
+                        fillOpacity: 0.5
+                      },
+                pointToLayer: function (feature, latlng) {
+                        // return L.marker(latlng, {icon: getOfficeIcon()});
+                        
+                        // <a href='/catalogue/v1/items/"+plot_id+"'>Get Catalogue-item-details</a><br/>
+                        var customPopup = "<a href='https://pune.iudx.org.in/api/1.0.0/resource/latest/"+_resourceServerGroup+"/"+_resourceId+"' target='_blank'>Get latest-details</a>";
+                        if(_resourceServerGroup==='streetlight-feeder-sree'){
+                            //console.log("street")
+                            var _marker = L.marker(latlng,{icon: getStreetlightIcon()}).addTo(map);
+                            _marker.itemUUID = _id;
+                        ////console.log(_marker.itemUUID);
+                        _marker.on('click', markerOnClick);
+                        _marker.bindPopup(customPopup)
+                        return _marker;
+                        }
+                        if(_resourceServerGroup==='aqm-bosch-climo'){
+                            //console.log("aqm")
+                            var _marker = L.marker(latlng,{icon: getAirQualityIcon()}).addTo(map);
+                            _marker.itemUUID = _id;
+                        ////console.log(_marker.itemUUID);
+                        _marker.on('click', markerOnClick);
+                        _marker.bindPopup(customPopup)
+                        return _marker;
+                        }
+                        if(_resourceServerGroup==='flood-sensor'){
+                            //console.log("flood")
+                            var _marker = L.marker(latlng,{icon: getFloodSensorIcon()}).addTo(map);
+                            _marker.itemUUID = _id;
+                        ////console.log(_marker.itemUUID);
+                        _marker.on('click', markerOnClick);
+                        _marker.bindPopup(customPopup)
+                        return _marker;
+                        }
+                        if(_resourceServerGroup==='wifi-hotspot'){
+                            //console.log("wifi")
+                            var _marker = L.marker(latlng,{icon: getWifiHotspotIcon()}).addTo(map);
+                            _marker.itemUUID = _id;
+                        ////console.log(_marker.itemUUID);
+                        _marker.on('click', markerOnClick);
+                        _marker.bindPopup(customPopup)
+                        return _marker;
+                        }
+                        if(_resourceServerGroup==='itms'){
+                            //console.log("itms")
+                            var _marker = L.marker(latlng,{icon: getITMSIcon()}).addTo(map);
+                            _marker.itemUUID = _id;
+                        ////console.log(_marker.itemUUID);
+                        _marker.on('click', markerOnClick);
+                        _marker.bindPopup(customPopup)
+                        return _marker;
+                        }
+                        if(_resourceServerGroup==='changebhai'){
+                            //console.log("change")
+                            var _marker = L.marker(latlng,{icon: getChangebhaiIcon()}).addTo(map);
+                            _marker.itemUUID = _id;
+                        ////console.log(_marker.itemUUID);
+                        _marker.on('click', markerOnClick);
+                        _marker.bindPopup(customPopup)
+                        return _marker;
+                        }
+                        if(_resourceServerGroup==='safetypin'){
+                            //console.log("safety")
+                            var _marker = L.marker(latlng,{icon: getSafetypinIcon()}).addTo(map);
+                            _marker.itemUUID = _id;
+                        ////console.log(_marker.itemUUID);
+                        _marker.on('click', markerOnClick);
+                        _marker.bindPopup(customPopup)
+                        return _marker;
+                        }
+                        if(_resourceServerGroup==='traffic-incidents'){
+                            //console.log("aqm")
+                            var _marker = L.marker(latlng,{icon: getAirQualityIcon()}).addTo(map);
+                            _marker.itemUUID = _id;
+                        ////console.log(_marker.itemUUID);
+                        _marker.on('click', markerOnClick);
+                        _marker.bindPopup(customPopup)
+                        return _marker;
+                        }
+                        
+                        // //console.log(_marker)
+                        // ////console.log(_id);
+                        // ////console.log(geoJSONObject);
+                        // _marker.itemUUID = _id;
+                        // ////console.log(_marker.itemUUID);
+                        // _marker.on('click', markerOnClick);
+                        // _marker.bindPopup(customPopup)
+                        // return _marker;
+                },
+                // filter: soffParkingFilter,
+                // onEachFeature: onEachFeature
+            }).addTo(markersLayer);
+    
+    }else if(geoJSONObject["type"]=="Point"){
+
+            L.geoJSON(geoJSONObject, {
+                pointToLayer: function (feature, latlng) {
+                        // return L.marker(latlng, {icon: getOfficeIcon()});
+                        
+                        // <a href='/catalogue/v1/items/"+plot_id+"'>Get Catalogue-item-details</a><br/>
+                        var customPopup = "<a href='https://pune.iudx.org.in/api/1.0.0/resource/latest/"+_resourceServerGroup+"/"+_resourceId+"' target='_blank'>Get latest-details</a>";
+                        if(_resourceServerGroup==='streetlight-feeder-sree'){
+                            //console.log("street")
+                            var _marker = L.marker(latlng,{icon: getStreetlightIcon()}).addTo(map);
+                            _marker.itemUUID = _id;
+                        ////console.log(_marker.itemUUID);
+                        _marker.on('click', markerOnClick);
+                        _marker.bindPopup(customPopup)
+                        return _marker;
+                        }
+                        if(_resourceServerGroup==='aqm-bosch-climo'){
+                            //console.log("aqm")
+                            var _marker = L.marker(latlng,{icon: getAirQualityIcon()}).addTo(map);
+                            _marker.itemUUID = _id;
+                        ////console.log(_marker.itemUUID);
+                        _marker.on('click', markerOnClick);
+                        _marker.bindPopup(customPopup)
+                        return _marker;
+                        }
+                        if(_resourceServerGroup==='flood-sensor'){
+                            //console.log("flood")
+                            var _marker = L.marker(latlng,{icon: getFloodSensorIcon()}).addTo(map);
+                            _marker.itemUUID = _id;
+                        ////console.log(_marker.itemUUID);
+                        _marker.on('click', markerOnClick);
+                        _marker.bindPopup(customPopup)
+                        return _marker;
+                        }
+                        if(_resourceServerGroup==='wifi-hotspot'){
+                            //console.log("wifi")
+                            var _marker = L.marker(latlng,{icon: getWifiHotspotIcon()}).addTo(map);
+                            _marker.itemUUID = _id;
+                        ////console.log(_marker.itemUUID);
+                        _marker.on('click', markerOnClick);
+                        _marker.bindPopup(customPopup)
+                        return _marker;
+                        }
+                        if(_resourceServerGroup==='itms'){
+                            //console.log("itms")
+                            var _marker = L.marker(latlng,{icon: getITMSIcon()}).addTo(map);
+                            _marker.itemUUID = _id;
+                        ////console.log(_marker.itemUUID);
+                        _marker.on('click', markerOnClick);
+                        _marker.bindPopup(customPopup)
+                        return _marker;
+                        }
+                        if(_resourceServerGroup==='changebhai'){
+                            //console.log("change")
+                            var _marker = L.marker(latlng,{icon: getChangebhaiIcon()}).addTo(map);
+                            _marker.itemUUID = _id;
+                        ////console.log(_marker.itemUUID);
+                        _marker.on('click', markerOnClick);
+                        _marker.bindPopup(customPopup)
+                        return _marker;
+                        }
+                        if(_resourceServerGroup==='safetypin'){
+                            //console.log("safety")
+                            var _marker = L.marker(latlng,{icon: getSafetypinIcon()}).addTo(map);
+                            _marker.itemUUID = _id;
+                        ////console.log(_marker.itemUUID);
+                        _marker.on('click', markerOnClick);
+                        _marker.bindPopup(customPopup)
+                        return _marker;
+                        }
+                        
+                        // //console.log(_marker)
+                        // ////console.log(_id);
+                        // ////console.log(geoJSONObject);
+                        // _marker.itemUUID = _id;
+                        // ////console.log(_marker.itemUUID);
+                        // _marker.on('click', markerOnClick);
+                        // _marker.bindPopup(customPopup)
+                        // return _marker;
+                },
+                // filter: soffParkingFilter,
+                // onEachFeature: onEachFeature
+            }).addTo(markersLayer);
+    
+    }
 }
 
 
