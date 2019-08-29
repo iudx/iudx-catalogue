@@ -1,3 +1,20 @@
+#text-icon {
+  z-index: 999999 !important;
+  position: fixed;
+  top: 10px;
+  left: 1450px;
+ 
+  padding: 5px;
+}
+.text-icon-line {
+  /* width: 35px;
+  height: 2px; */
+  background-color: transparent;
+  /* border: 2px solid blue; */
+  color: blue;
+  font-size: 22px;
+  margin: 70px 0;
+}
 .bg-white{
   background-color: white;
 }

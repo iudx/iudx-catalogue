@@ -141,10 +141,15 @@ var drawPluginOptions = {
         featureGroup: drawnItems, //REQUIRED!!
         remove: true
     }
+    
 };
+L.drawLocal.draw.toolbar.buttons.circle = 'Draw a circle!';
 
 var drawControl = new L.Control.Draw(drawPluginOptions);
 map.addControl(drawControl);
+// new L.Illustrate.Control({
+//     edit: { featureGroup: drawnItems }
+// }).addTo(map);
 
 map.on('draw:created', async function (e) {
     drawnItems.clearLayers();
