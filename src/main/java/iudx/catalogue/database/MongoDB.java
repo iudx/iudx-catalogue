@@ -392,10 +392,10 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     JsonObject updated = doc.copy();
     JsonObject geometry;
     JsonArray geometry_array;
-    String id, sha1, sha, resourceServer, resourceServerGroup, provider, resourceId, geometry_type, longitude, latitude, domain, region = null;
+    String id, sha1, sha, resourceServer, resourceServerGroup, provider, resourceId, geometry_type, longitude, latitude, domain, region = null, role;
     String[] onboardedBy;
     
-    sha1 = updated.getString("onboardedBy");
+    sha1 = updated.getString("role");
     onboardedBy = sha1.split("/");
     sha = onboardedBy[1];
     domain = onboardedBy[0];
@@ -430,6 +430,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 	
 	updated.put("geoJsonLocation", geometry);	
     updated.remove("sha_1_id");
+    updated.remove("role");
 	updated.put("createdAt", new JsonObject().put("type", "TimeProperty").put("value", new java.util.Date().toString()));
 	updated.put("updatedAt", new JsonObject().put("type", "TimeProperty").put("value", new java.util.Date().toString()));
 	

@@ -45,7 +45,7 @@ public class APIServerVerticle extends AbstractVerticle {
   static final int HTTP_STATUS_INTERNAL_SERVER_ERROR = 500;
   static final int HTTP_STATUS_UNAUTHORIZED = 401;
   static final int HTTP_STATUS_CONFLICT = 409;
-  static String emailID_SHA_1, onboardedBy;
+  static String emailID_SHA_1, onboardedBy, onboarder;
   private ArrayList<String> itemTypes;
 
   @Override
@@ -59,7 +59,7 @@ public class APIServerVerticle extends AbstractVerticle {
 
     HttpServer server = createServer();
 
-    int port = config().getInteger("http.port", 8443);
+    int port = config().getInteger("http.port", 18443);
 
     server.requestHandler(router::accept).listen(port);
 
@@ -236,10 +236,12 @@ public class APIServerVerticle extends AbstractVerticle {
 			Principal cn = routingContext.request().connection().sslSession().getPeerPrincipal();
 
 			String certificate_class[] = cn.toString().split(",");
-
+			System.out.println(cn.toString());
 			String class_level = certificate_class[0];
-			String email_id = certificate_class[1];
-			String user_level = certificate_class[2];
+			String email_id = certificate_class[8];
+			onboarder = certificate_class[1];
+			String designation = onboarder.split("=")[1];
+			System.out.println(designation);
 
 			String[] oid_class = class_level.split("=");
 			String level = oid_class[1];
@@ -251,10 +253,13 @@ public class APIServerVerticle extends AbstractVerticle {
 
 			emailID_SHA_1  = new DigestUtils(SHA_1).digestAsHex(email[1]);
 			logger.info("email in SHA-1 is " + emailID_SHA_1);
+			onboarder = designation + " at " + domain;
 			onboardedBy = domain + "/" + emailID_SHA_1;
 			logger.info("emailID in SHA-1 is " + emailID_SHA_1);
+			logger.info("onBoarder is " + onboarder);
+			logger.info("onBoardedBy is " + onboardedBy);
 
-			if (level.contains("class:2") || level.contains("class:3") || level.contains("class:4")
+			if (level.contains("class:3") || level.contains("class:4")
 					|| level.contains("class:5")) {
 				status = true;
 				logger.info("Valid Certificate");
@@ -322,7 +327,8 @@ public class APIServerVerticle extends AbstractVerticle {
 				if (authenticateRequest(routingContext, "user.list")) {
 					try {
 						JsonObject request_body = routingContext.getBodyAsJson();
-						request_body.put("onboardedBy", onboardedBy);
+						request_body.put("onboardedBy", onboarder);
+						request_body.put("role", onboardedBy);
 						request_body.put("item-type", itemType);
 						DeliveryOptions validator_action = new DeliveryOptions();
 						validator_action.addHeader("action", "validate-item");
