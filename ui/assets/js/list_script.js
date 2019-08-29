@@ -169,15 +169,16 @@ function show_details(id){
 			      <th scope="row">Resource Server Group</th>
 			      <td>`+ data[0]["resourceServerGroup"]["value"] +`</td>
 		    </tr>
-		    <tr>
-			      <th scope="row">Authorization Server Info</th>
-			      <td>`+ data[0]["authorizationServerInfo"]["value"]["authServer"] +` | Type: `+ data[0]["authorizationServerInfo"]["value"]["authType"] +`</td>
-		    </tr>
+		   
 		    <tr>
 			      <th scope="row">Status</th>
 			      <td>`+ data[0]["itemStatus"]["value"] +`</td>
 		    </tr>
 		`);
+		 // <tr>
+			//       <th scope="row">Authorization Server Info</th>
+			//       <td>`+ data[0]["authorizationServerInfo"]["value"]["authServer"] +` | Type: `+ data[0]["authorizationServerInfo"]["value"]["authType"] +`</td>
+		 //    </tr>
 			$("#details_section_"+id).append(`
 			<p>
 				<a href="https://pune.iudx.org.in/api/1.0.0/resource/latest/`+data[0]["resourceServerGroup"]["value"]+`/`+data[0]["resourceId"]["value"]+`" target="_blank">Latest Data</a>   |  
@@ -196,45 +197,50 @@ function resource_id_to_html_id(resource_id){
 }
 
 
-function request_access_token(resource_id,provider) {
-	var body_json = [
-             {
-                 "resource-id": resource_id,  //change to latest data
-                 "provider": provider, //change provider
-                 "api": "/contents",
-                 "methods": ["GET"]
-             }
-         ];
-    // /auth/v1/token
-	$.post("demo_test_post.asp",
-	{
-		name: "Donald Duck",
-		city: "Duckburg"
-	},
-	function(data, status){
-	alert("Data: " + data + "\nStatus: " + status);
+function request_access_token(resource_id, resourceServerGroup, rid) {
+	console.log(resource_id)
+	$.ajax({
+	  url: "https://auth.iudx.org.in/auth/v1/token",
+	  type: 'post',
+      dataType: 'json',
+      contentType: 'application/json',
+	  data: JSON.stringify({"resource-id": resource_id}),
+	  success: function (data) {
+	  	// console.log(data.access_token)
+	  	
+        // $('#token_section_'+resource_id_to_html_id(resource_id)).html($('#token_section_'+resource_id_to_html_id(resource_id)).html());
+        $('#token_section_'+resource_id_to_html_id(resource_id)).html(`<b>Token</b>: ` + data.access_token + ` | ` + `<a href="https://pune.iudx.org.in/api/1.0.0/resource/latest/`+ resourceServerGroup +`/`+rid+`" target="_blank">Get Latest Data</a>`);
+        alert("Success! \nToken received: " + data.access_token)
+        $('#token_section_'+resource_id_to_html_id(resource_id)).toggle();
+         	
+      }
 	});
 }
 
 function json_to_htmlcard(json_obj){
 	var openapi_url = json_obj["accessInformation"][0]["accessObject"]["value"]
-	console.log(openapi_url)
+	console.log(json_obj)
 	var is_public = (json_obj['secure']||[]).length === 0;
-	var rat_btn_html=`<button class="btn btn-secondary" onclick="request_access_token('` + json_obj.id + `','` + json_obj.onboardedBy + `')">Request Access Token</button>`
+	var rat_btn_html=`<button class="btn btn-success" onclick="request_access_token('` + json_obj.id + `', '`+ json_obj["resourceServerGroup"]["value"] + `', '`+ json_obj["resourceId"]["value"] + `' style="background-color:green")">Request Access Token</button>`
+	var s = json_obj["id"].split("/")
 	return `
 		<div class="col-12 card-margin-top">
 		<div class="card">
-		  <h5 class="card-header card-header-color">` + json_obj["id"] + `</h5>
+		  <h5 class="card-header card-header-color">` + s.splice(2).join("/") + " by " + s[0]  + `</h5>
 		  <div class="card-body">
 		    <h5 class="card-title">` + json_obj["itemDescription"] + `</h5>
+		    <strong>Item-ID</strong>: `+json_obj['id']+`<br>
 		    <strong>Onboarded-By</strong>: `+json_obj['onboardedBy']+`<br>
 		    <strong>Security</strong>: `+ (is_public ? "Public": "Requires Authentication") +`<br>
+		    <div id="btn_`+resource_id_to_html_id(json_obj.id)+`">
 		    <button class="btn btn-primary" onclick="show_details('`+ json_obj.id +`')">Details</button>
 		    <button class="btn btn-info" onclick="display_swagger_ui('` + openapi_url + `')">APIs Details</button>
-		    `+ ((!is_public)?"":rat_btn_html) +`
+		    `+ ((is_public)?"":rat_btn_html) +`
 		    
-		    <!--button class="btn btn-secondary">Request Access Token (For Non-Public data)???</button-->
+		    <button class="btn btn-secondary"><a href="https://pune.iudx.org.in/api/1.0.0/resource/latest/`+ json_obj["resourceServerGroup"]["value"] +`/`+json_obj["resourceId"]["value"]+`" target="_blank" style="color:white">Get Latest Data</a></button>
+		    </div>
 		  </div>
+		  <div id="token_section_`+resource_id_to_html_id(json_obj.id)+`" class="token_section"></div>
 		  <div id="details_section_`+resource_id_to_html_id(json_obj.id)+`" class="details_section">
 		  	<table class="table table-borderless table-dark">
 			  <thead>
