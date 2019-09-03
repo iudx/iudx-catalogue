@@ -227,7 +227,8 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 		JsonObject query = new JsonObject();
 		double latitude = Double.parseDouble(location.getString("lat"));
 		double longitude = Double.parseDouble(location.getString("lon"));
-		double rad = MetersToDecimalDegrees(Double.parseDouble(location.getString("radius")), latitude);
+		double rad = (Double.parseDouble(location.getString("radius")) / (6378.1*1000)); //converting the radius (ms) to radians
+		//double rad = MetersToDecimalDegrees(Double.parseDouble(location.getString("radius")), latitude);
 
 		System.out.println(latitude + "----" + longitude + "----" + rad);
 
