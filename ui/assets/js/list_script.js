@@ -1,5 +1,6 @@
 /*************************************************GLOBAL VARIABLES START*********************************************/
 var tags_set=[]
+var first_get_item_call_done=false
 /*************************************************GLOBAL VARIABLES END***********************************************/
 
 
@@ -10,11 +11,12 @@ var tags_set=[]
 
 /*************************************************FUNCTION DECLARATIONS START*********************************************/
 
-function display_search_section(){
-	$(".section").fadeOut(200);
-	$("body").css("background-image","none");
-	$("#search_section").fadeIn(1500);
-	get_items();
+function display_search_section(_attr_name,_attr_value){
+	if(is_attr_empty(_attr_name,_attr_value)){
+		return;
+	}
+	display_search_section();
+	get_items(_attr_name,_attr_value);
 }
 
 function display_saved_search_section(){
@@ -45,13 +47,37 @@ function display_swagger_ui(_openapi_url){
 	})
 }
 
+function is_attr_empty(_attr_name,_attr_value){
+	if(_attr_name === "" || _attr_value === ""){
+		alert("Error! Attribute-Name or Value missing");
+		return true;
+	}
+}
 
-function get_items(){
+function display_search_section(){
+	$(".section").fadeOut(200);
+	$("body").css("background-image","none");
+	$("#search_section").fadeIn(1500);
+}
+
+function get_items(_attr_name,_attr_value){
+	// console.log(_attr_name,_attr_value)
+	if(is_attr_empty(_attr_name,_attr_value)){
+		return;
+	}
+
+	if(!first_get_item_call_done){
+		first_get_item_call_done=true;
+		display_search_section();
+	}
+
+	console.log(first_get_item_call_done)
+
 	let seen_tags_set = [];
-	$.get("/catalogue/v1/search", function(data) {
+	$.get("/catalogue/v1/search?attribute-name=("+_attr_name+")&attribute-value=("+_attr_value+")", function(data) {
             // $("#searched_items").text(data);
 			data=JSON.parse(data)
-			
+			$("#searched_items").html("");
             for (var i = 0; i < data.length; i++) {
                 $("#searched_items").append(json_to_htmlcard(data[i]));
                 for (var tag_i = 0; tag_i < data[i]['tags']['value'].length - 1; tag_i++) {
@@ -80,7 +106,12 @@ function get_items_for_tag(tag){
 	$.get("/catalogue/v1/search?attribute-name=(tags)&attribute-value=((" + tag + "))", function(data) {
             // $("#searched_items").text(data);
             $("#searched_items").html("");
+
             data=JSON.parse(data)
+            if(!$('#searched_items').is(':visible')) {
+                	console.log("ddd")
+				    display_search_section();
+				}
             $("#retrieved_items_count").html("About " + data.length + " results for " + tag);
             for (var i = 0; i < data.length; i++) {
                 //console.log(data[i]);
@@ -95,6 +126,7 @@ function get_items_for_tag(tag){
             }
             }
         });
+
 	// $( "#_value" ).autocomplete({
 	//       source: seen_tags_set
 	// });
@@ -116,6 +148,7 @@ function set_tags(_tags_set) {
 			$( "#value" ).autocomplete({
 				source: _tags_set,
 				select: function( event, ui ) {
+					console.log(ui["item"]['label'])
 					get_items_for_tag(ui["item"]['label'])
 				}
 				// ,
@@ -192,7 +225,7 @@ function show_details(_id){
 }
 
 function get_latest_data_url(id, rsg, rid){
-	if(id=="rbccps.org/aa9d66a000d94a78895de8d4c0b3a67f3450e531/pscdcl/crowd-sourced-safetipin/safetipin"){
+	if(id=="rbccps.org/aa9d66a000d94a78895de8d4c0b3a67f3450e531/safetipin/safetipin/safetyIndex"){
 		return 'https://pune.iudx.org.in/api/1.0.0/resource/search/safetypin/18.56581555/73.77567708/10'
 	}else{
 		return `https://pune.iudx.org.in/api/1.0.0/resource/latest/`+rsg+`/`+rid
@@ -211,17 +244,17 @@ function _get_latest_data(_resource_id, _token){
       headers: {"token": _token},
 	  success: function (data) {
 	  	
-        alert("Success! \n"+data)
-     //    var w = window.open('about:blank');
-    	// w.document.open();
-    	// w.document.write(data);
-         	
+        // alert("Success! \n"+data)
+
+        var w = window.open('about:blank');
+    	w.document.open();
+    	w.document.write("<pre>"+data+"</pre><script src='https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/6.4.1/jsoneditor.js'></script>");
       }
 	});
 }
 
 function _get_security_based_latest_data_link(_resource_id, _resourceServerGroup, _rid, token){
-	if(_resource_id=="rbccps.org/aa9d66a000d94a78895de8d4c0b3a67f3450e531/pscdcl/crowd-sourced-safetipin/safetipin"){
+	if(_resource_id=="rbccps.org/aa9d66a000d94a78895de8d4c0b3a67f3450e531/safetipin/safetipin/safetyIndex"){
 		return `<button class="btn btn-secondary" onclick="_get_latest_data('`+_resource_id+`','`+token+`')">Get Full Latest Data</button>`
 	}else{
 		return `<a href="`+ get_latest_data_url(_resource_id,_resourceServerGroup,_rid) +`" target="_blank">Get Latest Data</a>`
@@ -244,12 +277,15 @@ function request_access_token(resource_id, resourceServerGroup, rid) {
         alert("Success! \nToken received: " + data.access_token)
         $('#token_section_'+resource_id_to_html_id(resource_id)).toggle();
          	
+      },
+      error: function (jqXHR, exception) {
+      	alert("Unauthorized access! Please get a token.")
       }
 	});
 }
 
 function json_to_htmlcard(json_obj){
-	var openapi_url = json_obj["accessInformation"][0]["accessObject"]["value"]
+	var openapi_url = json_obj["accessInformation"]["value"][0]["accessObject"]["value"]
 	// var openapi_url = json_obj["accessInformation"]["value"][0]["accessObject"]["value"]
 	// console.log(openapi_url)
 	var is_public = (json_obj['secure']||[]).length === 0;

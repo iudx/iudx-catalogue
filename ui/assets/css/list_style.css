@@ -32,6 +32,10 @@ header{
   color: white !important;
 }
 
+/*.errors-wrapper{
+  display: none !important;
+}*/
+
 .btn{
   border: none !important;
 }

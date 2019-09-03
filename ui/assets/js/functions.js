@@ -28,6 +28,33 @@ function jsonPrettyHighlightToId(jsonobj) {
     return json;
 }
 
+function jsonPrettyHighlightToIdwithBR(jsonobj) {
+
+    var json = JSON.stringify(jsonobj, undefined, 2);
+
+    json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    // console.log(json.replace(/\n/g, "<br />"))
+    json=json.replace(/\n/g, "<br />")
+    json = json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function(match) {
+        var cls = 'color: darkorange;';
+        if (/^"/.test(match)) {
+            if (/:$/.test(match)) {
+                cls = 'color: red;';
+            } else {
+                cls = 'color: green;';
+            }
+        } else if (/true|false/.test(match)) {
+            cls = 'color: blue;';
+        } else if (/null/.test(match)) {
+            cls = 'color: magenta;';
+        }
+        // //console.log(cls, match)
+        return '<span style="' + cls + '">' + urlify(match) + '</span>';
+    });
+    // return urlify(json);
+    return json;
+}
+
 
 //ajax call to get resource-items using /search/catalogue/attribute for geoquery type=circle
 // e.g. https://localhost:8443/search/catalogue/attribute?location={bounding-type=circle&lat=79.01234&long=78.33579&radius=1}
@@ -120,7 +147,7 @@ function plotGeoJSONs(geoJSONObject, _id, plot_id,_resourceServerGroup,_resource
                         // return L.marker(latlng, {icon: getOfficeIcon()});
                         
                         // <a href='/catalogue/v1/items/"+plot_id+"'>Get Catalogue-item-details</a><br/>
-                        var customPopup = "<a href='https://pune.iudx.org.in/api/1.0.0/resource/latest/"+_resourceServerGroup+"/"+_resourceId+"' target='_blank'>Get latest-details</a>";
+                        var customPopup = "<a href='https://pune.iudx.org.in/api/1.0.0/resource/latest/"+_resourceServerGroup+"/"+_resourceId+"' target='_blank'>Get latest-data</a>";
                         if(_resourceServerGroup==='streetlight-feeder-sree'){
                             //console.log("street")
                             var _marker = L.marker(latlng,{icon: getStreetlightIcon()}).addTo(map);
@@ -214,7 +241,7 @@ function plotGeoJSONs(geoJSONObject, _id, plot_id,_resourceServerGroup,_resource
                         // return L.marker(latlng, {icon: getOfficeIcon()});
                         
                         // <a href='/catalogue/v1/items/"+plot_id+"'>Get Catalogue-item-details</a><br/>
-                        var customPopup = "<a href='https://pune.iudx.org.in/api/1.0.0/resource/latest/"+_resourceServerGroup+"/"+_resourceId+"' target='_blank'>Get latest-details</a>";
+                        var customPopup = "<a href='https://pune.iudx.org.in/api/1.0.0/resource/latest/"+_resourceServerGroup+"/"+_resourceId+"' target='_blank'>Get latest-data</a>";
                         if(_resourceServerGroup==='streetlight-feeder-sree'){
                             //console.log("street")
                             var _marker = L.marker(latlng,{icon: getStreetlightIcon()}).addTo(map);

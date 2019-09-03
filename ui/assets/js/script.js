@@ -165,12 +165,14 @@ map.on('draw:created', async function (e) {
         // console.log(radius)
         markersLayer.clearLayers();
 
+        console.log("/catalogue/v1/search?lat="+ center_point["lat"] +"&lon="+ center_point["lng"] +"&radius="+radius)
+
 		$.get("/catalogue/v1/search?lat="+ center_point["lat"] +"&lon="+ center_point["lng"] +"&radius="+radius, function(data) {
 		//$.get("/catalogue/v1/search?lat=12.273737&lon=78.37475&radius=200000", function(data) {
         //$.get("/search/catalogue/attribute?bounding-type=circle&lat="+ center_point["lat"] +"&long="+ center_point["lng"] +"&radius="+radius, function(data) {
         	
             data=JSON.parse(data);
-            console.log(data)
+            console.log(data.length)
             for (var i = data.length - 1; i >= 0; i--) {
                 // console.log(data[i])
                            if(data[i].hasOwnProperty('location')){

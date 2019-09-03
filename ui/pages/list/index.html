@@ -43,7 +43,7 @@
         <div class="row style_list">
           <div class="col-lg-12">
               <h1 class="heading">
-                Discover <span id="resource_item_count"></span> resource-items by 1 provider/s <!-- grouped in a 25 resource groups -->
+                Discover <span id="resource_item_count"></span> resource-items by 4 providers <!-- grouped in a 25 resource groups -->
               </h1>
           
             <br>
@@ -92,10 +92,15 @@
             
               <div class="col-lg-2">
                 <!-- <label for="state">State</label> -->
-                <button class="btn btn-primary btn-block" type="submit" onclick="display_search_section()">Search</button>
+                
+                <button class="btn btn-primary btn-block" type="submit" onclick="get_items($('#attribute :selected').text(),$('#value').val())">Search</button>
+                
+                <!-- <button class="btn btn-primary btn-block" type="submit" onclick="display_search_section($('#attribute :selected').text(),$('#value').val())">Search</button> -->
+                
                 <!-- <div class="invalid-feedback">
                   Please provide a valid state.
                 </div> -->
+
               </div>
 
             </div>
@@ -153,7 +158,7 @@
             
               <div class="col-lg-2">
                 <!-- <label for="state">State</label> -->
-                <button class="btn btn-primary btn-block" type="submit" onclick="get_items()">Search</button>
+                <button class="btn btn-primary btn-block" type="submit" onclick="get_items($('#_attribute :selected').text(),$('#_value').val())">Search</button>
                 <!-- <div class="invalid-feedback">
                   Please provide a valid state.
                 </div> -->
@@ -196,5 +201,6 @@
 <script type="text/javascript" src="../assets/js/swagger/swagger-ui-bundle.js"></script>
 <script type="text/javascript" src="../assets/js/swagger/swagger-ui-standalone-preset.js"></script>
 <script type="text/javascript" src="../assets/js/swagger_script.js"></script>
+<script type="text/javascript" src="../assets/js/functions.js"></script>
 <script type="text/javascript" src="../assets/js/list_script.js"></script>
 </html>
