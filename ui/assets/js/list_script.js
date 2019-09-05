@@ -1,6 +1,7 @@
 /*************************************************GLOBAL VARIABLES START*********************************************/
 var tags_set=[]
 var first_get_item_call_done=false
+var filters="(id,resourceServerGroup,itemDescription,onboardedBy,accessInformation,resourceId,tags,secure)"
 /*************************************************GLOBAL VARIABLES END***********************************************/
 
 
@@ -103,13 +104,13 @@ function get_items(_attr_name,_attr_value){
 function get_items_for_tag(tag){
 	let seen_tags_set = [];
 
-	$.get("/catalogue/v1/search?attribute-name=(tags)&attribute-value=((" + tag + "))", function(data) {
+	$.get("/catalogue/v1/search?attribute-name=(tags)&attribute-value=((" + tag + "))&attribute-filter="+filters, function(data) {
             // $("#searched_items").text(data);
             $("#searched_items").html("");
 
             data=JSON.parse(data)
+            console.log(data)
             if(!$('#searched_items').is(':visible')) {
-                	console.log("ddd")
 				    display_search_section();
 				}
             $("#retrieved_items_count").html("About " + data.length + " results for " + tag);
@@ -174,6 +175,17 @@ function set_tags(_tags_set) {
 function show_details(_id){
 	$.get("/catalogue/v1/items/" + _id , function(data) {
 		data=JSON.parse(data)
+		// console.log(data)
+		// console.log(data[0]["resourceId"]["value"])
+		// console.log(data[0]["itemDescription"])
+		// console.log(data[0]["itemType"]["value"])
+		// console.log(data[0]["provider"]["value"])
+		// console.log(data[0]["createdAt"]["value"])
+		// console.log(data[0]["resourceServerGroup"]["value"])
+		// console.log(data[0]["itemStatus"]["value"])
+		// console.log(data[0]["refBaseSchema"]["value"])
+		// console.log(data[0]["refDataModel"]["value"])
+
 		var id = resource_id_to_html_id(_id)
 		//console.log(id);
 		
@@ -214,9 +226,9 @@ function show_details(_id){
 		 //    </tr>
 			$("#details_section_"+id).append(`
 			<p>
-				<a href="`+ get_latest_data_url(_id,data[0]["resourceServerGroup"]["value"],data[0]["resourceId"]["value"]) +`" target="_blank">Latest Data</a>   |  
-				<a href="`+data[0]["refBaseSchema"]["object"]+`" target="_blank">Base Schema </a> |
-				<a href="`+data[0]["refDataModel"]["object"]+`" target="_blank">Data Model </a>
+				<!--<a href="`+ get_latest_data_url(_id,data[0]["resourceServerGroup"]["value"],data[0]["resourceId"]["value"]) +`" target="_blank">Latest Data</a>   |  -->
+				<a href="`+data[0]["refBaseSchema"]["value"]+`" target="_blank">Base Schema </a> |
+				<a href="`+data[0]["refDataModel"]["value"]+`" target="_blank">Data Model </a>
 			</p>
 			`);
 			// <a href="`+data[0]["latestResourceData"]["object"]+`" target="_blank">Latest Data </a>
@@ -234,7 +246,7 @@ function get_latest_data_url(id, rsg, rid){
 
 function resource_id_to_html_id(resource_id){
 	var replace_with = "_";
-	return resource_id.replace(/\/|\.|\@/g,replace_with)
+	return resource_id.replace(/\/|\.|\s|\(|\)|\<|\>|\{|\}|\,|\"|\'|\`|\*|\;|\+|\!|\#|\%|\^|\&|\=|\₹|\@/g,replace_with)
 }
 
 function _get_latest_data(_resource_id, _token){
