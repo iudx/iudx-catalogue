@@ -246,7 +246,7 @@ function get_latest_data_url(id, rsg, rid){
 
 function resource_id_to_html_id(resource_id){
 	var replace_with = "_";
-	return resource_id.replace(/\/|\.|\s|\(|\)|\<|\>|\{|\}|\,|\"|\'|\`|\*|\;|\+|\!|\#|\%|\^|\&|\=|\₹|\@/g,replace_with)
+	return resource_id.replace(/\/|\.|\s|\(|\)|\<|\>|\{|\}|\,|\"|\'|\`|\*|\;|\+|\!|\#|\%|\^|\&|\=|\₹|\$|\@/g,replace_with)
 }
 
 function _get_latest_data(_resource_id, _token){
