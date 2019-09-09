@@ -257,11 +257,17 @@ function _get_latest_data(_resource_id, _token){
 	  success: function (data) {
 	  	
         // alert("Success! \n"+data)
+        
+
+        // display_json_response_in_modal(data)
+     
+
 
         var w = window.open('about:blank');
     	w.document.open();
     	w.document.write("<pre>"+data+"</pre><script src='https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/6.4.1/jsoneditor.js'></script>");
-      }
+      },
+      error: alert("Please try some time later. Server is facing some problems at this moment.")
 	});
 }
 
@@ -315,6 +321,21 @@ function copyToClipboard(element_id) {
 	document.execCommand("copy");
 	$temp.remove();
 	alert("Token copied!")
+	// $.sweetModal({
+	//   title: 'Token copied!',
+	//   theme: $.sweetModal.THEME_DARK
+	// });
+}
+
+function display_json_response_in_modal(json_obj){
+		$.sweetAlert({
+		  content: jsonPrettyHighlightToId(json_obj),
+		  // $.sweetModal.ICON_SUCCESS
+		  // $.sweetModal.ICON_WARNING
+		  // $.sweetModal.ICON_ERROR
+		  icon: $.sweetModal.ICON_SUCCESS
+
+		});
 }
 
 function json_to_htmlcard(json_obj){
@@ -343,8 +364,8 @@ function json_to_htmlcard(json_obj){
 		    <button class="btn btn-secondary"><a href="`+ get_latest_data_url(json_obj["id"],json_obj["resourceServerGroup"]["value"],json_obj["resourceId"]["value"]) +`" target="_blank" style="color:white">Get Latest Data</a></button>
 		    
 		    </div>
+		     <div id="token_section_`+resource_id_to_html_id(json_obj.id)+`" class="token_section"></div>
 		  </div>
-		  <div id="token_section_`+resource_id_to_html_id(json_obj.id)+`" class="token_section"></div>
 		  <div id="details_section_`+resource_id_to_html_id(json_obj.id)+`" class="details_section">
 		  	<table class="table table-borderless table-dark">
 			  <thead>
