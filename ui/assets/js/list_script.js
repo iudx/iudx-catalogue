@@ -139,7 +139,7 @@ function get_items_for_tag(tag){
 
 
 function getFooterContent(){
-	return `<p>&copy; 2019 <a href="https://iudx.org.in">IUDX </a> | Read the  <a href="https://docs.google.com/document/d/12kQteMgxINPjZUVaNBqvtEYJEfqDn7r7QWbL74o7wPQ/edit?usp=sharing">Doc</a>.</p>`
+	return `<p>&copy; 2019 <a href="https://iudx.org.in">IUDX </a> | Read the  <a href="https://docs.google.com/document/d/12kQteMgxINPjZUVaNBqvtEYJEfqDn7r7QWbL74o7wPQ/edit?usp=sharing">Doc</a> <br> <span style="font-size: 15px;">Icon made by <a href="https://www.flaticon.com/authors/freepik">Freepik</a> from <a href="https://www.flaticon.com">www.flaticon.com</a>.</span></p>`
 }
 
 function set_tags(_tags_set) {
@@ -306,12 +306,14 @@ function json_to_htmlcard(json_obj){
 	return `
 		<div class="col-12 card-margin-top">
 		<div class="card">
-		  <h5 class="card-header card-header-color">` + s.splice(2).join("/") + " by " + s[0]  + `</h5>
+		  <h5 class="card-header card-header-color">` + s.splice(2).join("/") + " by " + s[0]  + ` <span class="float-right"><img src='`+
+		  ((is_public) ? "https://image.flaticon.com/icons/svg/1161/1161388.svg" : "../assets/img/icons/secure_item.svg")
+		  +`' class='img-fluid secure_icon'></span> </h5>
 		  <div class="card-body">
 		    <h5 class="card-title">` + json_obj["itemDescription"] + `</h5>
 		    <strong>Item-ID</strong>: `+json_obj['id']+`<br>
 		    <strong>Onboarded-By</strong>: `+json_obj['onboardedBy']+`<br>
-		    <strong>Security</strong>: `+ (is_public ? "Public": "Requires Authentication") +`<br>
+		    <strong>Access</strong>: `+ (is_public ? "Public": "Requires Authentication") +`<br>
 		    <div id="btn_`+resource_id_to_html_id(json_obj.id)+`">
 		    <button class="btn btn-primary" onclick="show_details('`+ json_obj.id +`')">Details</button>
 		    <button class="btn btn-info" onclick="display_swagger_ui('` + openapi_url + `')">APIs Details</button>
