@@ -139,7 +139,7 @@ function get_items_for_tag(tag){
 
 
 function getFooterContent(){
-	return `<p>&copy; 2019 <a href="https://iudx.org.in">IUDX </a> | Read the  <a href="https://docs.google.com/document/d/12kQteMgxINPjZUVaNBqvtEYJEfqDn7r7QWbL74o7wPQ/edit?usp=sharing">Doc</a> <br> <span style="font-size: 15px;">Icon made by <a href="https://www.flaticon.com/authors/freepik">Freepik</a> from <a href="https://www.flaticon.com">www.flaticon.com</a>.</span></p>`
+	return `<p>&copy; 2019 <a href="https://iudx.org.in">IUDX </a> | Read the  <a href="https://docs.google.com/document/d/12kQteMgxINPjZUVaNBqvtEYJEfqDn7r7QWbL74o7wPQ/edit?usp=sharing">Doc</a> <br> <span style="font-size: 15px;">Icon made by <a href="https://www.flaticon.com/authors/freepik">Freepik</a> from <a href="https://www.flaticon.com">flaticon.com</a>.</span></p>`
 }
 
 function set_tags(_tags_set) {
@@ -285,7 +285,10 @@ function request_access_token(resource_id, resourceServerGroup, rid) {
 	  	// console.log(data.access_token)
 	  	
         // $('#token_section_'+resource_id_to_html_id(resource_id)).html($('#token_section_'+resource_id_to_html_id(resource_id)).html());
-        $('#token_section_'+resource_id_to_html_id(resource_id)).html(`<b>Token</b>: ` + data.access_token + ` | ` + _get_security_based_latest_data_link(resource_id,resourceServerGroup, rid, data.access_token));
+        $('#token_section_'+resource_id_to_html_id(resource_id)).html(
+        																`<b>Token</b>: <span id="token_value_`+resource_id_to_html_id(resource_id)+`">` + data.access_token + `</span>`
+        																+ `<span><img class="secure_icon" src="../assets/img/icons/copy.svg" onclick="copyToClipboard('`+resource_id_to_html_id(resource_id)+`')"></span> | `
+        																+ _get_security_based_latest_data_link(resource_id,resourceServerGroup, rid, data.access_token))
         alert("Success! \nToken received: " + data.access_token)
         $('#token_section_'+resource_id_to_html_id(resource_id)).toggle();
          	
@@ -294,6 +297,24 @@ function request_access_token(resource_id, resourceServerGroup, rid) {
       	alert("Unauthorized access! Please get a token.")
       }
 	});
+}
+
+function get_horizontal_spaces(space_count){
+	var horizontal_space_str=""
+	for (var i = space_count.length - 1; i >= 0; i--) {
+		horizontal_space_str+="&nbsp;"
+	}
+	return horizontal_space_str;
+}
+
+function copyToClipboard(element_id) {
+	var $temp = $("<input>");
+	$("body").append($temp);
+	$temp.val($("#token_value_"+element_id).text()).select();
+	// $("#copied_"+element_id).html("Token copied!")
+	document.execCommand("copy");
+	$temp.remove();
+	alert("Token copied!")
 }
 
 function json_to_htmlcard(json_obj){
@@ -306,9 +327,10 @@ function json_to_htmlcard(json_obj){
 	return `
 		<div class="col-12 card-margin-top">
 		<div class="card">
-		  <h5 class="card-header card-header-color">` + s.splice(2).join("/") + " by " + s[0]  + ` <span class="float-right"><img src='`+
-		  ((is_public) ? "https://image.flaticon.com/icons/svg/1161/1161388.svg" : "../assets/img/icons/secure_item.svg")
-		  +`' class='img-fluid secure_icon'></span> </h5>
+		  <h5 class="card-header card-header-color">
+		  <span class="float-left"><img src='`+
+		  ((is_public) ? "../assets/img/icons/public_shield.svg" : "../assets/img/icons/secure_item.svg")
+		  +`' class='img-fluid secure_icon'></span>` + get_horizontal_spaces(3) + s.splice(2).join("/") + " by " + s[0]  + `</h5>
 		  <div class="card-body">
 		    <h5 class="card-title">` + json_obj["itemDescription"] + `</h5>
 		    <strong>Item-ID</strong>: `+json_obj['id']+`<br>
