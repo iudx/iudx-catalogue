@@ -357,7 +357,7 @@ function json_to_htmlcard(json_obj){
 		<div class="col-12 card-margin-top">
 		<div class="card">
 		  <h5 class="card-header card-header-color">
-		  <span class="float-left"><img src='`+
+		  <span class="float-left" style="padding-right:7.5px;"><img src='`+
 		  ((is_public) ? "../assets/img/icons/public_shield.svg" : "../assets/img/icons/secure_item.svg")
 		  +`' class='img-fluid secure_icon'></span>` + get_horizontal_spaces(3) + s.splice(2).join("/") + " by " + s[0]  + `</h5>
 		  <div class="card-body">
