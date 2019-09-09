@@ -177,11 +177,11 @@ map.on('draw:created', async function (e) {
                 // console.log(data[i])
                            if(data[i].hasOwnProperty('location')){
                     // myLayer.addData(data[i]['geoJsonLocation']);
-            plotGeoJSONs(data[i]["location"]["value"]["geometry"], jsonPrettyHighlightToId(data[i]),data[i]["id"],data[i]["resourceServerGroup"]["value"],data[i]["resourceId"]["value"]);
+            plotGeoJSONs(data[i]["location"]["value"]["geometry"], data[i]["id"],data[i]["id"],data[i]["resourceServerGroup"]["value"],data[i]["resourceId"]["value"]);
                 }else if(data[i].hasOwnProperty('coverageRegion')){
                     // myLayer.addData(data[i]['geoJsonLocation']);
                     console.log("1")
-            plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], jsonPrettyHighlightToId(data[i]),data[i]["id"],data[i]["resourceServerGroup"]["value"],data[i]["resourceId"]["value"]);
+            plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], data[i]["id"],data[i]["id"],data[i]["resourceServerGroup"]["value"],data[i]["resourceId"]["value"]);
             console.log("2")        
         }
             }
@@ -208,7 +208,7 @@ map.on('draw:created', async function (e) {
                 console.log(Rohinarrr)
                 if(data[i].hasOwnProperty('location')){
                     // myLayer.addData(data[i]['geoJsonLocation']);
-		    plotGeoJSONs(data[i]["location"]["value"]["geometry"], jsonPrettyHighlightToId(data[i]),data[i]["id"],data[i]["resourceServerGroup"]["value"],data[i]["resourceId"]["value"]);
+		    plotGeoJSONs(data[i]["location"]["value"]["geometry"], data[i]["id"],data[i]["id"],data[i]["resourceServerGroup"]["value"],data[i]["resourceId"]["value"]);
                 }
             }
 		// console.log(data.length)
@@ -273,6 +273,90 @@ map.on('click', function (e) {
 
 //ajax call to get resource-items from /list/catalogue/resource-item
 
+function display_swagger_ui(_openapi_url){
+    $("#swagger_section").fadeIn(1500);
+    const ui = SwaggerUIBundle({
+    //url: "https://petstore.swagger.io/v2/swagger.json",
+    url: _openapi_url,
+    dom_id: '#swagger_ui',
+    deepLinking: true,
+    presets: [
+      SwaggerUIBundle.presets.apis,
+      SwaggerUIStandalonePreset
+    ],
+    plugins: [
+      SwaggerUIBundle.plugins.DownloadUrl
+    ],
+    layout: "StandaloneLayout"
+    })
+}
+
+function show_details(_id){
+    $.get("/catalogue/v1/items/" + _id , function(data) {
+        data=JSON.parse(data)
+        // console.log(data)
+        // console.log(data[0]["resourceId"]["value"])
+        // console.log(data[0]["itemDescription"])
+        // console.log(data[0]["itemType"]["value"])
+        // console.log(data[0]["provider"]["value"])
+        // console.log(data[0]["createdAt"]["value"])
+        // console.log(data[0]["resourceServerGroup"]["value"])
+        // console.log(data[0]["itemStatus"]["value"])
+        // console.log(data[0]["refBaseSchema"]["value"])
+        // console.log(data[0]["refDataModel"]["value"])
+
+        var id = resource_id_to_html_id(_id)
+        //console.log(id);
+        
+        $("#resource_item_details").html(`
+            <table class="table table-borderless table-dark">
+              <thead>
+                <tr></tr>
+              </thead>
+              <tbody id="_tbody">
+            <tr>
+                  <th scope="row">Resource-Id</th>
+                  <td>`+ data[0]["resourceId"]["value"] +`</td>
+            </tr>
+            <tr>
+                  <th scope="row">Description</th>
+                  <td>`+ data[0]["itemDescription"] +`</td>
+            </tr>
+            <tr>
+                  <th scope="row">Type</th>
+                  <td>`+ data[0]["itemType"]["value"] +`</td>
+            </tr>
+            <tr>
+                  <th scope="row">Provider</th>
+                  <td>`+ data[0]["provider"]["value"] +`</td>
+            </tr>
+            <tr>
+                  <th scope="row">Created-On</th>
+                  <td>`+ data[0]["createdAt"]["value"] +`</td>
+            </tr>
+            <tr>
+                  <th scope="row">Resource Server Group</th>
+                  <td>`+ data[0]["resourceServerGroup"]["value"] +`</td>
+            </tr>
+           
+            <tr>
+                  <th scope="row">Status</th>
+                  <td>`+ data[0]["itemStatus"]["value"] +`</td>
+            </tr>
+            <tr>
+                  <th scope="row">API Details</th>
+                  <td><button class="btn btn-info" onclick="display_swagger_ui('` + data[0]["accessInformation"]["value"][0]["accessObject"]["value"] + `')">APIs Details</button></td>
+            </tr>
+            <tr>
+                  <th scope="row">Acces DataModel</th>
+                  <td><a href="`+data[0]["refDataModel"]["value"]+`" target="_blank">Data Model </a></td>
+            </tr>
+            </tbody>
+            </table>
+        `);
+    });
+}
+
 
 $( document ).ready(function() {
     $.get("/catalogue/v1/search", function(data, status){
@@ -285,15 +369,15 @@ $( document ).ready(function() {
             // console.log(data[i]["location"]["value"]["geometry"])
             // if(data[i].hasOwnProperty('location')){
             //     // myLayer.addData(data[i]['geoJsonLocation']);
-            //     plotGeoJSONs(data[i]["location"]["value"]["geometry"], jsonPrettyHighlightToId(data[i]),data[i]["id"],data[i]["resourceServerGroup"]["value"],data[i]["resourceId"]["value"]);
+            //     plotGeoJSONs(data[i]["location"]["value"]["geometry"], data[i]["id"],data[i]["id"],data[i]["resourceServerGroup"]["value"],data[i]["resourceId"]["value"]);
             // }
             if(data[i].hasOwnProperty('location')){
                     // myLayer.addData(data[i]['geoJsonLocation']);
-            plotGeoJSONs(data[i]["location"]["value"]["geometry"], jsonPrettyHighlightToId(data[i]),data[i]["id"],data[i]["resourceServerGroup"]["value"],data[i]["resourceId"]["value"]);
+            plotGeoJSONs(data[i]["location"]["value"]["geometry"], data[i]["id"],data[i]["id"],data[i]["resourceServerGroup"]["value"],data[i]["resourceId"]["value"]);
                 }else if(data[i].hasOwnProperty('coverageRegion')){
                     // myLayer.addData(data[i]['geoJsonLocation']);
                     console.log("1")
-            plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], jsonPrettyHighlightToId(data[i]),data[i]["id"],data[i]["resourceServerGroup"]["value"],data[i]["resourceId"]["value"]);
+            plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], data[i]["id"],data[i]["id"],data[i]["resourceServerGroup"]["value"],data[i]["resourceId"]["value"]);
             console.log("2")   
         }
     }

@@ -172,82 +172,6 @@ function set_tags(_tags_set) {
 	}
 }
 
-function show_details(_id){
-	$.get("/catalogue/v1/items/" + _id , function(data) {
-		data=JSON.parse(data)
-		// console.log(data)
-		// console.log(data[0]["resourceId"]["value"])
-		// console.log(data[0]["itemDescription"])
-		// console.log(data[0]["itemType"]["value"])
-		// console.log(data[0]["provider"]["value"])
-		// console.log(data[0]["createdAt"]["value"])
-		// console.log(data[0]["resourceServerGroup"]["value"])
-		// console.log(data[0]["itemStatus"]["value"])
-		// console.log(data[0]["refBaseSchema"]["value"])
-		// console.log(data[0]["refDataModel"]["value"])
-
-		var id = resource_id_to_html_id(_id)
-		//console.log(id);
-		
-		$("#_tbody_"+id).html(`
-			<tr>
-			      <th scope="row">resource-Id</th>
-			      <td>`+ data[0]["resourceId"]["value"] +`</td>
-		    </tr>
-		    <tr>
-			      <th scope="row">Description</th>
-			      <td>`+ data[0]["itemDescription"] +`</td>
-		    </tr>
-		    <tr>
-			      <th scope="row">Type</th>
-			      <td>`+ data[0]["itemType"]["value"] +`</td>
-		    </tr>
-		    <tr>
-			      <th scope="row">Provider</th>
-			      <td>`+ data[0]["provider"]["value"] +`</td>
-		    </tr>
-		    <tr>
-			      <th scope="row">Created-On</th>
-			      <td>`+ data[0]["createdAt"]["value"] +`</td>
-		    </tr>
-		    <tr>
-			      <th scope="row">Resource Server Group</th>
-			      <td>`+ data[0]["resourceServerGroup"]["value"] +`</td>
-		    </tr>
-		   
-		    <tr>
-			      <th scope="row">Status</th>
-			      <td>`+ data[0]["itemStatus"]["value"] +`</td>
-		    </tr>
-		`);
-		 // <tr>
-			//       <th scope="row">Authorization Server Info</th>
-			//       <td>`+ data[0]["authorizationServerInfo"]["value"]["authServer"] +` | Type: `+ data[0]["authorizationServerInfo"]["value"]["authType"] +`</td>
-		 //    </tr>
-			$("#details_section_"+id).append(`
-			<p>
-				<!--<a href="`+ get_latest_data_url(_id,data[0]["resourceServerGroup"]["value"],data[0]["resourceId"]["value"]) +`" target="_blank">Latest Data</a>   |  -->
-				<a href="`+data[0]["refBaseSchema"]["value"]+`" target="_blank">Base Schema </a> |
-				<a href="`+data[0]["refDataModel"]["value"]+`" target="_blank">Data Model </a>
-			</p>
-			`);
-			// <a href="`+data[0]["latestResourceData"]["object"]+`" target="_blank">Latest Data </a>
-		$("#details_section_"+id).toggle();
-	});
-}
-
-function get_latest_data_url(id, rsg, rid){
-	if(id=="rbccps.org/aa9d66a000d94a78895de8d4c0b3a67f3450e531/safetipin/safetipin/safetyIndex"){
-		return 'https://pune.iudx.org.in/api/1.0.0/resource/search/safetypin/18.56581555/73.77567708/10'
-	}else{
-		return `https://pune.iudx.org.in/api/1.0.0/resource/latest/`+rsg+`/`+rid
-	}
-}
-
-function resource_id_to_html_id(resource_id){
-	var replace_with = "_";
-	return resource_id.replace(/\/|\.|\s|\(|\)|\<|\>|\{|\}|\,|\"|\'|\`|\*|\;|\+|\!|\#|\%|\^|\&|\=|\₹|\$|\@/g,replace_with)
-}
 
 function _get_latest_data(_resource_id, _token){
 	$.ajax({
@@ -336,6 +260,90 @@ function display_json_response_in_modal(json_obj){
 		  icon: $.sweetModal.ICON_SUCCESS
 
 		});
+}
+
+function show_details(_id){
+	$.get("/catalogue/v1/items/" + _id , function(data) {
+		data=JSON.parse(data)
+		// console.log(data)
+		// console.log(data[0]["resourceId"]["value"])
+		// console.log(data[0]["itemDescription"])
+		// console.log(data[0]["itemType"]["value"])
+		// console.log(data[0]["provider"]["value"])
+		// console.log(data[0]["createdAt"]["value"])
+		// console.log(data[0]["resourceServerGroup"]["value"])
+		// console.log(data[0]["itemStatus"]["value"])
+		// console.log(data[0]["refBaseSchema"]["value"])
+		// console.log(data[0]["refDataModel"]["value"])
+
+		var id = resource_id_to_html_id(_id)
+		//console.log(id);
+		
+		$("#_tbody_"+id).html(`
+			<tr>
+			      <th scope="row">resource-Id</th>
+			      <td>`+ data[0]["resourceId"]["value"] +`</td>
+		    </tr>
+		    <tr>
+			      <th scope="row">Description</th>
+			      <td>`+ data[0]["itemDescription"] +`</td>
+		    </tr>
+		    <tr>
+			      <th scope="row">Type</th>
+			      <td>`+ data[0]["itemType"]["value"] +`</td>
+		    </tr>
+		    <tr>
+			      <th scope="row">Provider</th>
+			      <td>`+ data[0]["provider"]["value"] +`</td>
+		    </tr>
+		    <tr>
+			      <th scope="row">Created-On</th>
+			      <td>`+ data[0]["createdAt"]["value"] +`</td>
+		    </tr>
+		    <tr>
+			      <th scope="row">Resource Server Group</th>
+			      <td>`+ data[0]["resourceServerGroup"]["value"] +`</td>
+		    </tr>
+		   
+		    <tr>
+			      <th scope="row">Status</th>
+			      <td>`+ data[0]["itemStatus"]["value"] +`</td>
+		    </tr>
+		`);
+		 // <tr>
+			//       <th scope="row">Authorization Server Info</th>
+			//       <td>`+ data[0]["authorizationServerInfo"]["value"]["authServer"] +` | Type: `+ data[0]["authorizationServerInfo"]["value"]["authType"] +`</td>
+		 //    </tr>
+			$("#details_section_"+id).append(`
+			<p>
+				<!--<a href="`+ get_latest_data_url(_id,data[0]["resourceServerGroup"]["value"],data[0]["resourceId"]["value"]) +`" target="_blank">Latest Data</a>   |  -->
+				<a href="`+data[0]["refBaseSchema"]["value"]+`" target="_blank">Base Schema </a> |
+				<a href="`+data[0]["refDataModel"]["value"]+`" target="_blank">Data Model </a>
+			</p>
+			`);
+			// <a href="`+data[0]["latestResourceData"]["object"]+`" target="_blank">Latest Data </a>
+		$("#details_section_"+id).toggle();
+	});
+}
+
+function display_swagger_ui(_openapi_url){
+    $(".section").fadeOut(200);
+    $("body").css("background-image","none");
+    $("#swagger_section").fadeIn(1500);
+    const ui = SwaggerUIBundle({
+    //url: "https://petstore.swagger.io/v2/swagger.json",
+    url: _openapi_url,
+    dom_id: '#swagger_ui',
+    deepLinking: true,
+    presets: [
+      SwaggerUIBundle.presets.apis,
+      SwaggerUIStandalonePreset
+    ],
+    plugins: [
+      SwaggerUIBundle.plugins.DownloadUrl
+    ],
+    layout: "StandaloneLayout"
+    })
 }
 
 function json_to_htmlcard(json_obj){

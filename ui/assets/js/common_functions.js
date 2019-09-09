@@ -323,6 +323,14 @@ function plotGeoJSONs(geoJSONObject, _id, plot_id,_resourceServerGroup,_resource
 }
 
 
+function get_latest_data_url(id, rsg, rid){
+    if(id=="rbccps.org/aa9d66a000d94a78895de8d4c0b3a67f3450e531/safetipin/safetipin/safetyIndex"){
+        return 'https://pune.iudx.org.in/api/1.0.0/resource/search/safetypin/18.56581555/73.77567708/10'
+    }else{
+        return `https://pune.iudx.org.in/api/1.0.0/resource/latest/`+rsg+`/`+rid
+    }
+}
+
 function show_menu_icon() {
     $("#menu-bar-icon").show(500);
 }
@@ -337,12 +345,19 @@ function activate_batch_mode() {
     hide_menu_icon();
 }
 
-function activate_point_mode(_markerdetails) {
+function activate_point_mode(_id) {
+    // console.log(1,_id)
     $("#batch").hide();
-    $("#resource_item_details").html(_markerdetails);
+    // console.log(2,_id)
+    console.log("called")
+    show_details(_id)
     $("#point").show();
 }
 
+function resource_id_to_html_id(resource_id){
+    var replace_with = "_";
+    return resource_id.replace(/\/|\.|\s|\(|\)|\<|\>|\{|\}|\,|\"|\'|\`|\*|\;|\+|\!|\#|\%|\^|\&|\=|\₹|\$|\@/g,replace_with)
+}
 
 function markerOnClick(e) {
     // var attributes = e.layer.properties;
