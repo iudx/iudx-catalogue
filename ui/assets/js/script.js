@@ -274,6 +274,7 @@ map.on('click', function (e) {
 //ajax call to get resource-items from /list/catalogue/resource-item
 
 function display_swagger_ui(_openapi_url){
+    $("#map").hide();
     $("#swagger_section").fadeIn(1500);
     const ui = SwaggerUIBundle({
     //url: "https://petstore.swagger.io/v2/swagger.json",
@@ -289,6 +290,12 @@ function display_swagger_ui(_openapi_url){
     ],
     layout: "StandaloneLayout"
     })
+}
+
+
+function display_map(){
+    $("#swagger_section").hide();
+    $("#map").fadeIn(1500);
 }
 
 function show_details(_id){
@@ -343,17 +350,13 @@ function show_details(_id){
                   <th scope="row">Status</th>
                   <td>`+ data[0]["itemStatus"]["value"] +`</td>
             </tr>
-            <tr>
-                  <th scope="row">API Details</th>
-                  <td><button class="btn btn-info" onclick="display_swagger_ui('` + data[0]["accessInformation"]["value"][0]["accessObject"]["value"] + `')">APIs Details</button></td>
-            </tr>
-            <tr>
-                  <th scope="row">Acces DataModel</th>
-                  <td><a href="`+data[0]["refDataModel"]["value"]+`" target="_blank">Data Model </a></td>
-            </tr>
             </tbody>
             </table>
         `);
+        $("#resource_item_special_feature_links").html(`
+                    <button onclick="display_swagger_ui('` + data[0]["accessInformation"]["value"][0]["accessObject"]["value"] + `')">API Details</button>
+                    <button><a href="`+data[0]["refDataModel"]["value"]+`" target="_blank">Data Model </a></button>
+            `);
     });
 }
 

@@ -59,9 +59,12 @@
                     <div class="container">
                         <h1>Details</h1>
                         
-                    <pre id="resource_item_details">
+                    <div id="resource_item_details">
                         
-                    </pre>
+                    </div>
+                    <div id="resource_item_special_feature_links">
+                        
+                    </div>
                     </div>
                 </div>
             </div>
@@ -100,7 +103,16 @@
             </div>
         </div>
     </div>
-    
+    <section id="swagger_section" class="container section">
+
+      <!-- <p>Display OPENAPI JSON as HTML</p> -->
+      <br><br>
+      <button class="btn btn-primary btn-block" onclick="display_map()">Go Back</button> <br>
+        <div id="swagger_ui"></div>
+
+        <div id="normal_footer" class="normal_footer"></div>
+
+    </section>
     <div id="map"></div>
 
 </body>

@@ -1,3 +1,12 @@
+.version{
+  background-color: transparent !important;
+  border: none !important;
+}
+
+.swagger_section{
+  display: none !important;
+}
+
 #text-icon {
   z-index: 999999 !important;
   position: fixed;
