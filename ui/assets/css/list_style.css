@@ -1,3 +1,31 @@
+.centerFlex {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+}
+
+.pagination>.disabled>span, .pagination>.disabled>span:hover, .pagination>.disabled>span:focus, .pagination>.disabled>a, .pagination>.disabled>a:hover, .pagination>.disabled>a:focus{
+  cursor: pointer !important;
+}
+
+.pagination>li>a{
+    position: relative;
+    float: left;
+    padding: 6px 12px;
+    margin-left: -1px;
+    line-height: 1.42857143;
+    color: #337ab7;
+    text-decoration: none;
+    background-color: #fff;
+    border: 1px solid #ddd;
+}
+
+.page-active > a{
+    color: #fff !important;
+    text-decoration: none !important;
+    background-color: #337ab7 !important;
+}
+
 .modal{
   z-index:2500 !important;
 }
