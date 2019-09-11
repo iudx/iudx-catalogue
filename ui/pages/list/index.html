@@ -13,7 +13,9 @@
   </title>
   <link href="../assets/css/swagger/swagger-ui.css" rel="stylesheet">
   <link href="../assets/css/mdb.min.css" rel="stylesheet">
+  <!-- <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css"> -->
   <link rel="stylesheet" type="text/css" href="../assets/css/bootstrap.min.css">
+  <link href="https://botmonster.com/jquery-bootpag/prettify.css" type="text/css" rel="stylesheet" />
   <link href="../assets/css/list_style.css" rel="stylesheet">
   <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
   <!-- Google Fonts  -->
@@ -120,7 +122,7 @@
           </div>
           <!-- <footer class="text-muted landing_footer"> -->
           <!-- <div id="landing_footer" class="container landing_footer"> -->
-          <div id="normal_footer" class="container nromal_footer">
+          <div id="normal_footer" class="container normal_footer">
           </div>
     <!-- </footer> -->
         </section>
@@ -174,7 +176,12 @@
             </div>
              
              <div id="searched_items" class="row"></div>
-
+             <!-- Pagination Start-->
+             
+             <div id="page-selection" class="centerFlex" style="padding-top: 40px"><!-- Pagination goes here --></div>
+             
+             <!-- Pagination End-->
+            
             <!-- <p>search_section</p> -->
 
             <div id="normal_footer" class="normal_footer">
@@ -187,7 +194,7 @@
             <!-- <p>Display OPENAPI JSON as HTML</p> -->
             <button class="btn btn-primary btn-block" onclick="display_saved_search_section()">Go Back</button> <br>
             <div id="swagger_ui"></div>
-
+            
             <div id="normal_footer" class="normal_footer">
             </div>
 
@@ -202,6 +209,8 @@
 <script type="text/javascript" src="../assets/js/swagger/swagger-ui-bundle.js"></script>
 <script type="text/javascript" src="../assets/js/swagger/swagger-ui-standalone-preset.js"></script>
 <script type="text/javascript" src="../assets/js/swagger_script.js"></script>
+<!-- https://botmonster.com/jquery-bootpag/ -->
+<script type="text/javascript" src="../assets/js/jquery.bootpag.min.js"></script>  
 <script type="text/javascript" src="../assets/js/common_functions.js"></script>
 <script type="text/javascript" src="../assets/js/list_script.js"></script>
 </html>

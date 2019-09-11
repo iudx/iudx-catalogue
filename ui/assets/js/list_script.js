@@ -2,6 +2,8 @@
 var tags_set=[]
 var first_get_item_call_done=false
 var filters="(id,resourceServerGroup,itemDescription,onboardedBy,accessInformation,resourceId,tags,secure)"
+var page_limit = 10;
+var __DATA;
 /*************************************************GLOBAL VARIABLES END***********************************************/
 
 
@@ -11,6 +13,63 @@ var filters="(id,resourceServerGroup,itemDescription,onboardedBy,accessInformati
 
 
 /*************************************************FUNCTION DECLARATIONS START*********************************************/
+function get_global_data(){
+	return __DATA;
+}
+
+function get_page_limit(){
+	return page_limit;
+}
+
+
+// To be used when UI has the ability to showcase this feature
+function set_page_limit(_page_limit){
+	page_limit = _page_limit;
+}
+
+function set_data_globally(_data){
+	__DATA = _data;
+}
+
+function min(val1, val2){
+	return Math.min(val1, val2);
+}
+
+function display_paginated_search_results(page_num){
+	var global_data = get_global_data();
+	$("#searched_items").html("");
+	var from = min(((page_num-1)*get_page_limit()),global_data.length);
+	var to = min(((page_num)*get_page_limit()-1), global_data.length);
+	for (var i=from;i < to; i++) {
+		$("#searched_items").append(json_to_htmlcard(global_data[i]));	
+	}
+	// console.log("dislpaying item from:"+from+" to:"+to + " " + (global_data.length/get_page_limit() + ((global_data.length%get_page_limit())>0) ? 1 : 0));
+}
+
+function populate_pagination_section(){
+    // init bootpag
+    var data_length = get_global_data().length
+    $('#page-selection').bootpag({
+        total: (data_length/get_page_limit() + (((data_length%get_page_limit())>0) ? 1 : 0)),
+        maxVisible: 5,
+        leaps: true,
+		next: '>',
+		prev: '<',
+	    firstLastUse: true,
+	    first: '<<',
+	    last: '>>',
+	    wrapClass: 'pagination',
+	    activeClass: 'page-active',
+	    disabledClass: 'disabled',
+	    nextClass: 'next',
+	    prevClass: 'prev',
+	    lastClass: 'last',
+	    firstClass: 'first'
+    }).on("page", function(event, /* page number here */ num){
+          display_paginated_search_results(num);
+    });
+	console.log("POP");
+}
 
 function display_search_section(_attr_name,_attr_value){
 	if(is_attr_empty(_attr_name,_attr_value)){
@@ -78,6 +137,7 @@ function get_items(_attr_name,_attr_value){
 	$.get("/catalogue/v1/search?attribute-name=("+_attr_name+")&attribute-value=("+_attr_value+")", function(data) {
             // $("#searched_items").text(data);
 			data=JSON.parse(data)
+			set_data_globally(data);
 			$("#searched_items").html("");
             for (var i = 0; i < data.length; i++) {
                 $("#searched_items").append(json_to_htmlcard(data[i]));
@@ -90,7 +150,9 @@ function get_items(_attr_name,_attr_value){
                 }
             }
             }
+            populate_pagination_section();
         });
+
 	// $( "#_value" ).autocomplete({
 	//       source: seen_tags_set
 	// });
@@ -109,7 +171,9 @@ function get_items_for_tag(tag){
             $("#searched_items").html("");
 
             data=JSON.parse(data)
-            console.log(data)
+            // __DATA=data;
+            set_data_globally(data);
+            // console.log(data)
             if(!$('#searched_items').is(':visible')) {
 				    display_search_section();
 				}
@@ -126,6 +190,7 @@ function get_items_for_tag(tag){
                 }
             }
             }
+            populate_pagination_section();
         });
 
 	// $( "#_value" ).autocomplete({
@@ -149,7 +214,7 @@ function set_tags(_tags_set) {
 			$( "#value" ).autocomplete({
 				source: _tags_set,
 				select: function( event, ui ) {
-					console.log(ui["item"]['label'])
+					// console.log(ui["item"]['label'])
 					get_items_for_tag(ui["item"]['label'])
 				}
 				// ,
@@ -358,7 +423,7 @@ function json_to_htmlcard(json_obj){
 		<div class="card">
 		  <h5 class="card-header card-header-color">
 		  <span class="float-left" style="padding-right:7.5px;"><img src='`+
-		  ((is_public) ? "../assets/img/icons/public_shield.svg" : "../assets/img/icons/secure_item.svg")
+		  ((is_public) ? "../assets/img/icons/green_unlock.svg" : "../assets/img/icons/red_lock.svg")
 		  +`' class='img-fluid secure_icon'></span>` + get_horizontal_spaces(3) + s.splice(2).join("/") + " by " + s[0]  + `</h5>
 		  <div class="card-body">
 		    <h5 class="card-title">` + json_obj["itemDescription"] + `</h5>
