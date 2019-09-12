@@ -22,7 +22,7 @@ function __get_latest_data(url) {
       error: function(error) {
         reject(error)
       },
-      timeout: 5000 // sets timeout to 5 seconds
+      timeout: 30000 // sets timeout to 30 seconds
     })
   })
 }
