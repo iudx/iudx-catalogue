@@ -1,3 +1,9 @@
+.ajs-button{
+  color: #fff !important;
+  background-color: #007bff !important;
+  border-color: #007bff !important;
+}
+
 .version{
   background-color: transparent !important;
   border: none !important;
