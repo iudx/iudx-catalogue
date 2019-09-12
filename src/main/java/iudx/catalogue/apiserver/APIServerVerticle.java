@@ -134,6 +134,7 @@ public class APIServerVerticle extends AbstractVerticle {
     router.delete("/remove/catalogue/resource-item/bulk/:bulkId").handler(this::bulkDelete);
 
     router.route("/ui/*").handler(StaticHandler.create("ui/pages"));
+    router.route("/ui/assets/*").handler(StaticHandler.create("ui/assets"));
     router.route("/assets/*").handler(StaticHandler.create("ui/assets"));
     return router;
   }
