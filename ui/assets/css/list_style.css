@@ -1,3 +1,8 @@
+#custom_alertbox{
+  width: 100% !important;
+  height: 100% !important;
+}
+
 .centerFlex {
   align-items: center;
   display: flex;

@@ -7,12 +7,37 @@ var __DATA;
 /*************************************************GLOBAL VARIABLES END***********************************************/
 
 
-
-
-
-
-
 /*************************************************FUNCTION DECLARATIONS START*********************************************/
+
+function __get_latest_data(url) {
+  return new Promise((resolve, reject) => {
+  	$.ajax({
+      url: encodeURI(url),
+      type: 'GET',
+      success: function(data) {
+        resolve(data)
+      },
+      error: function(error) {
+        reject(error)
+      },
+      timeout: 5000 // sets timeout to 5 seconds
+    })
+  })
+}
+
+function display_latest_data(e, ele) {
+    e.preventDefault();   // use this to NOT go to href site
+    __get_latest_data($(ele).attr("href"))
+	  .then(data => {
+	    alertify.alert('<pre id="custom_alertbox">'+jsonPrettyHighlightToId(JSON.parse(data))+'</pre>');
+	    $(".ajs-header").html("Success");
+	  })
+	  .catch(error => {
+	    alertify.alert('<pre id="custom_alertbox">: ' + error["statusText"]+ '</pre>');
+	    $(".ajs-header").html("Error");
+	  })
+}
+
 function get_global_data(){
 	return __DATA;
 }
@@ -20,7 +45,6 @@ function get_global_data(){
 function get_page_limit(){
 	return page_limit;
 }
-
 
 // To be used when UI has the ability to showcase this feature
 function set_page_limit(_page_limit){
@@ -68,7 +92,6 @@ function populate_pagination_section(){
     }).on("page", function(event, /* page number here */ num){
           display_paginated_search_results(num);
     });
-	console.log("POP");
 }
 
 function display_search_section(_attr_name,_attr_value){
@@ -244,19 +267,14 @@ function _get_latest_data(_resource_id, _token){
 	  type: 'get',
       headers: {"token": _token},
 	  success: function (data) {
-	  	
         // alert("Success! \n"+data)
-        
-
         // display_json_response_in_modal(data)
-     
-
-
-        var w = window.open('about:blank');
-    	w.document.open();
-    	w.document.write("<pre>"+data+"</pre><script src='https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/6.4.1/jsoneditor.js'></script>");
+	    alertify.alert('<pre id="custom_alertbox">'+jsonPrettyHighlightToId(JSON.parse(data))+'</pre>');
+	    $(".ajs-header").html("Success");
       },
-      error: alert("Please try some time later. Server is facing some problems at this moment.")
+      error: function(){alertify.alert('<pre id="custom_alertbox">: Please try some time later. Server is facing some problems at this moment.</pre>');
+	    			$(".ajs-header").html("Error");
+	    		}
 	});
 }
 
@@ -264,7 +282,7 @@ function _get_security_based_latest_data_link(_resource_id, _resourceServerGroup
 	if(_resource_id=="rbccps.org/aa9d66a000d94a78895de8d4c0b3a67f3450e531/safetipin/safetipin/safetyIndex"){
 		return `<button class="btn btn-secondary" onclick="_get_latest_data('`+_resource_id+`','`+token+`')">Get Full Latest Data</button>`
 	}else{
-		return `<a href="`+ get_latest_data_url(_resource_id,_resourceServerGroup,_rid) +`" target="_blank">Get Latest Data</a>`
+		return `<a href="`+ get_latest_data_url(_resource_id,_resourceServerGroup,_rid) +`" class="data-modal"  onclick="display_latest_data(event, this)">Get Latest Data</a>`
 	}
 }
 
@@ -381,7 +399,7 @@ function show_details(_id){
 		 //    </tr>
 			$("#details_section_"+id).append(`
 			<p>
-				<!--<a href="`+ get_latest_data_url(_id,data[0]["resourceServerGroup"]["value"],data[0]["resourceId"]["value"]) +`" target="_blank">Latest Data</a>   |  -->
+				<!--<a href="`+ get_latest_data_url(_id,data[0]["resourceServerGroup"]["value"],data[0]["resourceId"]["value"]) +`">Latest Data</a>   |  -->
 				<a href="`+data[0]["refBaseSchema"]["value"]+`" target="_blank">Base Schema </a> |
 				<a href="`+data[0]["refDataModel"]["value"]+`" target="_blank">Data Model </a>
 			</p>
@@ -434,7 +452,7 @@ function json_to_htmlcard(json_obj){
 		    <button class="btn btn-primary" onclick="show_details('`+ json_obj.id +`')">Details</button>
 		    <button class="btn btn-info" onclick="display_swagger_ui('` + openapi_url + `')">APIs Details</button>
 		    `+ ((is_public)?"":rat_btn_html) +`
-		    <button class="btn btn-secondary"><a href="`+ get_latest_data_url(json_obj["id"],json_obj["resourceServerGroup"]["value"],json_obj["resourceId"]["value"]) +`" target="_blank" style="color:white">Get Latest Data</a></button>
+		    <a href="`+ get_latest_data_url(json_obj["id"],json_obj["resourceServerGroup"]["value"],json_obj["resourceId"]["value"]) +`" style="color:white"  class="data-modal" onclick="display_latest_data(event, this)"><button class="btn btn-secondary">Get Latest Data</button></a>
 		    
 		    </div>
 		     <div id="token_section_`+resource_id_to_html_id(json_obj.id)+`" class="token_section"></div>
@@ -468,8 +486,6 @@ function json_to_htmlcard(json_obj){
 
 
 /*************************************************EVENT BINDINGS START*********************************************/
-
-
 
 
 // Set up Footer, filter seen_tags_set
@@ -523,8 +539,6 @@ $('select').on('change', function() {
 $(".ui-menu").on('click',function(){
 	//console.log("s",this.value)
 });
-
-
 
 
 /*************************************************EVENT BINDINGS END*********************************************/
