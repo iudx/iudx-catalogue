@@ -87,6 +87,98 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     return res;
   }
 
+
+  /**
+   *Helper function to validate relation for specified geometry.
+   *Currently only for bbox.
+   */
+
+  private boolean validateRelation(String geometry, String relation){
+	
+	if(geometry.equalsIgnoreCase("bbox") && (relation.equalsIgnoreCase("equals")
+							||relation.equalsIgnoreCase("disjoint")
+							|| relation.equalsIgnoreCase("touches")
+							|| relation.equalsIgnoreCase("overlaps")
+							|| relation.equalsIgnoreCase("crosses")
+							|| relation.equalsIgnoreCase("intersects") 
+							|| relation.equalsIgnoreCase("within") )){
+
+		return true;
+	}
+    
+    else
+	   return false;
+
+  }
+
+  /**
+   * Helper function to convert string values to Double
+   */
+  private Double getDoubleFromS(String s){
+    Double d = Double.parseDouble(s);
+    return d;
+  }
+
+  private JsonObject buildQuery(String geometry, JsonArray coordinates, String relation){
+	
+	JsonObject query = new JsonObject();
+
+	switch(relation){
+	
+		case "equals": query = new JsonObject()
+						.put("geoJsonLocation.coordinates",coordinates );
+				break;
+
+		case "disjoint": break;
+
+		case "touches": query = searchGeoIntersects(geometry,coordinates);
+				break;
+
+		case "overlaps": query = searchGeoIntersects(geometry,coordinates); 
+				 break;
+
+		case "crosses": query = searchGeoIntersects(geometry,coordinates);
+				break;
+
+		case "contains": break;
+
+		case "intersects": query = searchGeoIntersects(geometry,coordinates);
+				            break;
+
+		case "within": query = searchGeoWithin(geometry,coordinates);
+				        break;
+
+        default: break;
+	}
+	
+    return query;
+  }
+
+  private JsonObject searchGeoIntersects(String geometry, JsonArray coordinates){
+
+	JsonObject query = new JsonObject();
+	
+	query.put("geoJsonLocation", new JsonObject()
+					     .put("$geoIntersects", new JsonObject()
+					     					.put("$geometry",new JsonObject()
+									    				 .put("type",geometry)
+								                         .put("coordinates",coordinates))));
+	System.out.println("GeoIntersects: "+query.toString());
+    return query;
+  }
+
+  private JsonObject searchGeoWithin(String geometry, JsonArray coordinates){
+  
+    JsonObject query = new JsonObject();
+    query.put("geoJsonLocation", new JsonObject()
+            .put("$geoWithin", new JsonObject()
+                .put("$geometry",new JsonObject()
+                    .put("type",geometry)
+                    .put("coordinates",coordinates))));  
+    System.out.println("GeoWithin: " + query.toString());
+    return query;
+  }
+
   private void mongoFind(JsonObject query, JsonObject attributeFilter, Message<Object> message) {
 
     attributeFilter.put("_id", 0);
@@ -292,6 +384,11 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     JsonArray expressions = new JsonArray();
     System.out.println(requestBody);
 
+    String geometry="", relation="",coordinatesS="";
+    String[] coordinatesArr;
+    Double distance=0.0;
+    JsonArray coordinates=new JsonArray();
+
 		if (requestBody.containsKey("attribute-name") && requestBody.containsKey("attribute-value")
 				&& !requestBody.containsKey("lat") && !requestBody.containsKey("lon")
 				&& !requestBody.containsKey("radius")) {
@@ -301,11 +398,31 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 		
 		} else if (requestBody.containsKey("lat") && requestBody.containsKey("lon") && requestBody.containsKey("radius")
 				&& ! requestBody.containsKey("attribute-name") && ! requestBody.containsKey("attribute-value")) { 
-		System.out.println("GEO-SPATIAL Query");
+		System.out.println("GEO-SPATIAL Query (CENTRE PT)");
 		geo_query = geo_within_search_query(requestBody);
 		query = geo_query;
 
-		} else if (requestBody.containsKey("lat") && requestBody.containsKey("lon") && requestBody.containsKey("radius")
+		} else if (requestBody.containsKey("bbox")){
+            System.out.println("GEO-SPATIAL Query (BBOX)");
+            geometry="bbox";
+            relation=requestBody.containsKey("relation")?requestBody.getString("relation").toLowerCase():"intersects";
+            boolean valid = validateRelation(geometry,relation);
+            if(valid){
+                coordinatesS = requestBody.getString("bbox");
+                coordinatesArr = coordinatesS.split(",");
+                JsonArray temp = new JsonArray();
+                JsonArray y1x1 = new JsonArray().add(getDoubleFromS(coordinatesArr[1])).add(getDoubleFromS(coordinatesArr[0]));
+                JsonArray y1x2 = new JsonArray().add(getDoubleFromS(coordinatesArr[1])).add(getDoubleFromS(coordinatesArr[2]));
+                JsonArray y2x2 = new JsonArray().add(getDoubleFromS(coordinatesArr[3])).add(getDoubleFromS(coordinatesArr[2]));
+                JsonArray y2x1 = new JsonArray().add(getDoubleFromS(coordinatesArr[3])).add(getDoubleFromS(coordinatesArr[0]));
+                temp.add(y1x1).add(y1x2).add(y2x2).add(y2x1).add(y1x1);
+                coordinates.add(temp);
+                query = buildQuery("Polygon",coordinates,relation);
+            }
+            else
+                query = null;
+
+        } else if (requestBody.containsKey("lat") && requestBody.containsKey("lon") && requestBody.containsKey("radius")
 				&& requestBody.containsKey("attribute-name") && requestBody.containsKey("attribute-value")) {
 			System.out.println("GEO-SPATIAL with ATTRIBUTE Query");
 			attribute_query = attribute_search_query(requestBody);
@@ -315,11 +432,11 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 			query.put("$and", expressions);
 			
 		} else if (requestBody.containsKey("attribute-name")
-        && !requestBody.containsKey("attribute-value")) {
-      query = null;
-    } else if (!requestBody.containsKey("attribute-name")
-        && requestBody.containsKey("attribute-value")) {
-      query = null;
+            && !requestBody.containsKey("attribute-value")) {
+            query = null;
+        }else if (!requestBody.containsKey("attribute-name")
+            && requestBody.containsKey("attribute-value")) {
+            query = null;
 
     } else {
       query = new JsonObject();
