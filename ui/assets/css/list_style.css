@@ -37,14 +37,6 @@
     background-color: #337ab7 !important;
 }
 
-.modal{
-  z-index:2500 !important;
-}
-
-.secure_icon{
-  width: 25px !important;
-}
-
 #retrieved_items_count{
   color:green;
 }

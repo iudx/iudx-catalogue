@@ -1,3 +1,16 @@
+// Spinner by https://tobiasahlin.com/spinkit/
+function get_spinner_html(){
+    return `
+    <div class="spinner">
+      <div class="rect1"></div>
+      <div class="rect2"></div>
+      <div class="rect3"></div>
+      <div class="rect4"></div>
+      <div class="rect5"></div>
+    </div>
+    `
+}
+
 function __get_latest_data(url) {
   return new Promise((resolve, reject) => {
     $.ajax({
@@ -14,16 +27,20 @@ function __get_latest_data(url) {
   })
 }
 
+function _alertify(header_msg, body_msg){
+    alertify.alert(body_msg);
+    $(".ajs-header").html(header_msg);
+}
+
 function display_latest_data(e, ele) {
     e.preventDefault();   // use this to NOT go to href site
+    _alertify("Getting Data...", get_spinner_html())
     __get_latest_data($(ele).attr("href"))
       .then(data => {
-        alertify.alert('<pre id="custom_alertbox">'+jsonPrettyHighlightToId(JSON.parse(data))+'</pre>');
-        $(".ajs-header").html("Success");
+        _alertify("Success!!!", '<pre id="custom_alertbox">'+jsonPrettyHighlightToId(JSON.parse(data))+'</pre>')
       })
       .catch(error => {
-        alertify.alert('<pre id="custom_alertbox">: ' + error["statusText"]+ '</pre>');
-        $(".ajs-header").html("Error");
+        _alertify("Error!!!",'<pre id="custom_alertbox">: ' + error["statusText"]+ '</pre>');
       })
 }
 
@@ -35,13 +52,10 @@ function _get_latest_data(_resource_id, _token){
       success: function (data) {
         // alert("Success! \n"+data)
         // display_json_response_in_modal(data)
-        alertify.alert('<pre id="custom_alertbox">'+jsonPrettyHighlightToId(JSON.parse(data))+'</pre>');
-        $(".ajs-header").html("Success");
+        _alertify("Success!!!", '<pre id="custom_alertbox">'+jsonPrettyHighlightToId(JSON.parse(data))+'</pre>');
       },
-      error: function(){alertify.alert('<pre id="custom_alertbox">: Please try some time later. Server is facing some problems at this moment.</pre>');
-                    $(".ajs-header").html("Error");
-                }
-    });
+      error: _alertify("Error!!!", '<pre id="custom_alertbox">: Please try some time later. Server is facing some problems at this moment.</pre>')
+    })
 }
 
 function _get_security_based_latest_data_link(_resource_id, _resourceServerGroup, _rid, token){
@@ -66,14 +80,16 @@ function request_access_token(resource_id, resourceServerGroup, rid) {
         // $('#token_section_'+resource_id_to_html_id(resource_id)).html($('#token_section_'+resource_id_to_html_id(resource_id)).html());
         $('#token_section_'+resource_id_to_html_id(resource_id)).html(
                                                                         `<b>Token</b>: <span id="token_value_`+resource_id_to_html_id(resource_id)+`">` + data.access_token + `</span>`
-                                                                        + `<span><img class="secure_icon" src="../assets/img/icons/copy.svg" onclick="copyToClipboard('`+resource_id_to_html_id(resource_id)+`')"></span> | `
+                                                                        + `&nbsp;&nbsp;&nbsp;<button class="btn copy-btn"> Copy Token <img class="secure_icon svg-white" src="../assets/img/icons/copy_white.svg" onclick="copyToClipboard('`+resource_id_to_html_id(resource_id)+`')"></button> <br> `
                                                                         + _get_security_based_latest_data_link(resource_id,resourceServerGroup, rid, data.access_token))
-        alert("Success! \nToken received: " + data.access_token)
+        
+        _alertify("Success!!!", "Token received.<br>You are now authenticated to access the non-public data.")
+        // _alertify("Success!!!", "Token received: " + data.access_token)
         $('#token_section_'+resource_id_to_html_id(resource_id)).toggle();
             
       },
       error: function (jqXHR, exception) {
-        alert("Unauthorized access! Please get a token.")
+        _alertify("Error", "Unauthorized access! Please get a token.")
       }
     });
 }

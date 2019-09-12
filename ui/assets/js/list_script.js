@@ -103,7 +103,7 @@ function display_swagger_ui(_openapi_url){
 
 function is_attr_empty(_attr_name,_attr_value){
 	if(_attr_name === "" || _attr_value === ""){
-		alert("Error! Attribute-Name or Value missing");
+		_alertify("Error!!!", "Attribute-Name or Value missing");
 		return true;
 	}
 }
@@ -248,7 +248,7 @@ function copyToClipboard(element_id) {
 	// $("#copied_"+element_id).html("Token copied!")
 	document.execCommand("copy");
 	$temp.remove();
-	alert("Token copied!")
+	_alertify("Success!!!", "Token copied!")
 	// $.sweetModal({
 	//   title: 'Token copied!',
 	//   theme: $.sweetModal.THEME_DARK
