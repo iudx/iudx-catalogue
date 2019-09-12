@@ -191,6 +191,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     return query;
   }
 
+
   /**
    * Performs Mongo-GeoWithin operation
    * */
@@ -524,6 +525,11 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     JsonArray expressions = new JsonArray();
     System.out.println(requestBody);
 
+    String geometry="", relation="",coordinatesS="";
+    String[] coordinatesArr;
+    Double distance=0.0;
+    JsonArray coordinates=new JsonArray();
+
 		if (requestBody.containsKey("attribute-name") && requestBody.containsKey("attribute-value")
 				&& !requestBody.containsKey("lat") && !requestBody.containsKey("lon")
 				&& !requestBody.containsKey("radius")
@@ -538,7 +544,6 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 		System.out.println("GEO-SPATIAL Query (CENTRE PT)");
 		geo_query = geo_within_search_query(requestBody);
 		query = geo_query;
-
 		} else if (requestBody.containsKey("bbox")	&& ! requestBody.containsKey("attribute-name") && ! requestBody.containsKey("attribute-value")){
             System.out.println("GEO-SPATIAL Query (BBOX)");
             query=geoSearchQuery(requestBody);
@@ -555,7 +560,6 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 			geo_query = geo_within_search_query(requestBody);
 			expressions.add(geo_query);
 			query.put("$and", expressions);
-			
 		} else if(requestBody.containsKey("bbox") || requestBody.containsKey("geometry") && requestBody.containsKey("attribute-name") && requestBody.containsKey("attribute-value")){
             System.out.println("GEO-SPATIAL (BBOX/POLYGON/LINESTRING) WITH ATTRIBUTE QUERY");
 			attribute_query = attributeQuerySearch(requestBody);
@@ -563,7 +567,6 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 			geo_query = geoSearchQuery(requestBody);
 			expressions.add(geo_query);
 			query.put("$and", expressions);
-
 		} else if (requestBody.containsKey("attribute-name")
             && !requestBody.containsKey("attribute-value")) {
             query = null;
