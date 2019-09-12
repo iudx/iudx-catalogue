@@ -80,7 +80,7 @@ function request_access_token(resource_id, resourceServerGroup, rid) {
         // $('#token_section_'+resource_id_to_html_id(resource_id)).html($('#token_section_'+resource_id_to_html_id(resource_id)).html());
         $('#token_section_'+resource_id_to_html_id(resource_id)).html(
                                                                         `<b>Token</b>: <span id="token_value_`+resource_id_to_html_id(resource_id)+`">` + data.access_token + `</span>`
-                                                                        + `&nbsp;&nbsp;&nbsp;<button class="btn copy-btn"> Copy Token <img class="secure_icon svg-white" src="../assets/img/icons/copy_white.svg" onclick="copyToClipboard('`+resource_id_to_html_id(resource_id)+`')"></button> <br> `
+                                                                        + `&nbsp;&nbsp;&nbsp;<button class="btn copy-btn" onclick="copyToClipboard('`+resource_id_to_html_id(resource_id)+`')"> Copy Token <img class="secure_icon svg-white" src="../assets/img/icons/copy_white.svg"></button> <br> `
                                                                         + _get_security_based_latest_data_link(resource_id,resourceServerGroup, rid, data.access_token))
         
         _alertify("Success!!!", "Token received.<br>You are now authenticated to access the non-public data.")
