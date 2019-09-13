@@ -470,8 +470,6 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
         }
     } else
         query=null;
-
-
     return query;
   }
   
@@ -547,48 +545,13 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
             System.out.println("GEO-SPATIAL Query (BBOX)");
             query=geoSearchQuery(requestBody);
 
-        } else if(requestBody.containsKey("geometry") && ! requestBody.containsKey("attribute-name") && ! requestBody.containsKey("attribute-value")){ 
+        } else if(requestBody.containsKey("geometry") && ! requestBody.containsKey("attribute-name") && ! requestBody.containsKey("attribute-value")){
             System.out.println("GEO-SPATIAL Query (POLYGON/LINESTRING)");
             query=geoSearchQuery(requestBody);
-        } else if(requestBody.containsKey("geometry")){ 
+        } else if(requestBody.containsKey("geometry")){
             System.out.println("GEO-SPATIAL Query (POLYGON/LINESTRING)");
-            if(requestBody.getString("geometry").toUpperCase().contains("Polygon".toUpperCase()))
-                geometry = "Polygon";
-            else if(requestBody.getString("geometry").toUpperCase().contains("lineString".toUpperCase()))
-                geometry = "LineString";
-            relation=requestBody.containsKey("relation")?requestBody.getString("relation").toLowerCase():"intersects";
-            boolean valid = validateRelation(geometry,relation);
-            if(valid){
-                switch(geometry){
-                                case "Polygon": coordinatesS = requestBody.getString("geometry");
-                                    coordinatesS = coordinatesS.replaceAll("[a-zA-Z()]","");
-                                    coordinatesArr = coordinatesS.split(",");
-                                    JsonArray extRing = new JsonArray();
-                                    for (int i = 0 ; i<coordinatesArr.length;i+=2){
-                                        JsonArray points = new JsonArray();
-                                        points.add(getDoubleFromS(coordinatesArr[i+1])).add(getDoubleFromS(coordinatesArr[i]));
-                                        extRing.add(points);
-                                    }
-                                    coordinates.add(extRing);
-                                    System.out.println("QUERY: " + coordinates.toString());
-                                    query = buildQuery(geometry,coordinates,relation);
-                                    break;
-            
-                                case "LineString":  coordinatesS = requestBody.getString("geometry");
-                                    coordinatesS = coordinatesS.replaceAll("[a-zA-Z()]","");
-                                    coordinatesArr = coordinatesS.split(",");
-                                    for (int i = 0 ; i<coordinatesArr.length;i+=2){
-                                        JsonArray points = new JsonArray();
-                                        points.add(getDoubleFromS(coordinatesArr[i+1])).add(getDoubleFromS(coordinatesArr[i]));
-                                        coordinates.add(points);
-                                    }
-                                    query = buildQuery(geometry,coordinates,relation);
-                                    break;
-            
-                                default: query=null; 
-                }
-            }else
-                query = null;
+            query=geoSearchQuery(requestBody);
+
         } else if (requestBody.containsKey("lat") && requestBody.containsKey("lon") && requestBody.containsKey("radius")
 				&& requestBody.containsKey("attribute-name") && requestBody.containsKey("attribute-value")) {
 			System.out.println("GEO-SPATIAL with ATTRIBUTE Query");
