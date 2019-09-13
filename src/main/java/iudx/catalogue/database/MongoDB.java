@@ -183,10 +183,10 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 	JsonObject query = new JsonObject();
 	
 	query.put("geoJsonLocation", new JsonObject()
-					     .put("$geoIntersects", new JsonObject()
-					     					.put("$geometry",new JsonObject()
-									    				 .put("type",geometry)
-								                         .put("coordinates",coordinates))));
+				.put("$geoIntersects", new JsonObject()
+					.put("$geometry",new JsonObject()
+						.put("type",geometry)
+						.put("coordinates",coordinates))));
 	System.out.println("GeoIntersects: "+query.toString());
     return query;
   }
@@ -361,7 +361,77 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 		return meters / (111.32 * 1000 * Math.cos(latitude * (Math.PI / 180)));
 	}
 
+  private JsonObject geoSearchQuery(JsonObject requestBody){
+    JsonObject query = new JsonObject();
+    String geometry="", relation="", coordinatesS="";
+    String[] coordinatesArr;
+    JsonArray coordinates= new JsonArray();
+    
+     //Polygon or LineString
+    if(requestBody.containsKey("geometry")){
+        if(requestBody.getString("geometry").toUpperCase().contains("Polygon".toUpperCase()))
+            geometry = "Polygon";
+        else if(requestBody.getString("geometry").toUpperCase().contains("lineString".toUpperCase()))
+            geometry = "LineString";
+    }
+    //bounding-box
+    else if(requestBody.containsKey("bbox")){
+        geometry = "bbox";
+    }
 
+    //relation defaults to 'Intersects'
+    relation = requestBody.containsKey("relation")?requestBody.getString("relation").toLowerCase():"intersects";
+    boolean valid = validateRelation(geometry, relation);
+	if(valid){
+        switch(geometry){
+
+            case "bbox": 
+                coordinatesS = requestBody.getString("bbox");
+                coordinatesArr = coordinatesS.split(",");
+                JsonArray temp = new JsonArray();
+                JsonArray y1x1 = new JsonArray().add(getDoubleFromS(coordinatesArr[1])).add(getDoubleFromS(coordinatesArr[0]));
+                JsonArray y1x2 = new JsonArray().add(getDoubleFromS(coordinatesArr[1])).add(getDoubleFromS(coordinatesArr[2]));
+                JsonArray y2x2 = new JsonArray().add(getDoubleFromS(coordinatesArr[3])).add(getDoubleFromS(coordinatesArr[2]));
+                JsonArray y2x1 = new JsonArray().add(getDoubleFromS(coordinatesArr[3])).add(getDoubleFromS(coordinatesArr[0]));
+                temp.add(y1x1).add(y1x2).add(y2x2).add(y2x1).add(y1x1);
+                coordinates.add(temp);
+                query = buildQuery("Polygon",coordinates,relation);
+                break;
+
+            case "Polygon": 
+                coordinatesS = requestBody.getString("geometry");
+                coordinatesS = coordinatesS.replaceAll("[a-zA-Z()]","");
+                coordinatesArr = coordinatesS.split(",");
+                JsonArray extRing = new JsonArray();
+                for (int i = 0 ; i<coordinatesArr.length;i+=2){
+                    JsonArray points = new JsonArray();
+                    points.add(getDoubleFromS(coordinatesArr[i+1])).add(getDoubleFromS(coordinatesArr[i]));
+                    extRing.add(points);
+                }
+                coordinates.add(extRing);
+                System.out.println("QUERY: " + coordinates.toString());
+                query = buildQuery(geometry,coordinates,relation);
+                break;
+            
+            case "LineString":  
+                coordinatesS = requestBody.getString("geometry");
+                coordinatesS = coordinatesS.replaceAll("[a-zA-Z()]","");
+                coordinatesArr = coordinatesS.split(",");
+                for (int i = 0 ; i<coordinatesArr.length;i+=2){
+                    JsonArray points = new JsonArray();
+                    points.add(getDoubleFromS(coordinatesArr[i+1])).add(getDoubleFromS(coordinatesArr[i]));
+                    coordinates.add(points);
+                }
+                query = buildQuery(geometry,coordinates,relation);
+                break;
+            
+            default: query=null;     
+        }
+    } else
+        query=null;
+
+    return query;
+  }
   
   private String extractString(String s, int b) {
     String ans;
@@ -419,7 +489,9 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 
 		if (requestBody.containsKey("attribute-name") && requestBody.containsKey("attribute-value")
 				&& !requestBody.containsKey("lat") && !requestBody.containsKey("lon")
-				&& !requestBody.containsKey("radius")) {
+				&& !requestBody.containsKey("radius")
+                && !requestBody.containsKey("bbox")
+                && !requestBody.containsKey("geometry")) {
 		System.out.println("ATTRIBUTE Query");
 		attribute_query = attribute_search_query(requestBody);
 		query = attribute_query;
@@ -430,66 +502,15 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 		geo_query = geo_within_search_query(requestBody);
 		query = geo_query;
 
-		} else if (requestBody.containsKey("bbox")){
+		} else if (requestBody.containsKey("bbox")	&& ! requestBody.containsKey("attribute-name") && ! requestBody.containsKey("attribute-value")){
             System.out.println("GEO-SPATIAL Query (BBOX)");
-            geometry="bbox";
-            relation=requestBody.containsKey("relation")?requestBody.getString("relation").toLowerCase():"intersects";
-            boolean valid = validateRelation(geometry,relation);
-            if(valid){
-                coordinatesS = requestBody.getString("bbox");
-                coordinatesArr = coordinatesS.split(",");
-                JsonArray temp = new JsonArray();
-                JsonArray y1x1 = new JsonArray().add(getDoubleFromS(coordinatesArr[1])).add(getDoubleFromS(coordinatesArr[0]));
-                JsonArray y1x2 = new JsonArray().add(getDoubleFromS(coordinatesArr[1])).add(getDoubleFromS(coordinatesArr[2]));
-                JsonArray y2x2 = new JsonArray().add(getDoubleFromS(coordinatesArr[3])).add(getDoubleFromS(coordinatesArr[2]));
-                JsonArray y2x1 = new JsonArray().add(getDoubleFromS(coordinatesArr[3])).add(getDoubleFromS(coordinatesArr[0]));
-                temp.add(y1x1).add(y1x2).add(y2x2).add(y2x1).add(y1x1);
-                coordinates.add(temp);
-                query = buildQuery("Polygon",coordinates,relation);
-            }
-            else
-                query = null;
+            query=geoSearchQuery(requestBody);
 
-        } else if(requestBody.containsKey("geometry")){ 
+        } else if(requestBody.containsKey("geometry") && ! requestBody.containsKey("attribute-name") && ! requestBody.containsKey("attribute-value")){ 
             System.out.println("GEO-SPATIAL Query (POLYGON/LINESTRING)");
-            if(requestBody.getString("geometry").toUpperCase().contains("Polygon".toUpperCase()))
-                geometry = "Polygon";
-            else if(requestBody.getString("geometry").toUpperCase().contains("lineString".toUpperCase()))
-                geometry = "LineString";
-            relation=requestBody.containsKey("relation")?requestBody.getString("relation").toLowerCase():"intersects";
-            boolean valid = validateRelation(geometry,relation);
-            if(valid){
-                switch(geometry){
-                                case "Polygon": coordinatesS = requestBody.getString("geometry");
-                                    coordinatesS = coordinatesS.replaceAll("[a-zA-Z()]","");
-                                    coordinatesArr = coordinatesS.split(",");
-                                    JsonArray extRing = new JsonArray();
-                                    for (int i = 0 ; i<coordinatesArr.length;i+=2){
-                                        JsonArray points = new JsonArray();
-                                        points.add(getDoubleFromS(coordinatesArr[i+1])).add(getDoubleFromS(coordinatesArr[i]));
-                                        extRing.add(points);
-                                    }
-                                    coordinates.add(extRing);
-                                    System.out.println("QUERY: " + coordinates.toString());
-                                    query = buildQuery(geometry,coordinates,relation);
-                                    break;
-            
-                                case "LineString":  coordinatesS = requestBody.getString("geometry");
-                                    coordinatesS = coordinatesS.replaceAll("[a-zA-Z()]","");
-                                    coordinatesArr = coordinatesS.split(",");
-                                    for (int i = 0 ; i<coordinatesArr.length;i+=2){
-                                        JsonArray points = new JsonArray();
-                                        points.add(getDoubleFromS(coordinatesArr[i+1])).add(getDoubleFromS(coordinatesArr[i]));
-                                        coordinates.add(points);
-                                    }
-                                    query = buildQuery(geometry,coordinates,relation);
-                                    break;
-            
-                                default: query=null; 
-                }
-            }else
-                query = null;
-        } else if (requestBody.containsKey("lat") && requestBody.containsKey("lon") && requestBody.containsKey("radius")
+            query=geoSearchQuery(requestBody);
+
+		}  else if (requestBody.containsKey("lat") && requestBody.containsKey("lon") && requestBody.containsKey("radius")
 				&& requestBody.containsKey("attribute-name") && requestBody.containsKey("attribute-value")) {
 			System.out.println("GEO-SPATIAL with ATTRIBUTE Query");
 			attribute_query = attribute_search_query(requestBody);
@@ -498,6 +519,14 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 			expressions.add(geo_query);
 			query.put("$and", expressions);
 			
+		} else if(requestBody.containsKey("bbox") || requestBody.containsKey("geometry") && requestBody.containsKey("attribute-name") && requestBody.containsKey("attribute-value")){
+            System.out.println("GEO-SPATIAL (BBOX/POLYGON/LINESTRING) WITH ATTRIBUTE QUERY");
+			attribute_query = attribute_search_query(requestBody);
+			expressions.add(attribute_query);
+			geo_query = geoSearchQuery(requestBody);
+			expressions.add(geo_query);
+			query.put("$and", expressions);
+
 		} else if (requestBody.containsKey("attribute-name")
             && !requestBody.containsKey("attribute-value")) {
             query = null;
