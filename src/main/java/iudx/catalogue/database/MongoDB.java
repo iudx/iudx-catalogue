@@ -510,7 +510,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
             System.out.println("GEO-SPATIAL Query (POLYGON/LINESTRING)");
             query=geoSearchQuery(requestBody);
 
-        } else if (requestBody.containsKey("lat") && requestBody.containsKey("lon") && requestBody.containsKey("radius")
+		}  else if (requestBody.containsKey("lat") && requestBody.containsKey("lon") && requestBody.containsKey("radius")
 				&& requestBody.containsKey("attribute-name") && requestBody.containsKey("attribute-value")) {
 			System.out.println("GEO-SPATIAL with ATTRIBUTE Query");
 			attribute_query = attribute_search_query(requestBody);
@@ -527,7 +527,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 			expressions.add(geo_query);
 			query.put("$and", expressions);
 
-        } else if (requestBody.containsKey("attribute-name")
+		} else if (requestBody.containsKey("attribute-name")
             && !requestBody.containsKey("attribute-value")) {
             query = null;
         }else if (!requestBody.containsKey("attribute-name")

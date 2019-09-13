@@ -8,17 +8,19 @@
   <meta name="organization" content="RBCCPS, IISc Bangalore">
   <meta name="keywords" content="IUDX, CATALOGUE, RBCCPS, IISc BANGALORE">
   <meta name="author" content="Jishnu Jaykumar P (http://jishnujayakumar.github.io), Rohina Naaz">
+  <link rel="shortcut icon" href="../assets/img/custom_iudx.ico">
   <title>
     PSCDCL IUDX | Indian Urban Data Exchange Catalogue 
   </title>
-
+    <link href="../assets/css/swagger/swagger-ui.css" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css" />
     <!-- <link rel="stylesheet" href="https://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css" /> -->
     <link rel="stylesheet" href="https://openlayers.org/en/v5.3.0/css/ol.css" type="text/css">
     
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="../assets/css/styles.css">
-
+    <link rel="stylesheet" type="text/css" href="../assets/css/alertify.css">
+    <link rel="stylesheet" type="text/css" href="../assets/css/common_styles.css">
     <link rel="stylesheet" href="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.3.0/css/ol.css">
     <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/solid.js"
         integrity="sha384-tzzSw1/Vo+0N5UhStP3bvwWPq+uvzCMfrN1fEFe+xBmv1C/AtVX5K0uZtmcHitFZ"
@@ -59,9 +61,12 @@
                     <div class="container">
                         <h1>Details</h1>
                         
-                    <pre id="resource_item_details">
+                    <div id="resource_item_details">
                         
-                    </pre>
+                    </div>
+                    <div id="resource_item_special_feature_links">
+                        
+                    </div>
                     </div>
                 </div>
             </div>
@@ -100,7 +105,16 @@
             </div>
         </div>
     </div>
-    
+    <section id="swagger_section" class="container section">
+
+      <!-- <p>Display OPENAPI JSON as HTML</p> -->
+      <br><br>
+      <button class="btn btn-primary btn-block" onclick="display_map()">Go Back</button> <br>
+        <div id="swagger_ui"></div>
+
+        <div id="normal_footer" class="normal_footer"></div>
+
+    </section>
     <div id="map"></div>
 
 </body>
@@ -122,12 +136,16 @@
     crossorigin="anonymous"></script>
 <!-- <script src="https://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script> -->
 <script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js"></script>
+<script type="text/javascript" src="../assets/js/alertify.js"></script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/0.4.2/leaflet.draw.js"></script>
 
 <script src="../assets/js/L.Control.Sidebar.js"></script>
 <!-- <script src="../assets/js/leaflet-sidebar.js"></script> -->
-<script src="../assets/js/functions.js"></script>
+<script type="text/javascript" src="../assets/js/swagger/swagger-ui-bundle.js"></script>
+<script type="text/javascript" src="../assets/js/swagger/swagger-ui-standalone-preset.js"></script>
+<script type="text/javascript" src="../assets/js/swagger_script.js"></script>
+<script src="../assets/js/common_functions.js"></script>
 <script src="../assets/js/script.js"></script>
 
 </html>

@@ -1,3 +1,99 @@
+// Spinner by https://tobiasahlin.com/spinkit/
+function get_spinner_html(){
+    return `
+    <div class="spinner">
+      <div class="rect1"></div>
+      <div class="rect2"></div>
+      <div class="rect3"></div>
+      <div class="rect4"></div>
+      <div class="rect5"></div>
+    </div>
+    `
+}
+
+function __get_latest_data(url) {
+  return new Promise((resolve, reject) => {
+    $.ajax({
+      url: encodeURI(url),
+      type: 'GET',
+      success: function(data) {
+        resolve(data)
+      },
+      error: function(error) {
+        reject(error)
+      },
+      timeout: 30000 // sets timeout to 30 seconds
+    })
+  })
+}
+
+function _alertify(header_msg, body_msg){
+    alertify.alert(body_msg);
+    $(".ajs-header").html(header_msg);
+}
+
+function display_latest_data(e, ele) {
+    e.preventDefault();   // use this to NOT go to href site
+    _alertify("Getting Data...", get_spinner_html())
+    __get_latest_data($(ele).attr("href"))
+      .then(data => {
+        _alertify("Success!!!", '<pre id="custom_alertbox">'+jsonPrettyHighlightToId(JSON.parse(data))+'</pre>')
+      })
+      .catch(error => {
+        _alertify("Error!!!",'<pre id="custom_alertbox">: ' + error["statusText"]+ '</pre>');
+      })
+}
+
+function _get_latest_data(_resource_id, _token){
+    $.ajax({
+      url: "https://pune.iudx.org.in/api/1.0.0/resource/search/safetypin/18.56581555/73.77567708/10",
+      type: 'get',
+      headers: {"token": _token},
+      success: function (data) {
+        // alert("Success! \n"+data)
+        // display_json_response_in_modal(data)
+        _alertify("Success!!!", '<pre id="custom_alertbox">'+jsonPrettyHighlightToId(JSON.parse(data))+'</pre>');
+      },
+      error: _alertify("Error!!!", '<pre id="custom_alertbox">: Please try some time later. Server is facing some problems at this moment.</pre>')
+    })
+}
+
+function _get_security_based_latest_data_link(_resource_id, _resourceServerGroup, _rid, token){
+    if(_resource_id=="rbccps.org/aa9d66a000d94a78895de8d4c0b3a67f3450e531/safetipin/safetipin/safetyIndex"){
+        return `<button class="btn btn-secondary" onclick="_get_latest_data('`+_resource_id+`','`+token+`')">Get Full Latest Data</button>`
+    }else{
+        return `<a href="`+ get_latest_data_url(_resource_id,_resourceServerGroup,_rid) +`" class="data-modal"  onclick="display_latest_data(event, this)">Get Latest Data</a>`
+    }
+}
+
+function request_access_token(resource_id, resourceServerGroup, rid) {
+    console.log(resource_id)
+    $.ajax({
+      url: "https://auth.iudx.org.in/auth/v1/token",
+      type: 'post',
+      dataType: 'json',
+      contentType: 'application/json',
+      data: JSON.stringify({"resource-id": resource_id}),
+      success: function (data) {
+        // console.log(data.access_token)
+        
+        // $('#token_section_'+resource_id_to_html_id(resource_id)).html($('#token_section_'+resource_id_to_html_id(resource_id)).html());
+        $('#token_section_'+resource_id_to_html_id(resource_id)).html(
+                                                                        `<b>Token</b>: <span id="token_value_`+resource_id_to_html_id(resource_id)+`">` + data.access_token + `</span>`
+                                                                        + `&nbsp;&nbsp;&nbsp;<button class="btn copy-btn" onclick="copyToClipboard('`+resource_id_to_html_id(resource_id)+`')"> Copy Token <img class="secure_icon svg-white" src="../assets/img/icons/copy_white.svg"></button> <br> `
+                                                                        + _get_security_based_latest_data_link(resource_id,resourceServerGroup, rid, data.access_token))
+        
+        _alertify("Success!!!", "Token received.<br>You are now authenticated to access the non-public data.")
+        // _alertify("Success!!!", "Token received: " + data.access_token)
+        $('#token_section_'+resource_id_to_html_id(resource_id)).toggle();
+            
+      },
+      error: function (jqXHR, exception) {
+        _alertify("Error", "Unauthorized access! Please get a token.")
+      }
+    });
+}
+
 function urlify(text) {
   var urlRegex = /(https?:\/\/[^"]+)/g;
   return text.replace(urlRegex, '<a href="$1" target="_blank" style="text-decoration:underline">$1</a>')
@@ -147,7 +243,7 @@ function plotGeoJSONs(geoJSONObject, _id, plot_id,_resourceServerGroup,_resource
                         // return L.marker(latlng, {icon: getOfficeIcon()});
                         
                         // <a href='/catalogue/v1/items/"+plot_id+"'>Get Catalogue-item-details</a><br/>
-                        var customPopup = "<a href='https://pune.iudx.org.in/api/1.0.0/resource/latest/"+_resourceServerGroup+"/"+_resourceId+"' target='_blank'>Get latest-data</a>";
+                        var customPopup = "<a href='https://pune.iudx.org.in/api/1.0.0/resource/latest/"+_resourceServerGroup+"/"+_resourceId+" class='data-modal'  onclick='display_latest_data(event, this)'>Get latest-data</a>";
                         if(_resourceServerGroup==='streetlight-feeder-sree'){
                             //console.log("street")
                             var _marker = L.marker(latlng,{icon: getStreetlightIcon()}).addTo(map);
@@ -241,7 +337,7 @@ function plotGeoJSONs(geoJSONObject, _id, plot_id,_resourceServerGroup,_resource
                         // return L.marker(latlng, {icon: getOfficeIcon()});
                         
                         // <a href='/catalogue/v1/items/"+plot_id+"'>Get Catalogue-item-details</a><br/>
-                        var customPopup = "<a href='https://pune.iudx.org.in/api/1.0.0/resource/latest/"+_resourceServerGroup+"/"+_resourceId+"' target='_blank'>Get latest-data</a>";
+                        var customPopup = "<a href='https://pune.iudx.org.in/api/1.0.0/resource/latest/"+_resourceServerGroup+"/"+_resourceId+" class='data-modal'  onclick='display_latest_data(event, this)'>Get latest-data</a>";
                         if(_resourceServerGroup==='streetlight-feeder-sree'){
                             //console.log("street")
                             var _marker = L.marker(latlng,{icon: getStreetlightIcon()}).addTo(map);
@@ -323,6 +419,14 @@ function plotGeoJSONs(geoJSONObject, _id, plot_id,_resourceServerGroup,_resource
 }
 
 
+function get_latest_data_url(id, rsg, rid){
+    if(id=="rbccps.org/aa9d66a000d94a78895de8d4c0b3a67f3450e531/safetipin/safetipin/safetyIndex"){
+        return 'https://pune.iudx.org.in/api/1.0.0/resource/search/safetypin/18.56581555/73.77567708/10'
+    }else{
+        return `https://pune.iudx.org.in/api/1.0.0/resource/latest/`+rsg+`/`+rid
+    }
+}
+
 function show_menu_icon() {
     $("#menu-bar-icon").show(500);
 }
@@ -337,12 +441,19 @@ function activate_batch_mode() {
     hide_menu_icon();
 }
 
-function activate_point_mode(_markerdetails) {
+function activate_point_mode(_id) {
+    // console.log(1,_id)
     $("#batch").hide();
-    $("#resource_item_details").html(_markerdetails);
+    // console.log(2,_id)
+    console.log("called")
+    show_details(_id)
     $("#point").show();
 }
 
+function resource_id_to_html_id(resource_id){
+    var replace_with = "_";
+    return resource_id.replace(/\/|\.|\s|\(|\)|\<|\>|\{|\}|\,|\"|\'|\`|\*|\;|\+|\!|\#|\%|\^|\&|\=|\₹|\$|\@/g,replace_with)
+}
 
 function markerOnClick(e) {
     // var attributes = e.layer.properties;

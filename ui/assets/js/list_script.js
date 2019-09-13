@@ -2,15 +2,68 @@
 var tags_set=[]
 var first_get_item_call_done=false
 var filters="(id,resourceServerGroup,itemDescription,onboardedBy,accessInformation,resourceId,tags,secure)"
+var page_limit = 10;
+var __DATA;
 /*************************************************GLOBAL VARIABLES END***********************************************/
 
 
-
-
-
-
-
 /*************************************************FUNCTION DECLARATIONS START*********************************************/
+
+function get_global_data(){
+	return __DATA;
+}
+
+function get_page_limit(){
+	return page_limit;
+}
+
+// To be used when UI has the ability to showcase this feature
+function set_page_limit(_page_limit){
+	page_limit = _page_limit;
+}
+
+function set_data_globally(_data){
+	__DATA = _data;
+}
+
+function min(val1, val2){
+	return Math.min(val1, val2);
+}
+
+function display_paginated_search_results(page_num){
+	var global_data = get_global_data();
+	$("#searched_items").html("");
+	var from = min(((page_num-1)*get_page_limit()),global_data.length);
+	var to = min(((page_num)*get_page_limit()-1), global_data.length);
+	for (var i=from;i < to; i++) {
+		$("#searched_items").append(json_to_htmlcard(global_data[i]));	
+	}
+	// console.log("dislpaying item from:"+from+" to:"+to + " " + (global_data.length/get_page_limit() + ((global_data.length%get_page_limit())>0) ? 1 : 0));
+}
+
+function populate_pagination_section(){
+    // init bootpag
+    var data_length = get_global_data().length
+    $('#page-selection').bootpag({
+        total: (data_length/get_page_limit() + (((data_length%get_page_limit())>0) ? 1 : 0)),
+        maxVisible: 5,
+        leaps: true,
+		next: '>',
+		prev: '<',
+	    firstLastUse: true,
+	    first: '<<',
+	    last: '>>',
+	    wrapClass: 'pagination',
+	    activeClass: 'page-active',
+	    disabledClass: 'disabled',
+	    nextClass: 'next',
+	    prevClass: 'prev',
+	    lastClass: 'last',
+	    firstClass: 'first'
+    }).on("page", function(event, /* page number here */ num){
+          display_paginated_search_results(num);
+    });
+}
 
 function display_search_section(_attr_name,_attr_value){
 	if(is_attr_empty(_attr_name,_attr_value)){
@@ -50,7 +103,7 @@ function display_swagger_ui(_openapi_url){
 
 function is_attr_empty(_attr_name,_attr_value){
 	if(_attr_name === "" || _attr_value === ""){
-		alert("Error! Attribute-Name or Value missing");
+		_alertify("Error!!!", "Attribute-Name or Value missing");
 		return true;
 	}
 }
@@ -78,6 +131,7 @@ function get_items(_attr_name,_attr_value){
 	$.get("/catalogue/v1/search?attribute-name=("+_attr_name+")&attribute-value=("+_attr_value+")", function(data) {
             // $("#searched_items").text(data);
 			data=JSON.parse(data)
+			set_data_globally(data);
 			$("#searched_items").html("");
             for (var i = 0; i < data.length; i++) {
                 $("#searched_items").append(json_to_htmlcard(data[i]));
@@ -90,7 +144,9 @@ function get_items(_attr_name,_attr_value){
                 }
             }
             }
+            populate_pagination_section();
         });
+
 	// $( "#_value" ).autocomplete({
 	//       source: seen_tags_set
 	// });
@@ -109,7 +165,9 @@ function get_items_for_tag(tag){
             $("#searched_items").html("");
 
             data=JSON.parse(data)
-            console.log(data)
+            // __DATA=data;
+            set_data_globally(data);
+            // console.log(data)
             if(!$('#searched_items').is(':visible')) {
 				    display_search_section();
 				}
@@ -126,6 +184,7 @@ function get_items_for_tag(tag){
                 }
             }
             }
+            populate_pagination_section();
         });
 
 	// $( "#_value" ).autocomplete({
@@ -139,7 +198,7 @@ function get_items_for_tag(tag){
 
 
 function getFooterContent(){
-	return `<p>&copy; 2019 <a href="https://iudx.org.in">IUDX </a> | Read the  <a href="https://docs.google.com/document/d/12kQteMgxINPjZUVaNBqvtEYJEfqDn7r7QWbL74o7wPQ/edit?usp=sharing">Doc</a> <br> <span style="font-size: 15px;">Icon made by <a href="https://www.flaticon.com/authors/freepik">Freepik</a> from <a href="https://www.flaticon.com">www.flaticon.com</a>.</span></p>`
+	return `<p>&copy; 2019 <a href="https://iudx.org.in">IUDX </a> | Read the  <a href="https://docs.google.com/document/d/12kQteMgxINPjZUVaNBqvtEYJEfqDn7r7QWbL74o7wPQ/edit?usp=sharing">Doc</a> <br> <span style="font-size: 15px;">Icon made by <a href="https://www.flaticon.com/authors/freepik">Freepik</a> from <a href="https://www.flaticon.com">flaticon.com</a>.</span></p>`
 }
 
 function set_tags(_tags_set) {
@@ -149,7 +208,7 @@ function set_tags(_tags_set) {
 			$( "#value" ).autocomplete({
 				source: _tags_set,
 				select: function( event, ui ) {
-					console.log(ui["item"]['label'])
+					// console.log(ui["item"]['label'])
 					get_items_for_tag(ui["item"]['label'])
 				}
 				// ,
@@ -170,6 +229,41 @@ function set_tags(_tags_set) {
 			}
 		});
 	}
+}
+
+
+
+function get_horizontal_spaces(space_count){
+	var horizontal_space_str=""
+	for (var i = space_count.length - 1; i >= 0; i--) {
+		horizontal_space_str+="&nbsp;"
+	}
+	return horizontal_space_str;
+}
+
+function copyToClipboard(element_id) {
+	var $temp = $("<input>");
+	$("body").append($temp);
+	$temp.val($("#token_value_"+element_id).text()).select();
+	// $("#copied_"+element_id).html("Token copied!")
+	document.execCommand("copy");
+	$temp.remove();
+	_alertify("Success!!!", "Token copied!")
+	// $.sweetModal({
+	//   title: 'Token copied!',
+	//   theme: $.sweetModal.THEME_DARK
+	// });
+}
+
+function display_json_response_in_modal(json_obj){
+		$.sweetAlert({
+		  content: jsonPrettyHighlightToId(json_obj),
+		  // $.sweetModal.ICON_SUCCESS
+		  // $.sweetModal.ICON_WARNING
+		  // $.sweetModal.ICON_ERROR
+		  icon: $.sweetModal.ICON_SUCCESS
+
+		});
 }
 
 function show_details(_id){
@@ -226,7 +320,7 @@ function show_details(_id){
 		 //    </tr>
 			$("#details_section_"+id).append(`
 			<p>
-				<!--<a href="`+ get_latest_data_url(_id,data[0]["resourceServerGroup"]["value"],data[0]["resourceId"]["value"]) +`" target="_blank">Latest Data</a>   |  -->
+				<!--<a href="`+ get_latest_data_url(_id,data[0]["resourceServerGroup"]["value"],data[0]["resourceId"]["value"]) +`">Latest Data</a>   |  -->
 				<a href="`+data[0]["refBaseSchema"]["value"]+`" target="_blank">Base Schema </a> |
 				<a href="`+data[0]["refDataModel"]["value"]+`" target="_blank">Data Model </a>
 			</p>
@@ -236,64 +330,24 @@ function show_details(_id){
 	});
 }
 
-function get_latest_data_url(id, rsg, rid){
-	if(id=="rbccps.org/aa9d66a000d94a78895de8d4c0b3a67f3450e531/safetipin/safetipin/safetyIndex"){
-		return 'https://pune.iudx.org.in/api/1.0.0/resource/search/safetypin/18.56581555/73.77567708/10'
-	}else{
-		return `https://pune.iudx.org.in/api/1.0.0/resource/latest/`+rsg+`/`+rid
-	}
-}
-
-function resource_id_to_html_id(resource_id){
-	var replace_with = "_";
-	return resource_id.replace(/\/|\.|\s|\(|\)|\<|\>|\{|\}|\,|\"|\'|\`|\*|\;|\+|\!|\#|\%|\^|\&|\=|\₹|\$|\@/g,replace_with)
-}
-
-function _get_latest_data(_resource_id, _token){
-	$.ajax({
-	  url: "https://pune.iudx.org.in/api/1.0.0/resource/search/safetypin/18.56581555/73.77567708/10",
-	  type: 'get',
-      headers: {"token": _token},
-	  success: function (data) {
-	  	
-        // alert("Success! \n"+data)
-
-        var w = window.open('about:blank');
-    	w.document.open();
-    	w.document.write("<pre>"+data+"</pre><script src='https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/6.4.1/jsoneditor.js'></script>");
-      }
-	});
-}
-
-function _get_security_based_latest_data_link(_resource_id, _resourceServerGroup, _rid, token){
-	if(_resource_id=="rbccps.org/aa9d66a000d94a78895de8d4c0b3a67f3450e531/safetipin/safetipin/safetyIndex"){
-		return `<button class="btn btn-secondary" onclick="_get_latest_data('`+_resource_id+`','`+token+`')">Get Full Latest Data</button>`
-	}else{
-		return `<a href="`+ get_latest_data_url(_resource_id,_resourceServerGroup,_rid) +`" target="_blank">Get Latest Data</a>`
-	}
-}
-
-function request_access_token(resource_id, resourceServerGroup, rid) {
-	console.log(resource_id)
-	$.ajax({
-	  url: "https://auth.iudx.org.in/auth/v1/token",
-	  type: 'post',
-      dataType: 'json',
-      contentType: 'application/json',
-	  data: JSON.stringify({"resource-id": resource_id}),
-	  success: function (data) {
-	  	// console.log(data.access_token)
-	  	
-        // $('#token_section_'+resource_id_to_html_id(resource_id)).html($('#token_section_'+resource_id_to_html_id(resource_id)).html());
-        $('#token_section_'+resource_id_to_html_id(resource_id)).html(`<b>Token</b>: ` + data.access_token + ` | ` + _get_security_based_latest_data_link(resource_id,resourceServerGroup, rid, data.access_token));
-        alert("Success! \nToken received: " + data.access_token)
-        $('#token_section_'+resource_id_to_html_id(resource_id)).toggle();
-         	
-      },
-      error: function (jqXHR, exception) {
-      	alert("Unauthorized access! Please get a token.")
-      }
-	});
+function display_swagger_ui(_openapi_url){
+    $(".section").fadeOut(200);
+    $("body").css("background-image","none");
+    $("#swagger_section").fadeIn(1500);
+    const ui = SwaggerUIBundle({
+    //url: "https://petstore.swagger.io/v2/swagger.json",
+    url: _openapi_url,
+    dom_id: '#swagger_ui',
+    deepLinking: true,
+    presets: [
+      SwaggerUIBundle.presets.apis,
+      SwaggerUIStandalonePreset
+    ],
+    plugins: [
+      SwaggerUIBundle.plugins.DownloadUrl
+    ],
+    layout: "StandaloneLayout"
+    })
 }
 
 function json_to_htmlcard(json_obj){
@@ -306,9 +360,10 @@ function json_to_htmlcard(json_obj){
 	return `
 		<div class="col-12 card-margin-top">
 		<div class="card">
-		  <h5 class="card-header card-header-color">` + s.splice(2).join("/") + " by " + s[0]  + ` <span class="float-right"><img src='`+
-		  ((is_public) ? "https://image.flaticon.com/icons/svg/1161/1161388.svg" : "../assets/img/icons/secure_item.svg")
-		  +`' class='img-fluid secure_icon'></span> </h5>
+		  <h5 class="card-header card-header-color">
+		  <span class="float-left" style="padding-right:7.5px;"><img src='`+
+		  ((is_public) ? "../assets/img/icons/green_unlock.svg" : "../assets/img/icons/red_lock.svg")
+		  +`' class='img-fluid secure_icon'></span>` + get_horizontal_spaces(3) + s.splice(2).join("/") + " by " + s[0]  + `</h5>
 		  <div class="card-body">
 		    <h5 class="card-title">` + json_obj["itemDescription"] + `</h5>
 		    <strong>Item-ID</strong>: `+json_obj['id']+`<br>
@@ -318,11 +373,11 @@ function json_to_htmlcard(json_obj){
 		    <button class="btn btn-primary" onclick="show_details('`+ json_obj.id +`')">Details</button>
 		    <button class="btn btn-info" onclick="display_swagger_ui('` + openapi_url + `')">APIs Details</button>
 		    `+ ((is_public)?"":rat_btn_html) +`
-		    <button class="btn btn-secondary"><a href="`+ get_latest_data_url(json_obj["id"],json_obj["resourceServerGroup"]["value"],json_obj["resourceId"]["value"]) +`" target="_blank" style="color:white">Get Latest Data</a></button>
+		    <a href="`+ get_latest_data_url(json_obj["id"],json_obj["resourceServerGroup"]["value"],json_obj["resourceId"]["value"]) +`" style="color:white"  class="data-modal" onclick="display_latest_data(event, this)"><button class="btn btn-secondary">Get Latest Data</button></a>
 		    
 		    </div>
+		     <div id="token_section_`+resource_id_to_html_id(json_obj.id)+`" class="token_section"></div>
 		  </div>
-		  <div id="token_section_`+resource_id_to_html_id(json_obj.id)+`" class="token_section"></div>
 		  <div id="details_section_`+resource_id_to_html_id(json_obj.id)+`" class="details_section">
 		  	<table class="table table-borderless table-dark">
 			  <thead>
@@ -352,8 +407,6 @@ function json_to_htmlcard(json_obj){
 
 
 /*************************************************EVENT BINDINGS START*********************************************/
-
-
 
 
 // Set up Footer, filter seen_tags_set
@@ -407,8 +460,6 @@ $('select').on('change', function() {
 $(".ui-menu").on('click',function(){
 	//console.log("s",this.value)
 });
-
-
 
 
 /*************************************************EVENT BINDINGS END*********************************************/
