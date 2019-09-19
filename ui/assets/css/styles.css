@@ -1,3 +1,9 @@
+.filter_box{
+  width: 250px !important;
+  height: 250px !important;
+  overflow-y: auto !important;
+}
+
 .version{
   background-color: transparent !important;
   border: none !important;
@@ -216,7 +222,7 @@
   display: none;
 }
 
-#batch {
+#_batch {
   display: none;
 }
 
@@ -243,4 +249,34 @@
 .info h4 {
 	margin: 0 0 5px;
 	color: #777;
+}
+
+#taglist {
+  list-style-type: disc ;
+  padding: 0;
+  /* margin-left:50px; */
+}
+.field_size{
+
+}
+fieldset{
+  line-height:1.8;
+    /* display: block; */
+    display:inline-block;
+    margin-left : 50px;
+    
+}
+#filter_btn{
+  margin-top: 250px;
+  margin-left: 50px;
+}
+.label-margin{
+
+  margin-top:20px;
+  margin-left:40px;
+
+}
+
+.center_align{
+  text-align: center;
 }

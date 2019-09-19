@@ -225,6 +225,7 @@ function set_tags(_tags_set) {
 		$( "#_value" ).autocomplete({
 			source: _tags_set,
 			select: function( event, ui ) {
+				console.log(ui);
 				get_items_for_tag(ui["item"]['label'])
 			}
 		});

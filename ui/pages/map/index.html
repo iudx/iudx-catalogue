@@ -10,86 +10,153 @@
   <meta name="author" content="Jishnu Jaykumar P (http://jishnujayakumar.github.io), Rohina Naaz">
   <link rel="shortcut icon" href="../assets/img/custom_iudx.ico">
   <title>
-    PSCDCL IUDX | Indian Urban Data Exchange Catalogue 
+    PSCDCL IUDX | Indian Urban Data Exchange Catalogue
   </title>
-    <link href="../assets/css/swagger/swagger-ui.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css" />
-    <!-- <link rel="stylesheet" href="https://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css" /> -->
-    <link rel="stylesheet" href="https://openlayers.org/en/v5.3.0/css/ol.css" type="text/css">
-    
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
-    <link rel="stylesheet" href="../assets/css/styles.css">
-    <link rel="stylesheet" type="text/css" href="../assets/css/alertify.css">
-    <link rel="stylesheet" type="text/css" href="../assets/css/common_styles.css">
-    <link rel="stylesheet" href="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.3.0/css/ol.css">
-    <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/solid.js"
-        integrity="sha384-tzzSw1/Vo+0N5UhStP3bvwWPq+uvzCMfrN1fEFe+xBmv1C/AtVX5K0uZtmcHitFZ"
-        crossorigin="anonymous"></script>
-    <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/fontawesome.js"
-        integrity="sha384-6OIrr52G08NpOFSZdxxz1xdNSndlD4vdcf/q2myIUVO0VsqaGHJsB0RaBE01VTOY"
-        crossorigin="anonymous"></script>
+  <link href="../assets/css/swagger/swagger-ui.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css" />
+  <!-- <link rel="stylesheet" href="https://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css" /> -->
+  <link rel="stylesheet" href="https://openlayers.org/en/v5.3.0/css/ol.css" type="text/css">
 
-    <script
-        src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../assets/css/styles.css">
+  <link rel="stylesheet" type="text/css" href="../assets/css/alertify.css">
+  <link rel="stylesheet" type="text/css" href="../assets/css/common_styles.css">
+  <link rel="stylesheet" href="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.3.0/css/ol.css">
+  <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/solid.js"
+    integrity="sha384-tzzSw1/Vo+0N5UhStP3bvwWPq+uvzCMfrN1fEFe+xBmv1C/AtVX5K0uZtmcHitFZ"
+    crossorigin="anonymous"></script>
+  <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/fontawesome.js"
+    integrity="sha384-6OIrr52G08NpOFSZdxxz1xdNSndlD4vdcf/q2myIUVO0VsqaGHJsB0RaBE01VTOY"
+    crossorigin="anonymous"></script>
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/0.4.2/leaflet.draw.css" />
-    <!-- <link rel="stylesheet" href="../assets/css/leaflet-sidebar.css"/> -->
+  <script
+    src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/0.4.2/leaflet.draw.css" />
+  <!-- <link rel="stylesheet" href="../assets/css/leaflet-sidebar.css"/> -->
 
 
-    <title>PSCDCL IUDX Catalogue | MAP View</title>
+  <title>PSCDCL IUDX Catalogue | MAP View</title>
 </head>
 
 <body>
-    <div class="container">
+  <div class="container">
     <div id="menu-bar-icon">
-        <div class="menu-icon-line"></div>
-        <div class="menu-icon-line"></div>
-        <div class="menu-icon-line"></div>
+      <div class="menu-icon-line"></div>
+      <div class="menu-icon-line"></div>
+      <div class="menu-icon-line"></div>
     </div>
-    </div>
+  </div>
 
-    <div class="container">
-        <div id="text-icon">
-            <div class="text-icon-line"><strong>Click here for Geo Search --------></strong> </div>
-         </div>
-        </div>
-    
-    <div id="sidebar">
-        <div class="jumbotron bg-white">      
-            <div class="container">
-                <div id="point">
-                    <div class="container">
-                        <h1>Details</h1>
-                        
-                    <div id="resource_item_details">
-                        
-                    </div>
-                    <div id="resource_item_special_feature_links">
-                        
-                    </div>
-                    </div>
-                </div>
+  <div class="container">
+    <div id="text-icon">
+      <div class="text-icon-line"><strong>Click here for Geo Search --------></strong> </div>
+    </div>
+  </div>
+
+  <div id="sidebar">
+    <div class="jumbotron bg-white">
+      <div class="container">
+        <div id="point">
+          <div class="container">
+            <h1>Details</h1>
+
+            <div id="resource_item_details">
+
             </div>
+            <div id="resource_item_special_feature_links">
 
-            <div class="container">
-                <div id="batch">
-                    <h1>Filter Results</h1>
-                    <form>
-                      <div class="form-group row">
-                        <label class="col-sm-2 col-form-label">Tags</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="container">
+        <div id="_batch">
+          <h2 style="font-family:roboto;font-size:70pxpx;color:rgb(0, 102, 255);"class="center_align"><strong>Filter Results</strong></h2>
+
+          <div style="height:100px;" class="form-group row">
+            <label class="col-sm-10 col-form-label label-margin">Tags</label>
+            <fieldset id="taglist">
+              <!-- <legend id="taglist">Tags</legend> -->
+              <!-- <div>
+                                <input type="checkbox" id="coding" name="interest" value="coding">
+                                <label for="coding"></label>
+                              </div> -->
+              <!-- <div>
+                                <input type="checkbox" id="music" name="interest" value="music">
+                                <label for="music">Music</label>
+                              </div> -->
+            </fieldset>
+            <br>
+            <label class="col-sm-10 col-form-label label-margin">Resource Server Group</label>
+            <fieldset id="resource_group">
+              <!-- <legend id="resource_group">Tags</legend> -->
+              <div class="filter_box">
+                <div>
+                <input type="checkbox" id="StreetLight" name="resource_server_group" value="StreetLight">
+                <label for="StreetLight">StreetLight</label>
+              </div>
+              <div>
+                <input type="checkbox" id="AQM" name="resource_server_group" value="AQM">
+                <label for="AQM">AQM</label>
+              </div>
+              <div>
+                <input type="checkbox" id="Flood-Sensor" name="resource_server_group" value="Flood-Sensor">
+                <label for="Flood-Sensor">Flood-Sensor</label>
+              </div>
+              <div>
+                <input type="checkbox" id="Wifi-Hotspot" name="resource_server_group" value="Wifi-Hotspot">
+                <label for="Wifi-Hotspot">Wifi-Hotspot</label>
+              </div>
+              <div>
+                <input type="checkbox" id="ITMS" name="resource_server_group" value="ITMS">
+                <label for="ITMS">ITMS</label>
+              </div>
+              <div>
+                <input type="checkbox" id="ChangeBhai" name="resource_server_group" value="ChangeBhai">
+                <label for="ChangeBhai">ChangeBhai</label>
+              </div>
+              <div>
+                <input type="checkbox" id="SafetyPin" name="resource_server_group" value="SafetyPin">
+                <label for="SafetyPin">SafetyPin</label>
+              </div>
+              <div>
+                <input type="checkbox" id="TomTom" name="resource_server_group" value="TomTom">
+                <label for="TomTom">TomTom</label>
+              </div>
+            </div>
+            </fieldset>
+          </div>
+        
+          <button id="filter_btn" type="submit" class="col-sm-8 btn btn-primary mb-2 btn-lg" onclick="getValues_checkbox()">Filter</button>
+          
+        </div>
+        <!-- <label class="col-sm-2 col-form-label">Tags</label>
                         <div class="col-sm-10">
-                          <input type="text" class="form-control" placeholder="co2,no2">
-                        </div>
-                      </div>
-                      <div class="form-group row">
+                          <input type="text" id="#_tags" value="" class="form-control" placeholder="co2,no2">
+                        </div> -->
+        <!-- <fieldset>
+                          <legend>Tags</legend>
+                          <div>
+                            <input type="checkbox" id="coding" name="interest" value="coding">
+                            <label for="coding"></label>
+                          </div>
+                          <div>
+                            <input type="checkbox" id="music" name="interest" value="music">
+                            <label for="music">Music</label>
+                          </div>
+                        </fieldset> -->
+
+        <!-- <div class="form-group row">
                         <label class="col-sm-2 col-form-label">Provider</label>
                         <div class="col-sm-10">
-                          <input type="text" class="form-control" placeholder="iudx-provider">
+                          <input type="text" id="#_provider"class="form-control" value="" placeholder="iudx-provider">
                         </div>
-                      </div>
-                      <button type="submit" class="btn btn-primary mb-2">Filter</button>
-                    </form>
-                    <!-- <select class="form-control">
+                      </div> 
+                      <button type="submit" class="btn btn-primary mb-2" onclick="getItems_map($('#_tags').text(),$('#_provider').text())">Filter</button>
+                    -->
+        <!-- <select class="form-control">
                       <option>Attributes</option>
                       <option>NAME</option>
                       <option>Lat</option>
@@ -101,39 +168,38 @@
                           <li>...</li>
                           <li>Attr-N</li>
                         </ol>  -->
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
-    <section id="swagger_section" class="container section">
+  </div>
+  </div>
 
-      <!-- <p>Display OPENAPI JSON as HTML</p> -->
-      <br><br>
-      <button class="btn btn-primary btn-block" onclick="display_map()">Go Back</button> <br>
-        <div id="swagger_ui"></div>
 
-        <div id="normal_footer" class="normal_footer"></div>
+  <section id="swagger_section" class="container section">
 
-    </section>
-    <div id="map"></div>
+    <!-- <p>Display OPENAPI JSON as HTML</p> -->
+    <br><br>
+    <button class="btn btn-primary btn-block" onclick="display_map()">Go Back</button> <br>
+    <div id="swagger_ui"></div>
+
+    <div id="normal_footer" class="normal_footer"></div>
+
+  </section>
+
+  <div id="map"></div>
 
 </body>
 
 
 
 <!-- jQuery CDN - Slim version (=without AJAX) -->
-<script
-  src="https://code.jquery.com/jquery-3.4.1.min.js"
-  integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
-  crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"
+  integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <!-- Popper.JS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js"
-    integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ"
-    crossorigin="anonymous"></script>
+  integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ" crossorigin="anonymous"></script>
 <!-- Bootstrap JS -->
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"
-    integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm"
-    crossorigin="anonymous"></script>
+  integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm" crossorigin="anonymous"></script>
 <!-- <script src="https://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script> -->
 <script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js"></script>
 <script type="text/javascript" src="../assets/js/alertify.js"></script>
