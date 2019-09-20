@@ -1,9 +1,9 @@
 /*****Global variables declaration *****/
-var _provider_data;
-var _tags_data;
-var _resourceServerGroup_data;
-var _geoJSONObject;
-var _resourceId_data ;
+// var _provider_data;
+// var _tags_data;
+// var _resourceServerGroup_data;
+// var _geoJSONObject;
+// var _resourceId_data ;
 var tags_set=[];
 
 
@@ -18,6 +18,37 @@ function get_spinner_html(){
       <div class="rect5"></div>
     </div>
     `
+}
+
+function get_api_encoded_attr_(_attr){
+    return "("+_attr+")";
+}
+
+function get_api_encoded_attribute_names(__tags, __rsg, __pvdr){
+    var str = []
+    if(__tags.length != 0){
+        str.push(get_api_encoded_attr_("tags"))
+    }else if(__rsg.length != 0){
+        str.push(get_api_encoded_attr_("resourceServerGroup"))
+    }else if(__pvdr.length != 0){
+        str.push(get_api_encoded_attr_("provider"))
+    }
+    
+    return str.join(",")
+
+}
+
+function get_api_encoded_attribute_values(__tags, __rsg, __pvdr){
+    var str = []
+    if(__tags.length != 0){
+        str.push(get_api_encoded_attr_(__tags.join(",")))
+    }else if(__rsg.length != 0){
+        str.push(get_api_encoded_attr_(__rsg.join(",")))
+    }else if(__pvdr.length != 0){
+        str.push(get_api_encoded_attr_(__pvdr.join(",")))
+    }
+    
+    return str.join(",")
 }
 
 function __get_latest_data(url) {
@@ -164,27 +195,27 @@ function jsonPrettyHighlightToIdwithBR(jsonobj) {
 
 //ajax call to get resource-items using /search/catalogue/attribute for geoquery type=circle
 // e.g. https://localhost:8443/search/catalogue/attribute?location={bounding-type=circle&lat=79.01234&long=78.33579&radius=1}
-function geoquery_circle(_lat,_lng, _radius) {
-      return new Promise(function(resolve, reject) {
-        // resourceClass =  $.unique(data.map(function (d) {
-        //         return d.accessInformation[0].accessVariables.resourceClass
-        //     }));
-         // markersLayer.clearLayers();
+// function geoquery_circle(_lat,_lng, _radius) {
+//       return new Promise(function(resolve, reject) {
+//         // resourceClass =  $.unique(data.map(function (d) {
+//         //         return d.accessInformation[0].accessVariables.resourceClass
+//         //     }));
+//          // markersLayer.clearLayers();
          
-		      $.get("/search/catalogue/attribute?bounding-type=circle&lat="+ _lat +"&long="+ _lng +"&radius="+ _radius, function(data) {
+// 		      $.get("/search/catalogue/attribute?bounding-type=circle&lat="+ _lat +"&long="+ _lng +"&radius="+ _radius, function(data) {
 
-            data=JSON.parse(data)
-            for (var i = data.length - 1; i >= 0; i--) {
-                if(data[i].hasOwnProperty('geoJsonLocation')){
-                    // myLayer.addData(data[i]['geoJsonLocation']);
-                    plotGeoJSONs(data[i]["geoJsonLocation"])
-                }
-            }
-            // DATA=data
-            resolve(data);
-        });
-      });
-}
+//             data=JSON.parse(data)
+//             for (var i = data.length - 1; i >= 0; i--) {
+//                 if(data[i].hasOwnProperty('geoJsonLocation')){
+//                     // myLayer.addData(data[i]['geoJsonLocation']);
+//                     plotGeoJSONs(data[i]["geoJsonLocation"])
+//                 }
+//             }
+//             // DATA=data
+//             resolve(data);
+//         });
+//       });
+// }
 
 function settimeout(time_milli_seconds) {
       return new Promise(function(resolve, reject) {
@@ -210,16 +241,18 @@ function getRandomColor(){
 function plotGeoJSONs(geoJSONObject, _id, plot_id,_resourceServerGroup,_resourceId,_tags,_provider){
     //console.log(_resourceServerGroup)
     // //console.log("plotting "+ geoJSONObject, _id, _id["id"])
-    // console.log(geoJSONObject, color_count)
-    _provider_data = _provider;
-    _tags_data = _tags;
-    _resourceServerGroup_data =_resourceServerGroup;
-    _geoJSONObject = geoJSONObject;
-    _resourceId_data = _resourceId;
+    // // console.log(geoJSONObject, color_count)
+    // _provider_data = _provider;
+    // _tags_data = _tags;
+    // _resourceServerGroup_data =_resourceServerGroup;
+    // _geoJSONObject = geoJSONObject;
+    // _resourceId_data = _resourceId;
 
     //console.log(geoJSONObject)
-
+    
     if(geoJSONObject["type"]=="Polygon"){
+        
+        console.log("Printing Polygon....")
         color_count=color_count+1
         var _color=getRandomColor()
         
@@ -228,7 +261,7 @@ function plotGeoJSONs(geoJSONObject, _id, plot_id,_resourceServerGroup,_resource
         //console.log(_resourceServerGroup, div)
         if(_resourceServerGroup=="crowd-sourced-changebhai"){
         // loop through our density intervals and generate a label with a colored square for each interval
-
+            console.log("changeBhai")
             div.innerHTML +=  
             '<span style="background:' + _color + '"></span> ' +
               'ChangeBhai' + '<br>';
@@ -354,7 +387,7 @@ function plotGeoJSONs(geoJSONObject, _id, plot_id,_resourceServerGroup,_resource
     
     }
     else if(geoJSONObject["type"]=="Point"){
-
+            console.log("Printing Point....")
             L.geoJSON(geoJSONObject, {
                 pointToLayer: function (feature, latlng) {
                     
@@ -599,54 +632,31 @@ function getSafetypinIcon(){
     });
     return safetypinIcon;
 }
-$(document).ready(function(){
-	
-    let seen_tags_set = [];
-    
-	$.get("/catalogue/v1/search", function(data) {
-			// $("#searched_items").text(data);
-			//console.log("RRRRRRRR1");
-			data=JSON.parse(data)
-            var list = '<div id = "filters" class="filter_box">';
-    		
-            for (var i = 0; i < data.length; i++) { 
-                //console.log(data[i]['tags']['value']);               
-                for (var tag_i = 0; tag_i < data[i]['tags']['value'].length - 1; tag_i++) {
-                var _tag = data[i]['tags']['value'][tag_i].toLowerCase()
-                if (!seen_tags_set.includes(_tag)) {
-                    seen_tags_set.push(_tag)
-                    list += `<div>`;
-                    list += `<input type="checkbox" id="`+_tag+`" name="taglists" value="`+_tag+`">`;
-                    list += ` <label for="`+_tag+`">`+_tag+`</label>`;
-                    list +=`</div>`;
-                }
-            }
-            }
 
-            list +=`</div>`;
-            $("#taglist").append(list);
-        });
-        activate_batch_mode();
-        sidebar.show();
-       
 
-});
-
-function getValues_checkbox(){
+function getSelectedValuesCheckbox(){
     var _tags = [];
     var _rsg = [];
-
+    var _pr = [];
+    
     $.each($("input[name='taglists']:checked"), function(){            
         _tags.push($(this).val());
-        
     });
-    console.log(_tags[0]);
+
     $.each($("input[name='resource_server_group']:checked"), function(){            
         _rsg.push($(this).val());
     });
-    alert("My taglists are: " + _tags.join(", ")+"and My resource group are:" +_rsg.join(", "));
+
+    $.each($("input[name='provider']:checked"), function(){            
+        _pr.push($(this).val());
+    });
+    //alert("My taglists are: " + _tags.join(", ")+"and My resource group are:" +_rsg.join(", "));
+  
+      return values =
+    {
+        "tags" : _tags,
+        "rsg"  : _rsg,
+        "provider"   : _pr
+    }
+
 }
-
-
-
-

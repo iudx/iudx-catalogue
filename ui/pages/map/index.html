@@ -73,80 +73,67 @@
 
       <div class="container">
         <div id="_batch">
-          <h2 style="font-family:roboto;font-size:70pxpx;color:rgb(0, 102, 255);"class="center_align"><strong>Filter Results</strong></h2>
+          <h2 style="font-family:roboto;font-size:70pxpx;color:rgb(0, 102, 255);" class="center_align"><strong>Filter
+              Results</strong></h2>
 
           <div style="height:100px;" class="form-group row">
+
+            <br>
             <label class="col-sm-10 col-form-label label-margin">Tags</label>
-            <fieldset id="taglist">
-              <!-- <legend id="taglist">Tags</legend> -->
-              <!-- <div>
-                                <input type="checkbox" id="coding" name="interest" value="coding">
-                                <label for="coding"></label>
-                              </div> -->
-              <!-- <div>
-                                <input type="checkbox" id="music" name="interest" value="music">
-                                <label for="music">Music</label>
-                              </div> -->
-            </fieldset>
+            <fieldset id="taglist"></fieldset>
             <br>
             <label class="col-sm-10 col-form-label label-margin">Resource Server Group</label>
-            <fieldset id="resource_group">
-              <!-- <legend id="resource_group">Tags</legend> -->
-              <div class="filter_box">
+            <fieldset id="rsglist"> </fieldset>
+            <!--              
+              <div id="rsg_filters" class="filter_box">
                 <div>
-                <input type="checkbox" id="StreetLight" name="resource_server_group" value="StreetLight">
-                <label for="StreetLight">StreetLight</label>
-              </div>
-              <div>
-                <input type="checkbox" id="AQM" name="resource_server_group" value="AQM">
-                <label for="AQM">AQM</label>
-              </div>
-              <div>
-                <input type="checkbox" id="Flood-Sensor" name="resource_server_group" value="Flood-Sensor">
-                <label for="Flood-Sensor">Flood-Sensor</label>
-              </div>
-              <div>
-                <input type="checkbox" id="Wifi-Hotspot" name="resource_server_group" value="Wifi-Hotspot">
-                <label for="Wifi-Hotspot">Wifi-Hotspot</label>
-              </div>
-              <div>
-                <input type="checkbox" id="ITMS" name="resource_server_group" value="ITMS">
-                <label for="ITMS">ITMS</label>
-              </div>
-              <div>
-                <input type="checkbox" id="ChangeBhai" name="resource_server_group" value="ChangeBhai">
-                <label for="ChangeBhai">ChangeBhai</label>
-              </div>
-              <div>
-                <input type="checkbox" id="SafetyPin" name="resource_server_group" value="SafetyPin">
-                <label for="SafetyPin">SafetyPin</label>
-              </div>
-              <div>
-                <input type="checkbox" id="TomTom" name="resource_server_group" value="TomTom">
-                <label for="TomTom">TomTom</label>
-              </div>
-            </div>
-            </fieldset>
+                  <input type="checkbox" id="StreetLight" name="resource_server_group" class="filter_input_box"
+                    value="StreetLight">
+                  <label for="StreetLight">StreetLight</label>
+                </div>
+                <div>
+                  <input type="checkbox" id="AQM" name="resource_server_group" value="AQM" class="filter_input_box">
+                  <label for="AQM">AQM</label>
+                </div>
+                <div>
+                  <input type="checkbox" id="Flood-Sensor" name="resource_server_group" class="filter_input_box"
+                    value="Flood-Sensor">
+                  <label for="Flood-Sensor">Flood-Sensor</label>
+                </div>
+                <div>
+                  <input type="checkbox" id="Wifi-Hotspot" name="resource_server_group" class="filter_input_box"
+                    value="Wifi-Hotspot">
+                  <label for="Wifi-Hotspot">Wifi-Hotspot</label>
+                </div>
+                <div>
+                  <input type="checkbox" id="ITMS" name="resource_server_group" class="filter_input_box" value="ITMS">
+                  <label for="ITMS">ITMS</label>
+                </div>
+                <div>
+                  <input type="checkbox" id="ChangeBhai" name="resource_server_group" class="filter_input_box"
+                    value="ChangeBhai">
+                  <label for="ChangeBhai">ChangeBhai</label>
+                </div>
+                <div>
+                  <input type="checkbox" id="SafetyPin" name="resource_server_group" class="filter_input_box"
+                    value="SafetyPin">
+                  <label for="SafetyPin">SafetyPin</label>
+                </div>
+                <div>
+                  <input type="checkbox" id="TomTom" name="resource_server_group" class="filter_input_box"
+                    value="TomTom">
+                  <label for="TomTom">TomTom</label>
+                </div>
+              </div> -->
+            <!-- </fieldset> -->
+            <br>
+            <label class="col-sm-10 col-form-label label-margin">Provider</label>
+            <fieldset id="providerlist"></fieldset>
           </div>
-        
-          <button id="filter_btn" type="submit" class="col-sm-8 btn btn-primary mb-2 btn-lg" onclick="getValues_checkbox()">Filter</button>
-          
+
+          <!-- <button id="filter_btn" type="submit" class="col-sm-8 btn btn-primary mb-2 btn-lg" onclick="getSelectedValuesCheckbox()">Filter</button> -->
+
         </div>
-        <!-- <label class="col-sm-2 col-form-label">Tags</label>
-                        <div class="col-sm-10">
-                          <input type="text" id="#_tags" value="" class="form-control" placeholder="co2,no2">
-                        </div> -->
-        <!-- <fieldset>
-                          <legend>Tags</legend>
-                          <div>
-                            <input type="checkbox" id="coding" name="interest" value="coding">
-                            <label for="coding"></label>
-                          </div>
-                          <div>
-                            <input type="checkbox" id="music" name="interest" value="music">
-                            <label for="music">Music</label>
-                          </div>
-                        </fieldset> -->
 
         <!-- <div class="form-group row">
                         <label class="col-sm-2 col-form-label">Provider</label>
@@ -156,18 +143,7 @@
                       </div> 
                       <button type="submit" class="btn btn-primary mb-2" onclick="getItems_map($('#_tags').text(),$('#_provider').text())">Filter</button>
                     -->
-        <!-- <select class="form-control">
-                      <option>Attributes</option>
-                      <option>NAME</option>
-                      <option>Lat</option>
-                      <option>Attributes</option>
-                    </select>
-                        <ol>
-                          <li>Attr-1</li>
-                          <li>Attr-2</li>
-                          <li>...</li>
-                          <li>Attr-N</li>
-                        </ol>  -->
+
       </div>
     </div>
   </div>
@@ -213,5 +189,113 @@
 <script type="text/javascript" src="../assets/js/swagger_script.js"></script>
 <script src="../assets/js/common_functions.js"></script>
 <script src="../assets/js/script.js"></script>
+<script>
+  $(document).ready(function () {
+
+    let seen_tags_set = [];
+    let seen_rsg_set = [];
+    let seen_provider_set = [];
+
+    $.get("/catalogue/v1/search", function (data) {
+      data = JSON.parse(data)
+
+      var tlist = '<div id = "tag_filters" class="filter_box">';
+      for (var i = 0; i < data.length; i++) {
+                       
+        for (var tag_i = 0; tag_i < data[i]['tags']['value'].length - 1; tag_i++) {
+          var _tag = data[i]['tags']['value'][tag_i].toLowerCase()
+          if (!seen_tags_set.includes(_tag)) {
+            seen_tags_set.push(_tag)
+            tlist += `<div>`;
+            tlist += `<input type="checkbox" id="` + _tag + `" name="taglists"  class="filter_input_box" value="` + _tag + `">`;
+            tlist += ` <label for="` + _tag + `">` + _tag + `</label>`;
+            tlist += `</div>`;
+          }
+        }
+      }
+      tlist += '</div>';
+      $("#taglist").append(tlist);
+
+      console.log(data)
+
+      var rsglist = '<div id = "rsg_filters" class="filter_box">';
+      for (var i = 0; i < data.length; i++) {
+
+        var _resourceServerGroup = data[i]['resourceServerGroup']['value'].toLowerCase()
+        
+        if (!seen_rsg_set.includes(_resourceServerGroup)) {
+          seen_rsg_set.push(_resourceServerGroup)
+          rsglist += `<div>`;
+          rsglist += `<input type="checkbox" id="` + _resourceServerGroup + `" name="resource_server_group"  class="filter_input_box" value="` + _resourceServerGroup + `">`;
+          rsglist += ` <label for="` + _resourceServerGroup + `">` + _resourceServerGroup + `</label>`;
+          rsglist += `</div>`;
+        }
+
+      }
+      rsglist += '</div>';
+      $("#rsglist").append(rsglist);
+
+      var plist = '<div id = "provider_filters" class="filter_box">';
+      for (var i = 6; i < data.length; i++) {
+
+        var _provider = data[i]['provider']['value'].toLowerCase()
+
+        if (!seen_provider_set.includes(_provider)) {
+          seen_provider_set.push(_provider)
+          plist += `<div>`;
+          plist += `<input type="checkbox" id="` + _provider + `" name="provider"  class="filter_input_box" value="` + _provider + `">`;
+          plist += ` <label for="` + _provider + `">` + _provider + `</label>`;
+          plist += `</div>`;
+        }
+
+      }
+      plist += '</div>';
+      $("#providerlist").append(plist);
+
+      $(".filter_input_box").change(function () {
+        var value = getSelectedValuesCheckbox();
+          var tags = value.tags;
+          var rsg = value.rsg;
+          var provider = value.provider;
+          console.log(tags, rsg , provider)
+
+        var __filter_url = ""
+        
+        if(tags.length == 0 && rsg.length == 0 && provider.length == 0){
+            __filter_url=`/catalogue/v1/search?attribute-name=("")&attribute-value=("")`
+        }else{
+          var _attr_names = get_api_encoded_attribute_names(tags, rsg, provider) 
+          var _attr_values = get_api_encoded_attribute_values(tags, rsg, provider)
+          __filter_url=`/catalogue/v1/search?attribute-name=(`+ _attr_names +`)&attribute-value=(`+ _attr_values +`)`
+        }
+
+        $.get(__filter_url, function (data, status) {
+          markersLayer.clearLayers();
+          data = JSON.parse(data)
+
+          for (var i = data.length - 1; i >= 0; i--) {
+            // console.log(data[i])
+            if (data[i].hasOwnProperty('location')) {
+              
+              
+              plotGeoJSONs(data[i]["location"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
+            } else if (data[i].hasOwnProperty('coverageRegion')) {
+             
+              
+              plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
+              console.log("2")
+            }
+          }
+        });
+
+      });
+    });
+    activate_batch_mode();
+    sidebar.show();
+    
+
+  });
+
+</script>
 
 </html>
