@@ -4,6 +4,9 @@ var DATA;
 var map = L.map('map', {
     zoomControl: false
     //... other options
+
+     // Tell the map to use a loading control
+    //  loadingControl: true
 });
 
 map.setView(getPuneLatLng(), 12);
@@ -181,7 +184,7 @@ map.on('draw:created', async function (e) {
         $.get("/catalogue/v1/search?lat=" + center_point["lat"] + "&lon=" + center_point["lng"] + "&radius=" + radius, function (data) {
             //$.get("/catalogue/v1/search?lat=12.273737&lon=78.37475&radius=200000", function(data) {
             //$.get("/search/catalogue/attribute?bounding-type=circle&lat="+ center_point["lat"] +"&long="+ center_point["lng"] +"&radius="+radius, function(data) {
-
+            
             data = JSON.parse(data);
             console.log(data)
             for (var i = data.length - 1; i >= 0; i--) {
@@ -197,10 +200,55 @@ map.on('draw:created', async function (e) {
                     plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
                     //console.log("2")
                 }
+               
             }
-            // console.log(data.length)
-            // DATA=data
-        });
+
+            $(".filter_input_box").change(function () {
+                var value = getSelectedValuesCheckbox();
+                  var tags = value.tags;
+                  var rsg = value.rsg;
+                  var provider = value.provider;
+                  console.log(tags, rsg , provider)
+        
+                var __filter_url = ""
+                
+                if(tags.length == 0 && rsg.length == 0 && provider.length == 0){
+                    __filter_url=`/catalogue/v1/search?attribute-name=((""))&attribute-value=((""))`
+                }else{
+                  // console.log("else...")
+                  var _attr_names = get_api_encoded_attribute_names(tags, rsg, provider) 
+                  console.log(_attr_names)
+                  var _attr_values = get_api_encoded_attribute_values(tags, rsg, provider)
+                  console.log(_attr_values)
+                  __filter_url=`/catalogue/v1/search?attribute-name=((`+ _attr_names +`))&attribute-value=((`+ _attr_values +`))`
+                }
+        
+                $.get(__filter_url, function (data, status) {
+                  markersLayer.clearLayers();
+                  data = JSON.parse(data)
+                  console.log(data)
+                  for (var i = data.length - 1; i >= 0; i--) {
+                    // console.log(data[i])
+                    if (data[i].hasOwnProperty('location')) {
+                      
+                      
+                      plotGeoJSONs(data[i]["location"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
+                    } else if (data[i].hasOwnProperty('coverageRegion')) {
+                     
+                      
+                      plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
+                      console.log("2")
+                    }
+                  }
+                });
+        
+              });
+            });
+
+            
+        
+        
+
 
         // await geoquery_circle(center_point["lat"],center_point["lng"], radius)
     }
@@ -213,8 +261,6 @@ map.on('draw:created', async function (e) {
         markersLayer.clearLayers();
 
         $.get("/catalogue/v1/search?lat=" + center_point["lat"] + "&lon=" + center_point["lng"] + "&radius=300", function (data) {
-            //$.get("/catalogue/v1/search?lat=12.273737&lon=78.37475&radius=200000", function(data) {
-            //$.get("/search/catalogue/attribute?bounding-type=circle&lat="+ center_point["lat"] +"&long="+ center_point["lng"] +"&radius="+radius, function(data) {
 
             data = JSON.parse(data);
             console.log(data)
@@ -231,8 +277,6 @@ map.on('draw:created', async function (e) {
                     //console.log("2")
                 }
             }
-            // console.log(data.length)
-            // DATA=data
         });
 
     }
@@ -357,6 +401,7 @@ map.on('draw:created', async function (e) {
     drawnItems.addLayer(layer);
     activate_batch_mode();
     sidebar.show();
+    
 });
 
 

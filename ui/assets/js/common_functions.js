@@ -21,33 +21,33 @@ function get_spinner_html(){
 }
 
 function get_api_encoded_attr_(_attr){
-    return "("+_attr+")";
+    return _attr;
 }
 
 function get_api_encoded_attribute_names(__tags, __rsg, __pvdr){
     var str = []
     if(__tags.length != 0){
         str.push(get_api_encoded_attr_("tags"))
-    }else if(__rsg.length != 0){
+    } if(__rsg.length != 0){
         str.push(get_api_encoded_attr_("resourceServerGroup"))
-    }else if(__pvdr.length != 0){
+    } if(__pvdr.length != 0){
         str.push(get_api_encoded_attr_("provider"))
     }
-    
+    console.log(str.join(","))
     return str.join(",")
-
+    
 }
 
 function get_api_encoded_attribute_values(__tags, __rsg, __pvdr){
     var str = []
     if(__tags.length != 0){
         str.push(get_api_encoded_attr_(__tags.join(",")))
-    }else if(__rsg.length != 0){
+    } if(__rsg.length != 0){
         str.push(get_api_encoded_attr_(__rsg.join(",")))
-    }else if(__pvdr.length != 0){
+    } if(__pvdr.length != 0){
         str.push(get_api_encoded_attr_(__pvdr.join(",")))
     }
-    
+    console.log(str.join(","))
     return str.join(",")
 }
 
@@ -384,10 +384,11 @@ function plotGeoJSONs(geoJSONObject, _id, plot_id,_resourceServerGroup,_resource
                 //filter: filter_byTags,
                 // onEachFeature: onEachFeature
             }).addTo(markersLayer);
+            console.log("1111111111111111");
     
     }
     else if(geoJSONObject["type"]=="Point"){
-            console.log("Printing Point....")
+           // console.log("Printing Point....")
             L.geoJSON(geoJSONObject, {
                 pointToLayer: function (feature, latlng) {
                     
@@ -471,7 +472,7 @@ function plotGeoJSONs(geoJSONObject, _id, plot_id,_resourceServerGroup,_resource
                // filter: filter_byTags,
                 // onEachFeature: onEachFeature
             }).addTo(markersLayer);
-    
+   // console.log("22222222222")
     }
 }
 
