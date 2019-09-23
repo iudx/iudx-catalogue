@@ -99,21 +99,6 @@ public class APIServerVerticle extends AbstractVerticle {
     Router router = Router.router(vertx);
     router.route().handler(BodyHandler.create());
 
-    router
-        .route("/")
-        .handler(
-            routingContext -> {
-              HttpServerResponse response = routingContext.response();
-              response.sendFile("ui/landing/index.html");
-            });
-    router
-        .route("/search")
-        .handler(
-            routingContext -> {
-              HttpServerResponse response = routingContext.response();
-              response.sendFile("ui/search/index.html");
-            });
-
     // IUDX v1 APIs
     router.post("/catalogue/v1/items").handler(this::create);
     router.get("/catalogue/v1/items/:domain/:provider/:resourceServer/:resourceCatogery/:resourceId").handler(this::getItem);
@@ -133,8 +118,23 @@ public class APIServerVerticle extends AbstractVerticle {
     router.patch("/update/catalogue/resource-item/bulk/:bulkId").handler(this::bulkUpdate);
     router.delete("/remove/catalogue/resource-item/bulk/:bulkId").handler(this::bulkDelete);
 
-    router.route("/ui/*").handler(StaticHandler.create("ui/pages"));
-    router.route("/ui/assets/*").handler(StaticHandler.create("ui/assets"));
+    router
+    .route("/")
+    .handler(
+        routingContext -> {
+          HttpServerResponse response = routingContext.response();
+          response.sendFile("ui/pages/list/index.html");
+        });
+
+    router
+        .route("/map")
+        .handler(
+            routingContext -> {
+              HttpServerResponse response = routingContext.response();
+              response.sendFile("ui/pages/map/index.html");
+            });
+
+    //router.route("/*").handler(StaticHandler.create("ui/pages"));
     router.route("/assets/*").handler(StaticHandler.create("ui/assets"));
     return router;
   }
