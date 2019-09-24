@@ -84,6 +84,85 @@ function display_latest_data(e, ele) {
       })
 }
 
+function get_filtered_url(__filter_url){
+    if(__filter_url == `attribute-name=((""))&attribute-value=((""))`){
+        return ""
+    }else{
+        return "&" + __filter_url
+    }
+}
+
+function toast_alert(__msg, __msg_type){
+    $.toast({
+        text: __msg,
+        position: 'mid-center',
+        hideAfter: 1800,
+        loader: false,  // Whether to show loader or not. True by default
+        loaderBg: '#1abc9c',
+        bgColor: '#1abc9c',
+        showHideTransition: 'fade', // fade, slide or plain
+        allowToastClose: false, // Boolean value true or false
+        icon: __msg_type // Type of toast icon  
+    })
+}
+
+function reset_filter(__input_name){
+    $.each($(`input[name='`+__input_name+`']:checked`), function(){            
+        $(this).removeAttr("checked");
+    });
+    var category = "";
+    if (__input_name == "taglists"){
+        category = "Tag"
+    }else if (__input_name == "resource_server_group"){
+        category = "Resource Server Group"
+    }else if(__input_name == "provider"){
+        category = "Provider"
+    }
+
+    toast_alert(category + ' filter has been cleared', 'success')
+}
+
+function get_selected_values_framed_url(){
+    var value = getSelectedValuesCheckbox();
+    var tags = value.tags;
+    var rsg = value.rsg;
+    var provider = value.provider;
+    console.log(tags, rsg , provider)
+
+    var __filter_url = ""
+
+    if(tags.length == 0 && rsg.length == 0 && provider.length == 0){
+    __filter_url=`attribute-name=((""))&attribute-value=((""))`
+    }else{
+    // console.log("else...")
+    var _attr_names = get_api_encoded_attribute_names(tags, rsg, provider) 
+    // console.log(_attr_names)
+    var _attr_values = get_api_encoded_attribute_values(tags, rsg, provider)
+    // console.log(_attr_values)
+    __filter_url=`attribute-name=((`+ _attr_names +`))&attribute-value=((`+ _attr_values +`))`+get_geo_shape_url(geo_shape)
+    }
+    return __filter_url;
+}
+
+function get_geo_shape_url(__geo_shape){
+    var _url=""
+    if(__geo_shape != null){
+        if(__geo_shape['type'] == 'circle'){
+            _url= "&lat=" + __geo_shape.value.center_point["lat"] + "&lon=" + __geo_shape.value.center_point["lng"] + "&radius=" + __geo_shape.value.radius
+        }else if(__geo_shape['type'] == 'marker'){
+            _url= "&lat=" + __geo_shape.value.center_point["lat"] + "&lon=" + __geo_shape.value.center_point["lng"]
+        }else if(__geo_shape['type'] == 'polygon'){
+            _url= "&geometry=polygon(("+ __geo_shape.value.points + ","+__geo_shape.value.points[0]+"))&relation=within"
+        }else if(__geo_shape['type'] == 'rectangle'){
+            _url = "&bbox=" + __geo_shape.value.bbox_points + "&relation=within"
+        }else if(__geo_shape['type'] == 'polyline'){
+            _url = "&bbox=" + __geo_shape.value.bbox_points + "&relation=within"
+        }
+    }
+
+    return _url;
+}
+
 function _get_latest_data(_resource_id, _token){
     console.log(_token)
     $.ajax({
