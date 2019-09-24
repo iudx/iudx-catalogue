@@ -39,12 +39,12 @@
 
 
   <title>PSCDCL IUDX Catalogue | MAP View</title>
-  
- 
+
+
 </head>
 
 <body>
-    <div class="se-pre-con"></div>
+  <div class="se-pre-con"></div>
   <div class="container">
     <div id="menu-bar-icon">
       <div class="menu-icon-line"></div>
@@ -53,11 +53,11 @@
     </div>
   </div>
 
-  <div class="container">
+  <!-- <div class="container">
     <div id="text-icon">
       <div class="text-icon-line"><strong>Click here for Geo Search --------></strong> </div>
-    </div>
   </div>
+  </div> -->
 
   <div id="sidebar">
     <div class="jumbotron bg-white">
@@ -84,11 +84,12 @@
           <div style="height:100px;" class="form-group row">
 
             <br>
-           
+
             <label class="col-sm-10 col-form-label label-margin label-size"> <i class="icon-tags"></i> Tags</label>
             <fieldset id="taglist"></fieldset>
             <br>
-            <label class="col-sm-10 col-form-label label-margin label-size"><img width=10% height=10% src= "../../assets/img/icons/server.png"></i> Resource Server Group</label>
+            <label class="col-sm-10 col-form-label label-margin label-size"><img width=10% height=10%
+                src="../../assets/img/icons/server.png"></i> Resource Server Group</label>
             <fieldset id="rsglist"> </fieldset>
             <!--              
               <div id="rsg_filters" class="filter_box">
@@ -133,7 +134,8 @@
               </div> -->
             <!-- </fieldset> -->
             <br>
-            <label class="col-sm-10 col-form-label label-margin label-size"><img width="10%" height="10%" src="../../assets/img/icons/service.png"> Provider</label>
+            <label class="col-sm-10 col-form-label label-margin label-size"><img width="10%" height="10%"
+                src="../../assets/img/icons/service.png"> Provider</label>
             <fieldset id="providerlist"></fieldset>
           </div>
 
@@ -180,7 +182,7 @@
 <!-- jQuery CDN - Slim version (=without AJAX) -->
 <script src="https://code.jquery.com/jquery-3.4.1.min.js"
   integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
 <!-- <script src="http://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.js"></script> -->
 
 <!-- Popper.JS -->
@@ -203,11 +205,11 @@
 <script src="../assets/js/common_functions.js"></script>
 <script src="../assets/js/script.js"></script>
 <script>
-    $(window).load(function() {
-     // Animate loader off screen
-     $(".se-pre-con").fadeOut("slow");;
-   });
-   </script>
+  $(window).load(function () {
+    // Animate loader off screen
+    $(".se-pre-con").fadeOut("slow");;
+  });
+</script>
 <script>
   $(document).ready(function () {
     // var state = document.readyState
@@ -217,24 +219,24 @@
     let seen_provider_set = [];
 
     $.get("/catalogue/v1/search", function (data) {
-      
+
       // $('#spinner').show();
 
-     
+
       data = JSON.parse(data)
 
-      
+
 
       var tlist = '<div id = "tag_filters" class="filter_box">';
       for (var i = 0; i < data.length; i++) {
-                       
+
         for (var tag_i = 0; tag_i < data[i]['tags']['value'].length - 1; tag_i++) {
           var _tag = data[i]['tags']['value'][tag_i].toLowerCase()
           if (!seen_tags_set.includes(_tag)) {
             seen_tags_set.push(_tag)
-            tlist += `<div>`;
-            tlist += `<input type="checkbox" id="` + _tag + `" name="taglists"  class="filter_input_box" value="` + _tag + `">`;
-            tlist += ` <label for="` + _tag + `">` + _tag + `</label>`;
+            tlist += `<div class="field-item">`;
+            tlist += `<label for="` + _tag + `"><input type="checkbox" id="` + _tag + `" name="taglists"  class="filter_input_box" value="` + _tag + `"> ` + _tag + `</label>`;
+            // tlist += ` <label for="` + _tag + `">` + _tag + `</label>`;
             tlist += `</div>`;
           }
         }
@@ -242,18 +244,36 @@
       tlist += '</div>';
       $("#taglist").append(tlist);
 
+      // Added for Alphabetical order for Checkbox input type for Tags
+
+      var myform = $('.field-item');
+      console.log(myform)
+      els = $('label', myform).get(),
+        console.log(els)
+      sorted = els.sort(function (a, b) {
+        console.log($(a).text().toUpperCase()
+          .localeCompare($(b).text().toUpperCase()))
+        return $(a).text().toUpperCase()
+          .localeCompare($(b).text().toUpperCase());
+      });
+
+      $.each(sorted, function (idx, itm) {
+        myform.append(itm);
+        console.log(itm)
+      });
+// ---------------------------------------------------
       console.log(data)
 
       var rsglist = '<div id = "rsg_filters" class="filter_box">';
       for (var i = 0; i < data.length; i++) {
 
         var _resourceServerGroup = data[i]['resourceServerGroup']['value'].toLowerCase()
-        
+
         if (!seen_rsg_set.includes(_resourceServerGroup)) {
           seen_rsg_set.push(_resourceServerGroup)
-          rsglist += `<div>`;
-          rsglist += `<input type="checkbox" id="` + _resourceServerGroup + `" name="resource_server_group"  class="filter_input_box" value="` + _resourceServerGroup + `">`;
-          rsglist += ` <label for="` + _resourceServerGroup + `">` + _resourceServerGroup + `</label>`;
+          rsglist += `<div class="field-item">`;
+          rsglist += `<label for="` + _resourceServerGroup + `"><input type="checkbox" id="` + _resourceServerGroup + `" name="resource_server_group"  class="filter_input_box" value="` + _resourceServerGroup + `"> ` + _resourceServerGroup + `</label>`;
+          // rsglist += ` <label for="` + _resourceServerGroup + `">` + _resourceServerGroup + `</label>`;
           rsglist += `</div>`;
         }
 
@@ -268,9 +288,9 @@
 
         if (!seen_provider_set.includes(_provider)) {
           seen_provider_set.push(_provider)
-          plist += `<div>`;
-          plist += `<input type="checkbox" id="` + _provider + `" name="provider"  class="filter_input_box" value="` + _provider + `">`;
-          plist += ` <label for="` + _provider + `">` + _provider + `</label>`;
+          plist += `<div class="field-item">`;
+          plist += `<label for="` + _provider + `"><input type="checkbox" id="` + _provider + `" name="provider"  class="filter_input_box" value="` + _provider + `"> ` + _provider + `</label>`;
+          // plist += ` <label for="` + _provider + `">` + _provider + `</label>`;
           plist += `</div>`;
         }
 
@@ -278,24 +298,38 @@
       plist += '</div>';
       $("#providerlist").append(plist);
 
+      // var $els = $('.field-item');
+      // console.log($els.toArray().sort())
+      // var $sorted = $($els.toArray().sort(function(a, b) {
+      //   console.log($(a).find('label').text())
+      //   console.log($(b).find('label').text())
+      // return $(a).find('label').text() > $(b).find('label').text()
+      // }));
+
+      // $sorted.each(function(i) {
+      // $(this).after($sorted.eq(i));
+      // });
+
+
+
       $(".filter_input_box").change(function () {
         var value = getSelectedValuesCheckbox();
-          var tags = value.tags;
-          var rsg = value.rsg;
-          var provider = value.provider;
-          console.log(tags, rsg , provider)
+        var tags = value.tags;
+        var rsg = value.rsg;
+        var provider = value.provider;
+        console.log(tags, rsg, provider)
 
         var __filter_url = ""
-        
-        if(tags.length == 0 && rsg.length == 0 && provider.length == 0){
-            __filter_url=`/catalogue/v1/search?attribute-name=((""))&attribute-value=((""))`
-        }else{
+
+        if (tags.length == 0 && rsg.length == 0 && provider.length == 0) {
+          __filter_url = `/catalogue/v1/search?attribute-name=((""))&attribute-value=((""))`
+        } else {
           // console.log("else...")
-          var _attr_names = get_api_encoded_attribute_names(tags, rsg, provider) 
+          var _attr_names = get_api_encoded_attribute_names(tags, rsg, provider)
           console.log(_attr_names)
           var _attr_values = get_api_encoded_attribute_values(tags, rsg, provider)
           console.log(_attr_values)
-          __filter_url=`/catalogue/v1/search?attribute-name=((`+ _attr_names +`))&attribute-value=((`+ _attr_values +`))`
+          __filter_url = `/catalogue/v1/search?attribute-name=((` + _attr_names + `))&attribute-value=((` + _attr_values + `))`
         }
 
         $.get(__filter_url, function (data, status) {
@@ -305,12 +339,12 @@
           for (var i = data.length - 1; i >= 0; i--) {
             // console.log(data[i])
             if (data[i].hasOwnProperty('location')) {
-              
-              
+
+
               plotGeoJSONs(data[i]["location"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
             } else if (data[i].hasOwnProperty('coverageRegion')) {
-             
-              
+
+
               plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
               console.log("2")
             }
@@ -319,10 +353,10 @@
 
       });
     });
-    
+
     activate_batch_mode();
     sidebar.show();
-   
+
     // $('#spinner').hide();
 
   });
