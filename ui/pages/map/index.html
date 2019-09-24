@@ -90,7 +90,7 @@
 
             <br>
            
-            <label class="col-sm-10 col-form-label label-margin label-size"> <i class="icon-tags"></i> Tags <button class="btn btn-info" onclick="reset_filter('taglists')">Clear</button></label>
+            <label class="col-sm-10 col-form-label label-margin label-size"> <i class="icon-tags"></i> Tags <button class="btn btn-info" onclick="reset_filter('taglists')"> Clear</button></label>
             <fieldset id="taglist"></fieldset>
             <br>
             <label class="col-sm-10 col-form-label label-margin label-size"><img width=10% height=10% src= "../../assets/img/icons/server.png"></i> Resource Server Group<button class="btn btn-info" onclick="reset_filter('resource_server_group')">Clear</button></label>
@@ -174,22 +174,36 @@
 
       
 
-      var tlist = '<div id = "tag_filters" class="filter_box">';
+      var tlist = '<div id = "tag_filters" class="filter_box field-item">';
       for (var i = 0; i < data.length; i++) {
                        
         for (var tag_i = 0; tag_i < data[i]['tags']['value'].length - 1; tag_i++) {
           var _tag = data[i]['tags']['value'][tag_i].toLowerCase()
           if (!seen_tags_set.includes(_tag)) {
             seen_tags_set.push(_tag)
-            tlist += `<div>`;
-            tlist += `<input type="checkbox" id="` + _tag + `" name="taglists"  class="filter_input_box" value="` + _tag + `">`;
-            tlist += ` <label for="` + _tag + `">` + _tag + `</label>`;
-            tlist += `</div>`;
-          }
+            tlist += `<label for="` + _tag + `"><input type="checkbox" id="` + _tag + `" name="taglists"  class="filter_input_box" value="` + _tag + `"> ` + _tag + `</label>`;
+           }
         }
       }
       tlist += '</div>';
       $("#taglist").append(tlist);
+
+        // Added for Alphabetical order for Checkbox input type for Tags
+        var tagItem = $('.field-item');
+      console.log(tagItem)
+      els = $('label', tagItem).get(),
+        console.log(els)
+      sorted = els.sort(function (a, b) {
+        console.log($(a).text().toUpperCase()
+          .localeCompare($(b).text().toUpperCase()))
+        return $(a).text().toUpperCase()
+          .localeCompare($(b).text().toUpperCase());
+      });
+      $.each(sorted, function (idx, itm) {
+        tagItem.append(itm);
+        console.log(itm)
+      });
+      // ---------------------------------------------------
 
       console.log(data)
 
@@ -200,10 +214,9 @@
         
         if (!seen_rsg_set.includes(_resourceServerGroup)) {
           seen_rsg_set.push(_resourceServerGroup)
-          rsglist += `<div>`;
-          rsglist += `<input type="checkbox" id="` + _resourceServerGroup + `" name="resource_server_group"  class="filter_input_box" value="` + _resourceServerGroup + `">`;
-          rsglist += ` <label for="` + _resourceServerGroup + `">` + _resourceServerGroup + `</label>`;
-          rsglist += `</div>`;
+          
+          rsglist += `<label for="` + _resourceServerGroup + `"><input type="checkbox" id="` + _resourceServerGroup + `" name="resource_server_group"  class="filter_input_box" value="` + _resourceServerGroup + `"> ` + _resourceServerGroup + `</label>`;
+         
         }
 
       }
@@ -217,10 +230,8 @@
 
         if (!seen_provider_set.includes(_provider)) {
           seen_provider_set.push(_provider)
-          plist += `<div>`;
-          plist += `<input type="checkbox" id="` + _provider + `" name="provider"  class="filter_input_box" value="` + _provider + `">`;
-          plist += ` <label for="` + _provider + `">` + _provider + `</label>`;
-          plist += `</div>`;
+          
+          plist += `<label for="` + _provider + `"><input type="checkbox" id="` + _provider + `" name="provider"  class="filter_input_box" value="` + _provider + `"> ` + _provider + `</label>`;
         }
 
       }

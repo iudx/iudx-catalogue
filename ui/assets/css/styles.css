@@ -17,7 +17,7 @@
 .label-size{
   font-size:20px;
 }
-/*label {display: block}*/
+label {display: block}
 
 .filter_box{
   width: 250px !important;
