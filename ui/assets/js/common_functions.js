@@ -195,16 +195,16 @@ function request_access_token(resource_id, resourceServerGroup, rid) {
       contentType: 'application/json',
       data: JSON.stringify({"resource-id": resource_id}),
       success: function (data) {
-        // console.log(data.access_token)
+        // console.log(data.token)
         
         // $('#token_section_'+resource_id_to_html_id(resource_id)).html($('#token_section_'+resource_id_to_html_id(resource_id)).html());
         $('#token_section_'+resource_id_to_html_id(resource_id)).html(
-                                                                        `<b>Token</b>: <span id="token_value_`+resource_id_to_html_id(resource_id)+`">` + data.access_token + `</span>`
+                                                                        `<b>Token</b>: <span id="token_value_`+resource_id_to_html_id(resource_id)+`">` + data.token + `</span>`
                                                                         + `&nbsp;&nbsp;&nbsp;<button class="btn copy-btn" onclick="copyToClipboard('`+resource_id_to_html_id(resource_id)+`')"> Copy Token <img class="secure_icon svg-white" src="../assets/img/icons/copy_white.svg"></button> <br> `
-                                                                        + _get_security_based_latest_data_link(resource_id,resourceServerGroup, rid, data.access_token))
+                                                                        + _get_security_based_latest_data_link(resource_id,resourceServerGroup, rid, data.token))
         
         _alertify("Success!!!", "Token received.<br>You are now authenticated to access the non-public data.")
-        // _alertify("Success!!!", "Token received: " + data.access_token)
+        // _alertify("Success!!!", "Token received: " + data.token)
         $('#token_section_'+resource_id_to_html_id(resource_id)).toggle();
             
       },
