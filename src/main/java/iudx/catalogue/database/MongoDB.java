@@ -365,9 +365,10 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
             attributeNames.add(attrN);
         }
         attributeValues = extractElements(requestBody.getString("attribute-value"));
+
         if(attributeNames.size()!=attributeValues.size())
             return null;
-
+        
       for(int i = 0; i<attributeNames.size(); i++){
           String key = attributeNames.getString(i);
           JsonArray values = attributeValues.getJsonArray(i);
@@ -521,11 +522,6 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     JsonObject query = new JsonObject();
     JsonArray expressions = new JsonArray();
     System.out.println(requestBody);
-
-    String geometry="", relation="",coordinatesS="";
-    String[] coordinatesArr;
-    Double distance=0.0;
-    JsonArray coordinates=new JsonArray();
 
 		if (requestBody.containsKey("attribute-name") && requestBody.containsKey("attribute-value")
 				&& !requestBody.containsKey("lat") && !requestBody.containsKey("lon")
