@@ -365,12 +365,8 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
             attributeNames.add(attrN);
         }
         attributeValues = extractElements(requestBody.getString("attribute-value"));
-        System.out.println("AVs: "+attributeValues.toString());
-
-        //have a check to see if the attributeNames size matches the corresponding # of 1-d array in attributeValues.
-        //code goes here.
-        //if(attributeNames.size()!=attributeValues.size())
-        //    return null;
+        if(attributeNames.size()!=attributeValues.size())
+            return null;
 
       for(int i = 0; i<attributeNames.size(); i++){
           String key = attributeNames.getString(i);
