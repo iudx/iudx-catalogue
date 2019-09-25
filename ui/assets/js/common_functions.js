@@ -121,6 +121,11 @@ function reset_filter(__input_name){
 
     toast_alert(category + ' filter has been cleared', 'success')
 }
+ function showDetails(){
+     console.log("print this...")
+     $('#_batch').hide();
+     $('#point').show();
+ }
 
 function get_selected_values_framed_url(){
     var value = getSelectedValuesCheckbox();

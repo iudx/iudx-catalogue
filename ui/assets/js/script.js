@@ -482,7 +482,7 @@ function show_details(_id) {
                   <th scope="row">Status</th>
                   <td>`+ data[0]["itemStatus"]["value"] + `</td>
             </tr>
-            </tbody>
+            </tbod
             </table>
         `);
         $("#resource_item_special_feature_links").html(`

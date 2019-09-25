@@ -69,8 +69,12 @@
       <div class="container">
         <div id="point">
           <div class="container">
-            <h1>Details</h1>
-
+            <h2 style="font-family:roboto;font-size:30px;color:rgb(0, 102, 255);" class="center_align"><strong>Details</strong><button class="btn btn-primary" onclick="activate_batch_mode()">Go To Filters</button></h2></h2>
+            <br>
+            <br>
+            <h3 class="details-css">Click a point on the map to get the details <img height="10%" width="10%" src="../../assets/img/icons/pointing-right.png"></h3>
+            <br>
+            <br>
             <div id="resource_item_details">
 
             </div>
@@ -84,13 +88,13 @@
       <div class="container">
         <div id="_batch">
           <h2 style="font-family:roboto;font-size:30px;color:rgb(0, 102, 255);" class="center_align"><strong>Filter
-              Results</strong></h2>
+              Results</strong><button class="btn btn-primary" onclick="showDetails()">Go To Details</button></h2>
 
           <div style="height:100px;" class="form-group row">
 
             <br>
            
-            <label class="col-sm-10 col-form-label label-margin label-size"> <i class="icon-tags"></i> Tags <button class="btn btn-info" onclick="reset_filter('taglists')"> Clear</button></label>
+            <label class="col-sm-10 col-form-label label-margin label-size"> <i class="icon-tags"></i>Tags <button class="btn btn-info" onclick="reset_filter('taglists')"> Clear</button></label>
             <fieldset id="taglist"></fieldset>
             <br>
             <label class="col-sm-10 col-form-label label-margin label-size"><img width=10% height=10% src= "../../assets/img/icons/server.png"></i> Resource Server Group<button class="btn btn-info" onclick="reset_filter('resource_server_group')">Clear</button></label>
@@ -190,18 +194,16 @@
 
         // Added for Alphabetical order for Checkbox input type for Tags
         var tagItem = $('.field-item');
-      console.log(tagItem)
+      
       els = $('label', tagItem).get(),
-        console.log(els)
       sorted = els.sort(function (a, b) {
-        console.log($(a).text().toUpperCase()
-          .localeCompare($(b).text().toUpperCase()))
+        
         return $(a).text().toUpperCase()
           .localeCompare($(b).text().toUpperCase());
       });
       $.each(sorted, function (idx, itm) {
         tagItem.append(itm);
-        console.log(itm)
+       // console.log(itm)
       });
       // ---------------------------------------------------
 

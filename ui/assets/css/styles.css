@@ -9,13 +9,20 @@
 	z-index: 9999;
 	background: url(../img/icons/spinner.gif) center no-repeat #fff;
 }
+.btn-info{
+margin-left:5px;
+}
+.btn-primary{
+  margin-left:10px;
+  }
 #spinner{
   position: fixed;
   top:50%;
   left:50%;
 }
 .label-size{
-  font-size:20px;
+  font-size:17px;
+  
 }
 label {display: block}
 
@@ -24,7 +31,12 @@ label {display: block}
   height: 250px !important;
   overflow-y: auto !important;
 }
+.details-css{
+/* font-size: 20px; */
+color:rgb(0, 102, 255)
 
+
+}
 .version{
   background-color: transparent !important;
   border: none !important;
@@ -277,9 +289,7 @@ label {display: block}
   padding: 0;
   /* margin-left:50px; */
 }
-.field_size{
 
-}
 fieldset{
   line-height:1.8;
     /* display: block; */
