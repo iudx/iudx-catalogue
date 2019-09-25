@@ -1,3 +1,42 @@
+.no-js #loader { display: none;  }
+.js #loader { display: block; position: absolute; left: 100px; top: 0; }
+.se-pre-con {
+	position: fixed;
+	left: 0px;
+	top: 0px;
+	width: 100%;
+	height: 100%;
+	z-index: 9999;
+	background: url(../img/icons/spinner.gif) center no-repeat #fff;
+}
+.btn-info{
+margin-left:5px;
+}
+.btn-primary{
+  margin-left:10px;
+  }
+#spinner{
+  position: fixed;
+  top:50%;
+  left:50%;
+}
+.label-size{
+  font-size:17px;
+  
+}
+label {display: block}
+
+.filter_box{
+  width: 250px !important;
+  height: 250px !important;
+  overflow-y: auto !important;
+}
+.details-css{
+/* font-size: 20px; */
+color:rgb(0, 102, 255)
+
+
+}
 .version{
   background-color: transparent !important;
   border: none !important;
@@ -216,7 +255,7 @@
   display: none;
 }
 
-#batch {
+#_batch {
   display: none;
 }
 
@@ -243,4 +282,32 @@
 .info h4 {
 	margin: 0 0 5px;
 	color: #777;
+}
+
+#taglist {
+  list-style-type: disc ;
+  padding: 0;
+  /* margin-left:50px; */
+}
+
+fieldset{
+  line-height:1.8;
+    /* display: block; */
+    display:inline-block;
+    margin-left : 50px;
+    
+}
+#filter_btn{
+  margin-top: 250px;
+  margin-left: 50px;
+}
+.label-margin{
+
+  margin-top:20px;
+  margin-left:40px;
+
+}
+
+.center_align{
+  text-align: center;
 }

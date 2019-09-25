@@ -10,130 +10,137 @@
   <meta name="author" content="Jishnu Jaykumar P (http://jishnujayakumar.github.io), Rohina Naaz">
   <link rel="shortcut icon" href="../assets/img/custom_iudx.ico">
   <title>
-    PSCDCL IUDX | Indian Urban Data Exchange Catalogue 
+    PSCDCL IUDX | Indian Urban Data Exchange Catalogue
   </title>
-    <link href="../assets/css/swagger/swagger-ui.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css" />
-    <!-- <link rel="stylesheet" href="https://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css" /> -->
-    <link rel="stylesheet" href="https://openlayers.org/en/v5.3.0/css/ol.css" type="text/css">
-    
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
-    <link rel="stylesheet" href="../assets/css/styles.css">
-    <link rel="stylesheet" type="text/css" href="../assets/css/alertify.css">
-    <link rel="stylesheet" type="text/css" href="../assets/css/common_styles.css">
-    <link rel="stylesheet" href="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.3.0/css/ol.css">
-    <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/solid.js"
-        integrity="sha384-tzzSw1/Vo+0N5UhStP3bvwWPq+uvzCMfrN1fEFe+xBmv1C/AtVX5K0uZtmcHitFZ"
-        crossorigin="anonymous"></script>
-    <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/fontawesome.js"
-        integrity="sha384-6OIrr52G08NpOFSZdxxz1xdNSndlD4vdcf/q2myIUVO0VsqaGHJsB0RaBE01VTOY"
-        crossorigin="anonymous"></script>
+  <link href="../assets/css/swagger/swagger-ui.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css" />
+  <!-- <link rel="stylesheet" href="https://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css" /> -->
+  <link rel="stylesheet" href="https://openlayers.org/en/v5.3.0/css/ol.css" type="text/css">
 
-    <script
-        src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+  
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/0.4.2/leaflet.draw.css" />
-    <!-- <link rel="stylesheet" href="../assets/css/leaflet-sidebar.css"/> -->
+  <!-- https://kamranahmed.info/toast -->
+  <link rel="stylesheet" href="../assets/css/jquery.toast.css">
+  
+  <link rel="stylesheet" href="../assets/css/styles.css">
+  <link rel="stylesheet" type="text/css" href="../assets/css/alertify.css">
+  <link rel="stylesheet" type="text/css" href="../assets/css/common_styles.css">
+  <link rel="stylesheet" href="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.3.0/css/ol.css">
+  <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/solid.js"
+    integrity="sha384-tzzSw1/Vo+0N5UhStP3bvwWPq+uvzCMfrN1fEFe+xBmv1C/AtVX5K0uZtmcHitFZ"
+    crossorigin="anonymous"></script>
+  <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/fontawesome.js"
+    integrity="sha384-6OIrr52G08NpOFSZdxxz1xdNSndlD4vdcf/q2myIUVO0VsqaGHJsB0RaBE01VTOY"
+    crossorigin="anonymous"></script>
+
+  <script
+    src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/0.4.2/leaflet.draw.css" />
+
+  <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
+  <!-- <link rel="stylesheet" href="../assets/css/leaflet-sidebar.css"/> -->
 
 
-    <title>PSCDCL IUDX Catalogue | MAP View</title>
+  <title>PSCDCL IUDX Catalogue | MAP View</title>
+  
+ 
 </head>
 
 <body>
-    <div class="container">
+    <div class="se-pre-con"></div>
+  <div class="container">
     <div id="menu-bar-icon">
-        <div class="menu-icon-line"></div>
-        <div class="menu-icon-line"></div>
-        <div class="menu-icon-line"></div>
+      <div class="menu-icon-line"></div>
+      <div class="menu-icon-line"></div>
+      <div class="menu-icon-line"></div>
     </div>
-    </div>
+  </div>
 
-    <div class="container">
-        <div id="text-icon">
-            <div class="text-icon-line"><strong>Click here for Geo Search --------></strong> </div>
-         </div>
-        </div>
-    
-    <div id="sidebar">
-        <div class="jumbotron bg-white">      
-            <div class="container">
-                <div id="point">
-                    <div class="container">
-                        <h1>Details</h1>
-                        
-                    <div id="resource_item_details">
-                        
-                    </div>
-                    <div id="resource_item_special_feature_links">
-                        
-                    </div>
-                    </div>
-                </div>
+  <div class="container">
+    <div id="text-icon">
+       <!-- <div class="text-icon-line"><strong>Click here for Geo Search ------</strong> </div> -->
+    </div>
+  </div>
+
+  <div id="sidebar">
+    <div class="jumbotron bg-white">
+      <div class="container">
+        <div id="point">
+          <div class="container">
+            <h2 style="font-family:roboto;font-size:30px;color:rgb(0, 102, 255);" class="center_align"><strong>Details</strong><button class="btn btn-primary" onclick="activate_batch_mode()">Go To Filters</button></h2></h2>
+            <br>
+            <br>
+            <h3 class="details-css">Click a point on the map to get the details <img height="10%" width="10%" src="../../assets/img/icons/pointing-right.png"></h3>
+            <br>
+            <br>
+            <div id="resource_item_details">
+
             </div>
+            <div id="resource_item_special_feature_links">
 
-            <div class="container">
-                <div id="batch">
-                    <h1>Filter Results</h1>
-                    <form>
-                      <div class="form-group row">
-                        <label class="col-sm-2 col-form-label">Tags</label>
-                        <div class="col-sm-10">
-                          <input type="text" class="form-control" placeholder="co2,no2">
-                        </div>
-                      </div>
-                      <div class="form-group row">
-                        <label class="col-sm-2 col-form-label">Provider</label>
-                        <div class="col-sm-10">
-                          <input type="text" class="form-control" placeholder="iudx-provider">
-                        </div>
-                      </div>
-                      <button type="submit" class="btn btn-primary mb-2">Filter</button>
-                    </form>
-                    <!-- <select class="form-control">
-                      <option>Attributes</option>
-                      <option>NAME</option>
-                      <option>Lat</option>
-                      <option>Attributes</option>
-                    </select>
-                        <ol>
-                          <li>Attr-1</li>
-                          <li>Attr-2</li>
-                          <li>...</li>
-                          <li>Attr-N</li>
-                        </ol>  -->
-                </div>
             </div>
+          </div>
         </div>
+      </div>
+
+      <div class="container">
+        <div id="_batch">
+          <h2 style="font-family:roboto;font-size:30px;color:rgb(0, 102, 255);" class="center_align"><strong>Filter
+              Results</strong><button class="btn btn-primary" onclick="showDetails()">Go To Details</button></h2>
+
+          <div style="height:100px;" class="form-group row">
+
+            <br>
+           
+            <label class="col-sm-10 col-form-label label-margin label-size"> <i class="icon-tags"></i>Tags <button class="btn btn-info" onclick="reset_filter('taglists')"> Clear</button></label>
+            <fieldset id="taglist"></fieldset>
+            <br>
+            <label class="col-sm-10 col-form-label label-margin label-size"><img width=10% height=10% src= "../../assets/img/icons/server.png"></i> Resource Server Group<button class="btn btn-info" onclick="reset_filter('resource_server_group')">Clear</button></label>
+            <fieldset id="rsglist"> </fieldset>
+            <br>
+            <label class="col-sm-10 col-form-label label-margin label-size"><img width="10%" height="10%" src="../../assets/img/icons/service.png"> Provider<button class="btn btn-info" onclick="reset_filter('provider')">Clear</button></label>
+            <fieldset id="providerlist"></fieldset>
+          </div>
+        </div>
+
+      </div>
     </div>
-    <section id="swagger_section" class="container section">
+  </div>
+  </div>
 
-      <!-- <p>Display OPENAPI JSON as HTML</p> -->
-      <br><br>
-      <button class="btn btn-primary btn-block" onclick="display_map()">Go Back</button> <br>
-        <div id="swagger_ui"></div>
 
-        <div id="normal_footer" class="normal_footer"></div>
+  <section id="swagger_section" class="container section">
 
-    </section>
-    <div id="map"></div>
+    <!-- <p>Display OPENAPI JSON as HTML</p> -->
+    <br><br>
+    <button class="btn btn-primary btn-block" onclick="display_map()">Go Back</button> <br>
+    <div id="swagger_ui"></div>
+
+    <div id="normal_footer" class="normal_footer"></div>
+
+  </section>
+
+  <div id="map"></div>
+
 
 </body>
 
 
 
 <!-- jQuery CDN - Slim version (=without AJAX) -->
-<script
-  src="https://code.jquery.com/jquery-3.4.1.min.js"
-  integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
-  crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"
+  integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+<!-- <script src="http://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.js"></script> -->
+
 <!-- Popper.JS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js"
-    integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ"
-    crossorigin="anonymous"></script>
+  integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ" crossorigin="anonymous"></script>
 <!-- Bootstrap JS -->
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"
-    integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm"
-    crossorigin="anonymous"></script>
+  integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm" crossorigin="anonymous"></script>
 <!-- <script src="https://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script> -->
 <script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js"></script>
 <script type="text/javascript" src="../assets/js/alertify.js"></script>
@@ -145,7 +152,127 @@
 <script type="text/javascript" src="../assets/js/swagger/swagger-ui-bundle.js"></script>
 <script type="text/javascript" src="../assets/js/swagger/swagger-ui-standalone-preset.js"></script>
 <script type="text/javascript" src="../assets/js/swagger_script.js"></script>
+<script type="text/javascript" src="../assets/js/jquery.toast.js"></script>
 <script src="../assets/js/common_functions.js"></script>
 <script src="../assets/js/script.js"></script>
+<script>
+    $(window).load(function() {
+     // Animate loader off screen
+     $(".se-pre-con").fadeOut("slow");;
+   });
+   </script>
+<script>
+  $(document).ready(function () {
+    // var state = document.readyState
+    // console.log(state)
+    let seen_tags_set = [];
+    let seen_rsg_set = [];
+    let seen_provider_set = [];
+
+    $.get("/catalogue/v1/search", function (data) {
+      
+      // $('#spinner').show();
+
+     
+      data = JSON.parse(data)
+
+      
+
+      var tlist = '<div id = "tag_filters" class="filter_box field-item">';
+      for (var i = 0; i < data.length; i++) {
+                       
+        for (var tag_i = 0; tag_i < data[i]['tags']['value'].length - 1; tag_i++) {
+          var _tag = data[i]['tags']['value'][tag_i].toLowerCase()
+          if (!seen_tags_set.includes(_tag)) {
+            seen_tags_set.push(_tag)
+            tlist += `<label for="` + _tag + `"><input type="checkbox" id="` + _tag + `" name="taglists"  class="filter_input_box" value="` + _tag + `"> ` + _tag + `</label>`;
+           }
+        }
+      }
+      tlist += '</div>';
+      $("#taglist").append(tlist);
+
+        // Added for Alphabetical order for Checkbox input type for Tags
+        var tagItem = $('.field-item');
+      
+      els = $('label', tagItem).get(),
+      sorted = els.sort(function (a, b) {
+        
+        return $(a).text().toUpperCase()
+          .localeCompare($(b).text().toUpperCase());
+      });
+      $.each(sorted, function (idx, itm) {
+        tagItem.append(itm);
+       // console.log(itm)
+      });
+      // ---------------------------------------------------
+
+      console.log(data)
+
+      var rsglist = '<div id = "rsg_filters" class="filter_box">';
+      for (var i = 0; i < data.length; i++) {
+
+        var _resourceServerGroup = data[i]['resourceServerGroup']['value'].toLowerCase()
+        
+        if (!seen_rsg_set.includes(_resourceServerGroup)) {
+          seen_rsg_set.push(_resourceServerGroup)
+          
+          rsglist += `<label for="` + _resourceServerGroup + `"><input type="checkbox" id="` + _resourceServerGroup + `" name="resource_server_group"  class="filter_input_box" value="` + _resourceServerGroup + `"> ` + _resourceServerGroup + `</label>`;
+         
+        }
+
+      }
+      rsglist += '</div>';
+      $("#rsglist").append(rsglist);
+
+      var plist = '<div id = "provider_filters" class="filter_box">';
+      for (var i = 6; i < data.length; i++) {
+
+        var _provider = data[i]['provider']['value'].toLowerCase()
+
+        if (!seen_provider_set.includes(_provider)) {
+          seen_provider_set.push(_provider)
+          
+          plist += `<label for="` + _provider + `"><input type="checkbox" id="` + _provider + `" name="provider"  class="filter_input_box" value="` + _provider + `"> ` + _provider + `</label>`;
+        }
+
+      }
+      plist += '</div>';
+      $("#providerlist").append(plist);
+
+      $(".filter_input_box").change(function () {
+
+        var __filter_url =  "/catalogue/v1/search?" + get_selected_values_framed_url()
+
+        $.get(__filter_url, function (data, status) {
+          markersLayer.clearLayers();
+          data = JSON.parse(data)
+          console.log(data)
+          for (var i = data.length - 1; i >= 0; i--) {
+            // console.log(data[i])
+            if (data[i].hasOwnProperty('location')) {
+              
+              
+              plotGeoJSONs(data[i]["location"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
+            } else if (data[i].hasOwnProperty('coverageRegion')) {
+             
+              
+              plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
+              console.log("2")
+            }
+          }
+        });
+
+      });
+    });
+    
+    activate_batch_mode();
+    sidebar.show();
+   
+    // $('#spinner').hide();
+
+  });
+
+</script>
 
 </html>

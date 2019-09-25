@@ -471,6 +471,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     } else
         query=null;
 
+
     return query;
   }
   
