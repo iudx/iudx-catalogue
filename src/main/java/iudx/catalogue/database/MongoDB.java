@@ -365,10 +365,8 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
             attributeNames.add(attrN);
         }
         attributeValues = extractElements(requestBody.getString("attribute-value"));
-
         if(attributeNames.size()!=attributeValues.size())
             return null;
-        
       for(int i = 0; i<attributeNames.size(); i++){
           String key = attributeNames.getString(i);
           JsonArray values = attributeValues.getJsonArray(i);
