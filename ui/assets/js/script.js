@@ -198,6 +198,7 @@ map.on('draw:created', async function (e) {
             //$.get("/search/catalogue/attribute?bounding-type=circle&lat="+ center_point["lat"] +"&long="+ center_point["lng"] +"&radius="+radius, function(data) {
             
             data = JSON.parse(data);
+            toast_alert_for_response_data_length(data);
             //console.log(data)
             for (var i = data.length - 1; i >= 0; i--) {
                 
@@ -239,6 +240,9 @@ map.on('draw:created', async function (e) {
 
             data = JSON.parse(data);
             //console.log(data)
+
+            toast_alert_for_response_data_length(data);
+
             for (var i = data.length - 1; i >= 0; i--) {
                 
                 if (data[i].hasOwnProperty('location')) {
@@ -282,6 +286,7 @@ map.on('draw:created', async function (e) {
 
 
             data = JSON.parse(data);
+            toast_alert_for_response_data_length(data);
             //console.log(data)
             for (var i = data.length - 1; i >= 0; i--) {
 
@@ -324,6 +329,7 @@ map.on('draw:created', async function (e) {
 
 
             data = JSON.parse(data);
+            toast_alert_for_response_data_length(data);
             //console.log(data)
             for (var i = data.length - 1; i >= 0; i--) {
 
@@ -364,6 +370,7 @@ map.on('draw:created', async function (e) {
 
 
             data = JSON.parse(data);
+            toast_alert_for_response_data_length(data);
          //   //console.log(data)
             for (var i = data.length - 1; i >= 0; i--) {
 

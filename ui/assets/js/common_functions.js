@@ -92,14 +92,14 @@ function get_filtered_url(__filter_url){
     }
 }
 
-function toast_alert(__msg, __msg_type){
+function toast_alert(__msg, __msg_type, __bg_color){
     $.toast({
         text: __msg,
         position: 'mid-center',
         hideAfter: 1800,
         loader: false,  // Whether to show loader or not. True by default
         loaderBg: '#1abc9c',
-        bgColor: '#1abc9c',
+        bgColor: __bg_color,
         showHideTransition: 'fade', // fade, slide or plain
         allowToastClose: false, // Boolean value true or false
         icon: __msg_type // Type of toast icon  
@@ -140,8 +140,18 @@ function reset_filter(__input_name){
       }
     });
 
-    toast_alert(category + ' filter has been cleared', 'success')
+    toast_alert(category + ' filter has been cleared', 'success','#1abc9c')
 }
+
+function toast_alert_for_response_data_length(__data){
+    var len = __data.length;
+    if(len == 0){
+        toast_alert('Zero items found for this query', 'warning','#c0392b');
+    }else{
+        toast_alert('Found ' + len + ' items for this query', 'success','#1abc9c');
+    }
+}
+
  function showDetails(){
      //console.log("print this...")
      $('#_batch').hide();
