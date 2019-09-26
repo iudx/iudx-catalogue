@@ -7,6 +7,49 @@
 var tags_set=[];
 
 
+function getImageRsg(_resourceServerGroup) {
+    if(_resourceServerGroup==='streetlight-feeder-sree'){
+       
+    return `
+    ../../assets/img//icons/lamppost.png`;
+    }
+    if(_resourceServerGroup==='aqm-bosch-climo'){
+        return `
+        https://img.icons8.com/color/48/000000/air-quality.png`;
+   
+    }
+    if(_resourceServerGroup==='flood-sensor'){
+        return `
+        https://img.icons8.com/office/16/000000/sensor.png`; 
+  
+    }
+    if(_resourceServerGroup==='wifi-hotspot'){
+        
+        return `
+        https://img.icons8.com/flat_round/64/000000/wi-fi-connected.png`;
+    }
+    if(_resourceServerGroup==='ptz-video camera'){
+      
+        return `
+        https://img.icons8.com/ultraviolet/40/000000/marker.png`;
+    }
+    if(_resourceServerGroup==='crowd-sourced-changebhai'){
+      
+        return `
+        https://img.icons8.com/color/48/000000/marker.png`;
+    }
+    if(_resourceServerGroup==='safetipin'){
+        return `
+        https://img.icons8.com/flat_round/64/000000/safety-pin--v2.png`;
+    }
+    if(_resourceServerGroup==='traffic-incidents'){
+        
+        return `
+        https://image.flaticon.com/icons/svg/1167/1167993.svg
+        `;
+    }
+}
+
 // Spinner by https://tobiasahlin.com/spinkit/
 function get_spinner_html(){
     return `
@@ -418,7 +461,7 @@ function plotGeoJSONs(geoJSONObject, _id, plot_id,_resourceServerGroup,_resource
                         _marker.bindPopup(customPopup)
                         return _marker;
                         }
-                        if(_resourceServerGroup==='itms'){
+                        if(_resourceServerGroup==='ptz-video camera'){
                             //console.log("itms")
                             var _marker = L.marker(latlng,{icon: getITMSIcon()}).addTo(map);
                             _marker.itemUUID = _id;

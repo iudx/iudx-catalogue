@@ -11,6 +11,10 @@
 }
 .btn-info{
 margin-left:5px;
+color:black!important;
+}
+.leaflet-container a {
+  color: black!important;
 }
 .btn-primary{
   margin-left:10px;
