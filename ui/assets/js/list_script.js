@@ -330,7 +330,7 @@ function json_to_htmlcard(json_obj){
 		    <button class="btn btn-primary" onclick="show_details('`+ json_obj.id +`')">Details</button>
 		    <button class="btn btn-info" onclick="display_swagger_ui('` + openapi_url + `')">APIs Details</button>
 		    `+ ((is_public)?"":rat_btn_html) +`
-		    <a href="`+ get_latest_data_url(json_obj["id"],json_obj["resourceServerGroup"]["value"],json_obj["resourceId"]["value"]) +`" style="color:white"  class="data-modal" onclick="display_latest_data(event, this)"><button class="btn btn-secondary">Get Latest Data</button></a>
+		    <a href="#" style="color:white"  class="data-modal" onclick="display_latest_data(event, this, '`+json_obj['id']+`')"><button class="btn btn-secondary">Get Latest Data</button></a>
 		    
 		    </div>
 		     <div id="token_section_`+resource_id_to_html_id(json_obj.id)+`" class="token_section"></div>
