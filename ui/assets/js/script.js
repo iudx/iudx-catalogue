@@ -62,7 +62,14 @@ legend.onAdd = function (map) {
 
     var div = L.DomUtil.create('div', 'info legend'),
         grades = ["StreetLight", "AQM", "Flood-Sensor", "Wifi-Hotspot", "ITMS", "ChangeBhai", "SafetyPin", "TomTom"],
-        labels = ["https://img.icons8.com/color/48/000000/street-light.png", "https://img.icons8.com/color/48/000000/air-quality.png", "https://img.icons8.com/office/16/000000/sensor.png", "https://img.icons8.com/flat_round/64/000000/wi-fi-connected.png", "https://img.icons8.com/ultraviolet/40/000000/marker.png", "https://img.icons8.com/color/48/000000/marker.png", "https://img.icons8.com/flat_round/64/000000/safety-pin--v2.png", "https://image.flaticon.com/icons/svg/1167/1167993.svg"];
+        labels = ["https://image.flaticon.com/icons/svg/1339/1339969.svg", 
+                    "../assets/img/icons/aqm.svg", 
+                    "https://image.flaticon.com/icons/svg/1890/1890123.svg", 
+                    "https://image.flaticon.com/icons/svg/179/179428.svg", 
+                    "https://img.icons8.com/ultraviolet/40/000000/marker.png", 
+                    "https://img.icons8.com/color/48/000000/marker.png", 
+                    "https://img.icons8.com/flat_round/64/000000/safety-pin--v2.png", 
+                    "https://image.flaticon.com/icons/svg/1167/1167993.svg"];
 
     // loop through our density intervals and generate a label with a colored square for each interval
     var heading = '<h4>LEGENDS</h4>'

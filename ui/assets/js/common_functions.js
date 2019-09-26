@@ -34,21 +34,21 @@ function get_api_encoded_attribute_names(__tags, __rsg, __pvdr){
         str.push(get_api_encoded_attr_("provider"))
     }
     console.log(str.join(","))
-    return str.join(",")
+    return "(" + str.join(",") +")"
     
 }
 
 function get_api_encoded_attribute_values(__tags, __rsg, __pvdr){
     var str = []
     if(__tags.length != 0){
-        str.push(get_api_encoded_attr_(__tags.join(",")))
+        str.push(get_api_encoded_attr_("("+__tags.join(",")+")"))
     } if(__rsg.length != 0){
-        str.push(get_api_encoded_attr_(__rsg.join(",")))
+        str.push(get_api_encoded_attr_("("+__rsg.join(",")+")"))
     } if(__pvdr.length != 0){
-        str.push(get_api_encoded_attr_(__pvdr.join(",")))
+        str.push(get_api_encoded_attr_("("+__pvdr.join(",")+")"))
     }
     console.log(str.join(","))
-    return str.join(",")
+    return "("+str.join(",")+")"
 }
 
 function __get_latest_data(url) {
@@ -85,7 +85,7 @@ function display_latest_data(e, ele) {
 }
 
 function get_filtered_url(__filter_url){
-    if(__filter_url == `attribute-name=((""))&attribute-value=((""))`){
+    if(__filter_url == `attribute-name=("")&attribute-value=((""))`){
         return ""
     }else{
         return "&" + __filter_url
@@ -119,6 +119,27 @@ function reset_filter(__input_name){
         category = "Provider"
     }
 
+    var __filter_url =  "/catalogue/v1/search?" + get_selected_values_framed_url()
+
+    $.get(__filter_url, function (data, status) {
+      markersLayer.clearLayers();
+      data = JSON.parse(data)
+      console.log(data)
+      for (var i = data.length - 1; i >= 0; i--) {
+        // console.log(data[i])
+        if (data[i].hasOwnProperty('location')) {
+          
+          
+          plotGeoJSONs(data[i]["location"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
+        } else if (data[i].hasOwnProperty('coverageRegion')) {
+         
+          
+          plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
+          console.log("2")
+        }
+      }
+    });
+
     toast_alert(category + ' filter has been cleared', 'success')
 }
  function showDetails(){
@@ -137,14 +158,14 @@ function get_selected_values_framed_url(){
     var __filter_url = ""
 
     if(tags.length == 0 && rsg.length == 0 && provider.length == 0){
-    __filter_url=`attribute-name=((""))&attribute-value=((""))`
+    __filter_url=`attribute-name=("")&attribute-value=((""))`
     }else{
     // console.log("else...")
     var _attr_names = get_api_encoded_attribute_names(tags, rsg, provider) 
     // console.log(_attr_names)
     var _attr_values = get_api_encoded_attribute_values(tags, rsg, provider)
     // console.log(_attr_values)
-    __filter_url=`attribute-name=((`+ _attr_names +`))&attribute-value=((`+ _attr_values +`))`+get_geo_shape_url(geo_shape)
+    __filter_url=`attribute-name=`+ _attr_names +`&attribute-value=`+ _attr_values + get_geo_shape_url(geo_shape)
     }
     return __filter_url;
 }
@@ -378,7 +399,7 @@ function plotGeoJSONs(geoJSONObject, _id, plot_id,_resourceServerGroup,_resource
                         // return L.marker(latlng, {icon: getOfficeIcon()});
                        
                         // <a href='/catalogue/v1/items/"+plot_id+"'>Get Catalogue-item-details</a><br/>
-                        var customPopup = "<a href='https://pune.iudx.org.in/api/1.0.0/resource/latest/"+_resourceServerGroup+"/"+_resourceId + "' class='data-modal'  onclick='display_latest_data(event, this)'>Get latest-data</a>";
+                        var customPopup = "<a href='https://pune.iudx.org.in/api/1.0.0/resource/latest/"+_resourceServerGroup+"/"+_resourceId +"' class='data-modal'  onclick='display_latest_data(event, this)'>Get latest-data</a>";
                         if(_resourceServerGroup==='streetlight-feeder-sree'){
                             //console.log("street")
                             var _marker = L.marker(latlng,{icon: getStreetlightIcon()}).addTo(map);
@@ -630,7 +651,7 @@ function getOfficeIcon(){
 
 function getStreetlightIcon(){
     var streetlightIcon = L.icon({
-        iconUrl: 'https://img.icons8.com/color/48/000000/street-light.png',
+        iconUrl: 'https://image.flaticon.com/icons/svg/1339/1339969.svg',
         // shadowUrl: 'leaf-shadow.png',
 
         iconSize:      [25, 41], // size of the icon
@@ -643,7 +664,7 @@ function getStreetlightIcon(){
 
 function getAirQualityIcon(){
     var AirQualityIcon = L.icon({
-        iconUrl: 'https://img.icons8.com/color/48/000000/air-quality.png',
+        iconUrl: '../assets/img/icons/aqm.svg',
         // shadowUrl: 'leaf-shadow.png',
 
         iconSize:      [25, 41], // size of the icon
@@ -656,7 +677,7 @@ function getAirQualityIcon(){
 
 function getFloodSensorIcon(){
     var FloodSensorIcon = L.icon({
-        iconUrl: 'https://img.icons8.com/office/16/000000/sensor.png',
+        iconUrl: 'https://image.flaticon.com/icons/svg/1890/1890123.svg',
         // shadowUrl: 'leaf-shadow.png',
 
         iconSize:      [25, 41], // size of the icon
@@ -669,7 +690,7 @@ function getFloodSensorIcon(){
 
 function getWifiHotspotIcon(){
     var WifiHotspotIcon = L.icon({
-        iconUrl: 'https://img.icons8.com/flat_round/64/000000/wi-fi-connected.png',
+        iconUrl: 'https://image.flaticon.com/icons/svg/179/179428.svg',
         // shadowUrl: 'leaf-shadow.png',
 
         iconSize:      [25, 41], // size of the icon
@@ -682,7 +703,7 @@ function getWifiHotspotIcon(){
 
 function getITMSIcon(){
     var ITMSIcon = L.icon({
-        iconUrl: 'https://img.icons8.com/ultraviolet/40/000000/marker.png',
+        iconUrl: 'https://image.flaticon.com/icons/svg/1167/1167993.svg',
         // shadowUrl: 'leaf-shadow.png',
         iconSize:      [25, 41], // size of the icon
         iconAnchor:    [12, 41], // point of the icon which will correspond to marker's location

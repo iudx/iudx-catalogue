@@ -1,8 +1,11 @@
 /*************************************************GLOBAL VARIABLES START*********************************************/
 var tags_set=[]
+var rsg_set=[]
+var provider_set=[]
 var first_get_item_call_done=false
 var filters="(id,resourceServerGroup,itemDescription,onboardedBy,accessInformation,resourceId,tags,secure)"
 var page_limit = 10;
+var max_visible_pagesinpagination_bar = 10;
 var __DATA;
 /*************************************************GLOBAL VARIABLES END***********************************************/
 
@@ -46,7 +49,7 @@ function populate_pagination_section(){
     var data_length = get_global_data().length
     $('#page-selection').bootpag({
         total: (data_length/get_page_limit() + (((data_length%get_page_limit())>0) ? 1 : 0)),
-        maxVisible: 5,
+        maxVisible: max_visible_pagesinpagination_bar,
         leaps: true,
 		next: '>',
 		prev: '<',
@@ -127,7 +130,6 @@ function get_items(_attr_name,_attr_value){
 
 	console.log(first_get_item_call_done)
 
-	let seen_tags_set = [];
 	$.get("/catalogue/v1/search?attribute-name=("+_attr_name+")&attribute-value=("+_attr_value+")", function(data) {
             // $("#searched_items").text(data);
 			data=JSON.parse(data)
@@ -139,53 +141,12 @@ function get_items(_attr_name,_attr_value){
                 // if(data[i]['tags'][tag_i].toLowerCase()=="feeder" || data[i]['tags'][tag_i].toLowerCase()=="streetlight" || data[i]['tags'][tag_i].toLowerCase()=="streetlighting"){
                 //     continue;
                 // }
-                if (!seen_tags_set.includes(data[i]['tags']['value'][tag_i].toLowerCase())) {
-                    seen_tags_set.push(data[i]['tags']['value'][tag_i].toLowerCase())
-                }
+                
             }
             }
             populate_pagination_section();
         });
 
-	// $( "#_value" ).autocomplete({
-	//       source: seen_tags_set
-	// });
-
-	// $( "#value" ).autocomplete({
-	//       source: seen_tags_set
-	// });
-}
-
-
-function get_items_for_tag(tag){
-	let seen_tags_set = [];
-
-	$.get("/catalogue/v1/search?attribute-name=(tags)&attribute-value=((" + tag + "))&attribute-filter="+filters, function(data) {
-            // $("#searched_items").text(data);
-            $("#searched_items").html("");
-
-            data=JSON.parse(data)
-            // __DATA=data;
-            set_data_globally(data);
-            // console.log(data)
-            if(!$('#searched_items').is(':visible')) {
-				    display_search_section();
-				}
-            $("#retrieved_items_count").html("About " + data.length + " results for " + tag);
-            for (var i = 0; i < data.length; i++) {
-                //console.log(data[i]);
-                $("#searched_items").append(json_to_htmlcard(data[i]));
-                for (var tag_i = 0; tag_i < data[i]['tags'].length - 1; tag_i++) {
-                // if(data[i]['tags'][tag_i].toLowerCase()=="feeder" || data[i]['tags'][tag_i].toLowerCase()=="streetlight" || data[i]['tags'][tag_i].toLowerCase()=="streetlighting"){
-                //     continue;
-                // }
-                if (!seen_tags_set.includes(data[i]['tags'][tag_i].toLowerCase())) {
-                    seen_tags_set.push(data[i]['tags'][tag_i].toLowerCase())
-                }
-            }
-            }
-            populate_pagination_section();
-        });
 
 	// $( "#_value" ).autocomplete({
 	//       source: seen_tags_set
@@ -201,15 +162,15 @@ function getFooterContent(){
 	return `<p>&copy; 2019 <a href="https://iudx.org.in">IUDX </a> | Read the  <a href="https://docs.google.com/document/d/12kQteMgxINPjZUVaNBqvtEYJEfqDn7r7QWbL74o7wPQ/edit?usp=sharing">Doc</a> <br> <span style="font-size: 15px;">Icon made by <a href="https://www.flaticon.com/authors/freepik">Freepik</a> from <a href="https://www.flaticon.com">flaticon.com</a>.</span></p>`
 }
 
-function set_tags(_tags_set) {
+function set_attr_value(__attr_name,__attr_value) {
 	// //console.log("v:",$( "#value" ).is(':visible'))
 	// //console.log("_v:",$( "#_value" ).is(':visible'))
 	if($( "#value" ).is(':visible')){
 			$( "#value" ).autocomplete({
-				source: _tags_set,
+				source: __attr_value,
 				select: function( event, ui ) {
-					// console.log(ui["item"]['label'])
-					get_items_for_tag(ui["item"]['label'])
+					console.log(ui["item"]['label'])
+					get_items(__attr_name, ui["item"]['label'])
 				}
 				// ,
 				// select: function (e, ui) {
@@ -223,10 +184,10 @@ function set_tags(_tags_set) {
 
 	if($( "#_value" ).is(':visible')){
 		$( "#_value" ).autocomplete({
-			source: _tags_set,
+			source: __attr_value,
 			select: function( event, ui ) {
 				console.log(ui);
-				get_items_for_tag(ui["item"]['label'])
+				get_items(ui["item"]['label'], ui["item"]['label'])
 			}
 		});
 	}
@@ -404,10 +365,6 @@ function json_to_htmlcard(json_obj){
 
 
 
-
-
-
-
 /*************************************************EVENT BINDINGS START*********************************************/
 
 
@@ -416,6 +373,8 @@ $(document).ready(function(){
 	$("body").fadeIn(1000);
 	$("#landing_section").fadeIn();
 	let seen_tags_set = [];
+	let seen_rsg_set = [];
+	let seen_provider_set = [];
 	$.get("/catalogue/v1/search", function(data) {
 			// $("#searched_items").text(data);
 			//console.log("RRRRRRRR1");
@@ -423,16 +382,22 @@ $(document).ready(function(){
 			//console.log("RRRRRRRR");
             for (var i = 0; i < data.length; i++) {                
                 for (var tag_i = 0; tag_i < data[i]['tags']['value'].length - 1; tag_i++) {
-                // if(data[i]['tags'][tag_i].toLowerCase()=="feeder" || data[i]['tags'][tag_i].toLowerCase()=="streetlight" || data[i]['tags'][tag_i].toLowerCase()=="streetlighting"){
-                //     continue;
-                // }
-                if (!seen_tags_set.includes(data[i]['tags']['value'][tag_i].toLowerCase())) {
-                    seen_tags_set.push(data[i]['tags']['value'][tag_i].toLowerCase())
-                }
-            }
+	                if (!seen_tags_set.includes(data[i]['tags']['value'][tag_i].toLowerCase())) {
+	                    seen_tags_set.push(data[i]['tags']['value'][tag_i].toLowerCase())
+	                }
+            	}
+
+            	if (data[i]['resourceServerGroup']['value'] != undefined && !seen_rsg_set.includes(data[i]['resourceServerGroup']['value'].toLowerCase())) {
+					seen_rsg_set.push(data[i]['resourceServerGroup']['value'].toLowerCase())
+	            }
+	            if (data[i]['provider']['value'] != undefined && !seen_provider_set.includes(data[i]['provider']['value'].toLowerCase())) {
+					seen_provider_set.push(data[i]['provider']['value'].toLowerCase())
+	            }
             }
         });
 	tags_set=seen_tags_set;
+    rsg_set = seen_rsg_set;
+    provider_set = seen_provider_set;
 
 	$("#landing_footer, #normal_footer").html(getFooterContent()	);
 	$.get("/catalogue/v1/count", function(data) {
@@ -447,11 +412,16 @@ $(document).ready(function(){
 
 // Capture select on change effect for populating tags autosuggest 
 $('select').on('change', function() {
+	var _arr = []
 	if(this.value == "tags"){
-		set_tags(tags_set)
-}else{
-	set_tags=[]
-}
+		_arr = tags_set
+	}else if(this.value == "resourceServerGroup"){
+		_arr = rsg_set
+	}else if(this.value == "provider"){
+		_arr = provider_set
+	}
+	console.log(this.value, _arr)
+	set_attr_value(this.value, _arr)
 //console.log( this.value );
 });
 

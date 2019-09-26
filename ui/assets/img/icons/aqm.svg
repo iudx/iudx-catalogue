@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Layer_1" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve" width="512px" height="512px" class=""><g><g>
+	<rect x="271" y="75.5" style="fill:#30A8C1" width="90" height="30" data-original="#A3BBC0" class="" data-old_color="#A3BBC0"/>
+	<rect x="151" y="75.5" style="fill:#09637F" width="90" height="30" data-original="#8B9EA4" class="" data-old_color="#8B9EA4"/>
+	<polygon points="301,226 301,0 256,0 226,286  " data-original="#000000" class="active-path" data-old_color="#000000" style="fill:#338E99"/>
+	<polygon style="fill:#2F4F8D" points="256,0 211,0 211,226 256,286  " data-original="#292C32" class="" data-old_color="#292C32"/>
+	<polygon style="fill:#2F4F8D" points="196,391.5 361,331.5 301,226 256,226  " data-original="#292C32" class="" data-old_color="#292C32"/>
+	<polygon style="fill:#34A1DD" points="256,512 361,512 361,437 226,397  " data-original="#5A656B" class="" data-old_color="#5A656B"/>
+	<polygon style="fill:#31B7E1" points="151,437 151,512 256,512 256,397  " data-original="#728287" class="" data-old_color="#728287"/>
+	<polygon style="fill:#3995CF" points="256,226 211,226 151,331.5 256,391.5  " data-original="#41494E" class="" data-old_color="#41494E"/>
+	<polygon points="256,331.5 196,384.25 256,437 361,437 361,331.5  " data-original="#000000" class="active-path" data-old_color="#000000" style="fill:#338E99"/>
+	<rect x="151" y="331.5" style="fill:#2F4F8D" width="105" height="105.5" data-original="#292C32" class="" data-old_color="#292C32"/>
+	<circle style="fill:#3995CF" cx="90.5" cy="90.5" r="90.5" data-original="#41494E" class="" data-old_color="#41494E"/>
+	<circle style="fill:#2F4F8D" cx="421.5" cy="90.5" r="90.5" data-original="#292C32" class="" data-old_color="#292C32"/>
+</g></g> </svg>
