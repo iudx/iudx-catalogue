@@ -244,7 +244,7 @@ function show_details(_id){
 
 		var id = resource_id_to_html_id(_id)
 		//console.log(id);
-		$("#details_section_"+id).html("")
+		
 		$("#_tbody_"+id).html(`
 			<tr>
 			      <th scope="row">Resource-Id</th>
@@ -281,7 +281,7 @@ function show_details(_id){
 			//       <td>`+ data[0]["authorizationServerInfo"]["value"]["authServer"] +` | Type: `+ data[0]["authorizationServerInfo"]["value"]["authType"] +`</td>
 		 //    </tr>
 
-			$("#details_section_"+id).append(`
+			$("#extra_links_"+id).html(`
 			<p>
 				<!--<a href="`+ get_latest_data_url(_id,data[0]["resourceServerGroup"]["value"],data[0]["resourceId"]["value"]) +`">Latest Data</a>   |  -->
 				<a href="`+data[0]["refBaseSchema"]["value"]+`" target="_blank">Base Schema </a> |
@@ -350,6 +350,7 @@ function json_to_htmlcard(json_obj){
 
 			  </tbody>
 			</table>
+			<p id="extra_links_`+resource_id_to_html_id(json_obj.id)+`"></p>
 		  </div>
 		</div>
 		</div>
