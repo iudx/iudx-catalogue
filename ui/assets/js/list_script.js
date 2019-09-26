@@ -66,6 +66,9 @@ function populate_pagination_section(){
     }).on("page", function(event, /* page number here */ num){
           display_paginated_search_results(num);
     });
+
+    display_paginated_search_results(1);
+
 }
 
 function display_search_section(_attr_name,_attr_value){
@@ -131,15 +134,10 @@ function get_items(_attr_name,_attr_value){
             // $("#searched_items").text(data);
 			data=JSON.parse(data)
 			set_data_globally(data);
+			$("#retrieved_items_count").html("About " + data.length + " results for " + _attr_value + " (Attribute: " + _attr_name + ")");
 			$("#searched_items").html("");
             for (var i = 0; i < data.length; i++) {
                 $("#searched_items").append(json_to_htmlcard(data[i]));
-                for (var tag_i = 0; tag_i < data[i]['tags']['value'].length - 1; tag_i++) {
-                // if(data[i]['tags'][tag_i].toLowerCase()=="feeder" || data[i]['tags'][tag_i].toLowerCase()=="streetlight" || data[i]['tags'][tag_i].toLowerCase()=="streetlighting"){
-                //     continue;
-                // }
-                
-            }
             }
             populate_pagination_section();
         });
