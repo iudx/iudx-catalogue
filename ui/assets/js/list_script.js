@@ -187,7 +187,7 @@ function set_attr_value(__attr_name,__attr_value) {
 			source: __attr_value,
 			select: function( event, ui ) {
 				console.log(ui);
-				get_items(ui["item"]['label'], ui["item"]['label'])
+				get_items(__attr_name, ui["item"]['label'])
 			}
 		});
 	}
