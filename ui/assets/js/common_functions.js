@@ -7,49 +7,6 @@
 var tags_set=[];
 
 
-function getImageRsg(_resourceServerGroup) {
-    if(_resourceServerGroup==='streetlight-feeder-sree'){
-       
-    return `
-    ../../assets/img//icons/lamppost.png`;
-    }
-    if(_resourceServerGroup==='aqm-bosch-climo'){
-        return `
-        https://img.icons8.com/color/48/000000/air-quality.png`;
-   
-    }
-    if(_resourceServerGroup==='flood-sensor'){
-        return `
-        https://img.icons8.com/office/16/000000/sensor.png`; 
-  
-    }
-    if(_resourceServerGroup==='wifi-hotspot'){
-        
-        return `
-        https://img.icons8.com/flat_round/64/000000/wi-fi-connected.png`;
-    }
-    if(_resourceServerGroup==='ptz-video camera'){
-      
-        return `
-        https://img.icons8.com/ultraviolet/40/000000/marker.png`;
-    }
-    if(_resourceServerGroup==='crowd-sourced-changebhai'){
-      
-        return `
-        https://img.icons8.com/color/48/000000/marker.png`;
-    }
-    if(_resourceServerGroup==='safetipin'){
-        return `
-        https://img.icons8.com/flat_round/64/000000/safety-pin--v2.png`;
-    }
-    if(_resourceServerGroup==='traffic-incidents'){
-        
-        return `
-        https://image.flaticon.com/icons/svg/1167/1167993.svg
-        `;
-    }
-}
-
 // Spinner by https://tobiasahlin.com/spinkit/
 function get_spinner_html(){
     return `
@@ -76,22 +33,22 @@ function get_api_encoded_attribute_names(__tags, __rsg, __pvdr){
     } if(__pvdr.length != 0){
         str.push(get_api_encoded_attr_("provider"))
     }
-    console.log(str.join(","))
-    return str.join(",")
+    //console.log(str.join(","))
+    return "(" + str.join(",") +")"
     
 }
 
 function get_api_encoded_attribute_values(__tags, __rsg, __pvdr){
     var str = []
     if(__tags.length != 0){
-        str.push(get_api_encoded_attr_(__tags.join(",")))
+        str.push(get_api_encoded_attr_("("+__tags.join(",")+")"))
     } if(__rsg.length != 0){
-        str.push(get_api_encoded_attr_(__rsg.join(",")))
+        str.push(get_api_encoded_attr_("("+__rsg.join(",")+")"))
     } if(__pvdr.length != 0){
-        str.push(get_api_encoded_attr_(__pvdr.join(",")))
+        str.push(get_api_encoded_attr_("("+__pvdr.join(",")+")"))
     }
-    console.log(str.join(","))
-    return str.join(",")
+    //console.log(str.join(","))
+    return "("+str.join(",")+")"
 }
 
 function __get_latest_data(url) {
@@ -128,7 +85,7 @@ function display_latest_data(e, ele) {
 }
 
 function get_filtered_url(__filter_url){
-    if(__filter_url == `attribute-name=((""))&attribute-value=((""))`){
+    if(__filter_url == `attribute-name=("")&attribute-value=((""))`){
         return ""
     }else{
         return "&" + __filter_url
@@ -162,10 +119,31 @@ function reset_filter(__input_name){
         category = "Provider"
     }
 
+    var __filter_url =  "/catalogue/v1/search?" + get_selected_values_framed_url()
+
+    $.get(__filter_url, function (data, status) {
+      markersLayer.clearLayers();
+      data = JSON.parse(data)
+      //console.log(data)
+      for (var i = data.length - 1; i >= 0; i--) {
+        // //console.log(data[i])
+        if (data[i].hasOwnProperty('location')) {
+          
+          
+          plotGeoJSONs(data[i]["location"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
+        } else if (data[i].hasOwnProperty('coverageRegion')) {
+         
+          
+          plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
+          //console.log("2")
+        }
+      }
+    });
+
     toast_alert(category + ' filter has been cleared', 'success')
 }
  function showDetails(){
-     console.log("print this...")
+     //console.log("print this...")
      $('#_batch').hide();
      $('#point').show();
  }
@@ -175,19 +153,19 @@ function get_selected_values_framed_url(){
     var tags = value.tags;
     var rsg = value.rsg;
     var provider = value.provider;
-    console.log(tags, rsg , provider)
+    //console.log(tags, rsg , provider)
 
     var __filter_url = ""
 
     if(tags.length == 0 && rsg.length == 0 && provider.length == 0){
-    __filter_url=`attribute-name=((""))&attribute-value=((""))`
+    __filter_url=`attribute-name=("")&attribute-value=((""))`
     }else{
-    // console.log("else...")
+    // //console.log("else...")
     var _attr_names = get_api_encoded_attribute_names(tags, rsg, provider) 
-    // console.log(_attr_names)
+    // //console.log(_attr_names)
     var _attr_values = get_api_encoded_attribute_values(tags, rsg, provider)
-    // console.log(_attr_values)
-    __filter_url=`attribute-name=((`+ _attr_names +`))&attribute-value=((`+ _attr_values +`))`+get_geo_shape_url(geo_shape)
+    // //console.log(_attr_values)
+    __filter_url=`attribute-name=`+ _attr_names +`&attribute-value=`+ _attr_values + get_geo_shape_url(geo_shape)
     }
     return __filter_url;
 }
@@ -212,7 +190,7 @@ function get_geo_shape_url(__geo_shape){
 }
 
 function _get_latest_data(_resource_id, _token){
-    console.log(_token)
+    //console.log(_token)
     $.ajax({
       url: "https://pune.iudx.org.in/api/1.0.0/resource/search/safetypin/18.56581555/73.77567708/10",
       type: 'get',
@@ -235,7 +213,7 @@ function _get_security_based_latest_data_link(_resource_id, _resourceServerGroup
 }
 
 function request_access_token(resource_id, resourceServerGroup, rid) {
-    console.log(resource_id)
+    //console.log(resource_id)
     $.ajax({
       url: "https://auth.iudx.org.in/auth/v1/token",
       type: 'post',
@@ -243,7 +221,7 @@ function request_access_token(resource_id, resourceServerGroup, rid) {
       contentType: 'application/json',
       data: JSON.stringify({"resource-id": resource_id}),
       success: function (data) {
-        // console.log(data.token)
+        // //console.log(data.token)
         
         // $('#token_section_'+resource_id_to_html_id(resource_id)).html($('#token_section_'+resource_id_to_html_id(resource_id)).html());
         $('#token_section_'+resource_id_to_html_id(resource_id)).html(
@@ -285,7 +263,7 @@ function jsonPrettyHighlightToId(jsonobj) {
         } else if (/null/.test(match)) {
             cls = 'color: magenta;';
         }
-        // //console.log(cls, match)
+        // ////console.log(cls, match)
         return '<span style="' + cls + '">' + urlify(match) + '</span>';
     });
     // return urlify(json);
@@ -297,7 +275,7 @@ function jsonPrettyHighlightToIdwithBR(jsonobj) {
     var json = JSON.stringify(jsonobj, undefined, 2);
 
     json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    // console.log(json.replace(/\n/g, "<br />"))
+    // //console.log(json.replace(/\n/g, "<br />"))
     json=json.replace(/\n/g, "<br />")
     json = json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function(match) {
         var cls = 'color: darkorange;';
@@ -312,7 +290,7 @@ function jsonPrettyHighlightToIdwithBR(jsonobj) {
         } else if (/null/.test(match)) {
             cls = 'color: magenta;';
         }
-        // //console.log(cls, match)
+        // ////console.log(cls, match)
         return '<span style="' + cls + '">' + urlify(match) + '</span>';
     });
     // return urlify(json);
@@ -366,29 +344,29 @@ function getRandomColor(){
 }
 
 function plotGeoJSONs(geoJSONObject, _id, plot_id,_resourceServerGroup,_resourceId,_tags,_provider){
-    //console.log(_resourceServerGroup)
-    // //console.log("plotting "+ geoJSONObject, _id, _id["id"])
-    // // console.log(geoJSONObject, color_count)
+    ////console.log(_resourceServerGroup)
+    // ////console.log("plotting "+ geoJSONObject, _id, _id["id"])
+    // // //console.log(geoJSONObject, color_count)
     // _provider_data = _provider;
     // _tags_data = _tags;
     // _resourceServerGroup_data =_resourceServerGroup;
     // _geoJSONObject = geoJSONObject;
     // _resourceId_data = _resourceId;
 
-    //console.log(geoJSONObject)
+    ////console.log(geoJSONObject)
     
     if(geoJSONObject["type"]=="Polygon"){
         
-        console.log("Printing Polygon....")
+        //console.log("Printing Polygon....")
         color_count=color_count+1
         var _color=getRandomColor()
         
         var div = $('div.info.legend');
 
-        //console.log(_resourceServerGroup, div)
+        ////console.log(_resourceServerGroup, div)
         if(_resourceServerGroup=="crowd-sourced-changebhai"){
         // loop through our density intervals and generate a label with a colored square for each interval
-            console.log("changeBhai")
+            //console.log("changeBhai")
             div.innerHTML +=  
             '<span style="background:' + _color + '"></span> ' +
               'ChangeBhai' + '<br>';
@@ -417,92 +395,92 @@ function plotGeoJSONs(geoJSONObject, _id, plot_id,_resourceServerGroup,_resource
                         fillOpacity: 0.5
                       },
                 pointToLayer: function (feature, latlng) {
-                        console.log(feature.properties);
+                        //console.log(feature.properties);
                         // return L.marker(latlng, {icon: getOfficeIcon()});
                        
                         // <a href='/catalogue/v1/items/"+plot_id+"'>Get Catalogue-item-details</a><br/>
-                        var customPopup = "<a href='https://pune.iudx.org.in/api/1.0.0/resource/latest/"+_resourceServerGroup+"/"+_resourceId+" class='data-modal'  onclick='display_latest_data(event, this)'>Get latest-data</a>";
+                        var customPopup = "<a href='https://pune.iudx.org.in/api/1.0.0/resource/latest/"+_resourceServerGroup+"/"+_resourceId +"' class='data-modal'  onclick='display_latest_data(event, this)'>Get latest-data</a>";
                         if(_resourceServerGroup==='streetlight-feeder-sree'){
-                            //console.log("street")
+                            ////console.log("street")
                             var _marker = L.marker(latlng,{icon: getStreetlightIcon()}).addTo(map);
                             _marker.itemUUID = _id;
-                        ////console.log(_marker.itemUUID);
+                        //////console.log(_marker.itemUUID);
                         _marker.on('click', markerOnClick);
                         _marker.bindPopup(customPopup)
-                        console.log(_marker)
+                        //console.log(_marker)
                         return _marker;
                         }
                         if(_resourceServerGroup==='aqm-bosch-climo'){
-                            //console.log("aqm")
+                            ////console.log("aqm")
                             var _marker = L.marker(latlng,{icon: getAirQualityIcon()}).addTo(map);
                             _marker.itemUUID = _id;
-                        ////console.log(_marker.itemUUID);
+                        //////console.log(_marker.itemUUID);
                         _marker.on('click', markerOnClick);
                         _marker.bindPopup(customPopup)
-                        console.log(_marker)
+                        //console.log(_marker)
                         return _marker;
                         }
                         if(_resourceServerGroup==='flood-sensor'){
-                            //console.log("flood")
+                            ////console.log("flood")
                             var _marker = L.marker(latlng,{icon: getFloodSensorIcon()}).addTo(map);
                             _marker.itemUUID = _id;
-                        ////console.log(_marker.itemUUID);
+                        //////console.log(_marker.itemUUID);
                         _marker.on('click', markerOnClick);
                         _marker.bindPopup(customPopup)
-                        console.log(_marker)
+                        //console.log(_marker)
                         return _marker;
                         }
                         if(_resourceServerGroup==='wifi-hotspot'){
-                            //console.log("wifi")
+                            ////console.log("wifi")
                             var _marker = L.marker(latlng,{icon: getWifiHotspotIcon()}).addTo(map);
                             _marker.itemUUID = _id;
-                        ////console.log(_marker.itemUUID);
+                        //////console.log(_marker.itemUUID);
                         _marker.on('click', markerOnClick);
                         _marker.bindPopup(customPopup)
                         return _marker;
                         }
-                        if(_resourceServerGroup==='ptz-video camera'){
-                            //console.log("itms")
+                        if(_resourceServerGroup==='itms'){
+                            ////console.log("itms")
                             var _marker = L.marker(latlng,{icon: getITMSIcon()}).addTo(map);
                             _marker.itemUUID = _id;
-                        ////console.log(_marker.itemUUID);
+                        //////console.log(_marker.itemUUID);
                         _marker.on('click', markerOnClick);
                         _marker.bindPopup(customPopup)
                         return _marker;
                         }
                         if(_resourceServerGroup==='changebhai'){
-                            //console.log("change")
+                            ////console.log("change")
                             var _marker = L.marker(latlng,{icon: getChangebhaiIcon()}).addTo(map);
                             _marker.itemUUID = _id;
-                        ////console.log(_marker.itemUUID);
+                        //////console.log(_marker.itemUUID);
                         _marker.on('click', markerOnClick);
                         _marker.bindPopup(customPopup)
                         return _marker;
                         }
                         if(_resourceServerGroup==='safetypin'){
-                            //console.log("safety")
+                            ////console.log("safety")
                             var _marker = L.marker(latlng,{icon: getSafetypinIcon()}).addTo(map);
                             _marker.itemUUID = _id;
-                        ////console.log(_marker.itemUUID);
+                        //////console.log(_marker.itemUUID);
                         _marker.on('click', markerOnClick);
                         _marker.bindPopup(customPopup)
                         return _marker;
                         }
                         if(_resourceServerGroup==='traffic-incidents'){
-                            //console.log("aqm")
+                            ////console.log("aqm")
                             var _marker = L.marker(latlng,{icon: getAirQualityIcon()}).addTo(map);
                             _marker.itemUUID = _id;
-                        ////console.log(_marker.itemUUID);
+                        //////console.log(_marker.itemUUID);
                         _marker.on('click', markerOnClick);
                         _marker.bindPopup(customPopup)
                         return _marker;
                         }
                         
-                        // //console.log(_marker)
-                        // ////console.log(_id);
-                        // ////console.log(geoJSONObject);
+                        // ////console.log(_marker)
+                        // //////console.log(_id);
+                        // //////console.log(geoJSONObject);
                         // _marker.itemUUID = _id;
-                        // ////console.log(_marker.itemUUID);
+                        // //////console.log(_marker.itemUUID);
                         // _marker.on('click', markerOnClick);
                         // _marker.bindPopup(customPopup)
                         // return _marker;
@@ -511,87 +489,87 @@ function plotGeoJSONs(geoJSONObject, _id, plot_id,_resourceServerGroup,_resource
                 //filter: filter_byTags,
                 // onEachFeature: onEachFeature
             }).addTo(markersLayer);
-            console.log("1111111111111111");
+            //console.log("1111111111111111");
     
     }
     else if(geoJSONObject["type"]=="Point"){
-           // console.log("Printing Point....")
+           // //console.log("Printing Point....")
             L.geoJSON(geoJSONObject, {
                 pointToLayer: function (feature, latlng) {
                     
                         // return L.marker(latlng, {icon: getOfficeIcon()});
                        
                         // <a href='/catalogue/v1/items/"+plot_id+"'>Get Catalogue-item-details</a><br/>
-                        var customPopup = "<a href='https://pune.iudx.org.in/api/1.0.0/resource/latest/"+_resourceServerGroup+"/"+_resourceId+" class='data-modal'  onclick='display_latest_data(event, this)'>Get latest-data</a>";
+                        var customPopup = "<a href='https://pune.iudx.org.in/api/1.0.0/resource/latest/"+_resourceServerGroup+"/"+_resourceId+"' class='data-modal'  onclick='display_latest_data(event, this)'>Get latest-data</a>";
                         if(_resourceServerGroup==='streetlight-feeder-sree'){
-                            //console.log("street")
+                            ////console.log("street")
                             var _marker = L.marker(latlng,{icon: getStreetlightIcon()}).addTo(map);
                             _marker.itemUUID = _id;
-                        ////console.log(_marker.itemUUID);
+                        //////console.log(_marker.itemUUID);
                         _marker.on('click', markerOnClick);
                         _marker.bindPopup(customPopup)
                         return _marker;
                         }
                         if(_resourceServerGroup==='aqm-bosch-climo'){
-                            //console.log("aqm")
+                            ////console.log("aqm")
                             var _marker = L.marker(latlng,{icon: getAirQualityIcon()}).addTo(map);
                             _marker.itemUUID = _id;
-                        ////console.log(_marker.itemUUID);
+                        //////console.log(_marker.itemUUID);
                         _marker.on('click', markerOnClick);
                         _marker.bindPopup(customPopup)
                         return _marker;
                         }
                         if(_resourceServerGroup==='flood-sensor'){
-                            //console.log("flood")
+                            ////console.log("flood")
                             var _marker = L.marker(latlng,{icon: getFloodSensorIcon()}).addTo(map);
                             _marker.itemUUID = _id;
-                        ////console.log(_marker.itemUUID);
+                        //////console.log(_marker.itemUUID);
                         _marker.on('click', markerOnClick);
                         _marker.bindPopup(customPopup)
                         return _marker;
                         }
                         if(_resourceServerGroup==='wifi-hotspot'){
-                            //console.log("wifi")
+                            ////console.log("wifi")
                             var _marker = L.marker(latlng,{icon: getWifiHotspotIcon()}).addTo(map);
                             _marker.itemUUID = _id;
-                        ////console.log(_marker.itemUUID);
+                        //////console.log(_marker.itemUUID);
                         _marker.on('click', markerOnClick);
                         _marker.bindPopup(customPopup)
                         return _marker;
                         }
                         if(_resourceServerGroup==='itms'){
-                            //console.log("itms")
+                            ////console.log("itms")
                             var _marker = L.marker(latlng,{icon: getITMSIcon()}).addTo(map);
                             _marker.itemUUID = _id;
-                        ////console.log(_marker.itemUUID);
+                        //////console.log(_marker.itemUUID);
                         _marker.on('click', markerOnClick);
                         _marker.bindPopup(customPopup)
                         return _marker;
                         }
                         if(_resourceServerGroup==='changebhai'){
-                            //console.log("change")
+                            ////console.log("change")
                             var _marker = L.marker(latlng,{icon: getChangebhaiIcon()}).addTo(map);
                             _marker.itemUUID = _id;
-                        ////console.log(_marker.itemUUID);
+                        //////console.log(_marker.itemUUID);
                         _marker.on('click', markerOnClick);
                         _marker.bindPopup(customPopup)
                         return _marker;
                         }
                         if(_resourceServerGroup==='safetypin'){
-                            //console.log("safety")
+                            ////console.log("safety")
                             var _marker = L.marker(latlng,{icon: getSafetypinIcon()}).addTo(map);
                             _marker.itemUUID = _id;
-                        ////console.log(_marker.itemUUID);
+                        //////console.log(_marker.itemUUID);
                         _marker.on('click', markerOnClick);
                         _marker.bindPopup(customPopup)
                         return _marker;
                         }
                         
-                        // //console.log(_marker)
-                        // ////console.log(_id);
-                        // ////console.log(geoJSONObject);
+                        // ////console.log(_marker)
+                        // //////console.log(_id);
+                        // //////console.log(geoJSONObject);
                         // _marker.itemUUID = _id;
-                        // ////console.log(_marker.itemUUID);
+                        // //////console.log(_marker.itemUUID);
                         // _marker.on('click', markerOnClick);
                         // _marker.bindPopup(customPopup)
                         // return _marker;
@@ -599,7 +577,7 @@ function plotGeoJSONs(geoJSONObject, _id, plot_id,_resourceServerGroup,_resource
                // filter: filter_byTags,
                 // onEachFeature: onEachFeature
             }).addTo(markersLayer);
-   // console.log("22222222222")
+   // //console.log("22222222222")
     }
 }
 
@@ -623,15 +601,15 @@ function hide_menu_icon() {
 function activate_batch_mode() {
     $("#point").hide();
     $("#_batch").show();
-    //console.log("batch mode")
+    ////console.log("batch mode")
     hide_menu_icon();
 }
 
 function activate_point_mode(_id) {
-    // console.log(1,_id)
+    // //console.log(1,_id)
     $("#_batch").hide();
-    // console.log(2,_id)
-   // console.log("called")
+    // //console.log(2,_id)
+   // //console.log("called")
     show_details(_id)
     $("#point").show();
 }
@@ -643,12 +621,12 @@ function resource_id_to_html_id(resource_id){
 
 function markerOnClick(e) {
     // var attributes = e.layer.properties;
-    ////console.log(e.target.itemUUID)
+    //////console.log(e.target.itemUUID)
     
     activate_point_mode(e.target.itemUUID);  
     sidebar.show();
     // alert(e.target.itemUUID);
-    // //console.log(attributes);
+    // ////console.log(attributes);
     // do some stuff…
 }
 
@@ -673,7 +651,7 @@ function getOfficeIcon(){
 
 function getStreetlightIcon(){
     var streetlightIcon = L.icon({
-        iconUrl: 'https://img.icons8.com/color/48/000000/street-light.png',
+        iconUrl: 'https://image.flaticon.com/icons/svg/1339/1339969.svg',
         // shadowUrl: 'leaf-shadow.png',
 
         iconSize:      [25, 41], // size of the icon
@@ -686,7 +664,7 @@ function getStreetlightIcon(){
 
 function getAirQualityIcon(){
     var AirQualityIcon = L.icon({
-        iconUrl: 'https://img.icons8.com/color/48/000000/air-quality.png',
+        iconUrl: '../assets/img/icons/aqm.svg',
         // shadowUrl: 'leaf-shadow.png',
 
         iconSize:      [25, 41], // size of the icon
@@ -699,7 +677,7 @@ function getAirQualityIcon(){
 
 function getFloodSensorIcon(){
     var FloodSensorIcon = L.icon({
-        iconUrl: 'https://img.icons8.com/office/16/000000/sensor.png',
+        iconUrl: 'https://image.flaticon.com/icons/svg/1890/1890123.svg',
         // shadowUrl: 'leaf-shadow.png',
 
         iconSize:      [25, 41], // size of the icon
@@ -712,7 +690,7 @@ function getFloodSensorIcon(){
 
 function getWifiHotspotIcon(){
     var WifiHotspotIcon = L.icon({
-        iconUrl: 'https://img.icons8.com/flat_round/64/000000/wi-fi-connected.png',
+        iconUrl: 'https://image.flaticon.com/icons/svg/179/179428.svg',
         // shadowUrl: 'leaf-shadow.png',
 
         iconSize:      [25, 41], // size of the icon
@@ -725,7 +703,7 @@ function getWifiHotspotIcon(){
 
 function getITMSIcon(){
     var ITMSIcon = L.icon({
-        iconUrl: 'https://img.icons8.com/ultraviolet/40/000000/marker.png',
+        iconUrl: 'https://image.flaticon.com/icons/svg/1167/1167993.svg',
         // shadowUrl: 'leaf-shadow.png',
         iconSize:      [25, 41], // size of the icon
         iconAnchor:    [12, 41], // point of the icon which will correspond to marker's location
