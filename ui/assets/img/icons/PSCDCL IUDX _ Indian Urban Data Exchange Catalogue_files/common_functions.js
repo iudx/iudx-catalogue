@@ -7,50 +7,6 @@
 var tags_set=[];
 
 
-function getImageRsg(_resourceServerGroup) {
-    if(_resourceServerGroup==='streetlight-feeder-sree'){
-       
-    return `
-    https://img.icons8.com/color/48/000000/street-light.png`;
-    }
-    if(_resourceServerGroup==='aqm-bosch-climo'){
-        return `
-        https://img.icons8.com/color/48/000000/air-quality.png`;
-   
-    }
-    if(_resourceServerGroup==='flood-sensor'){
-        return `
-        https://img.icons8.com/office/16/000000/sensor.png`; 
-  
-    }
-    if(_resourceServerGroup==='wifi-hotspot'){
-        
-        return `
-        https://img.icons8.com/flat_round/64/000000/wi-fi-connected.png`;
-    }
-    if(_resourceServerGroup==='ptz-video camera'){
-      
-        return `
-        https://img.icons8.com/color/48/000000/marker.png`;
-    }
-    if(_resourceServerGroup==='crowd-sourced-changebhai'){
-      
-        return `
-        https://img.icons8.com/ultraviolet/40/000000/marker.png
-        `;
-    }
-    if(_resourceServerGroup==='safetipin'){
-        return `
-        https://img.icons8.com/flat_round/64/000000/safety-pin--v2.png`;
-    }
-    if(_resourceServerGroup==='traffic-incidents'){
-        
-        return `
-        https://image.flaticon.com/icons/svg/1167/1167993.svg
-        `;
-    }
-}
-
 // Spinner by https://tobiasahlin.com/spinkit/
 function get_spinner_html(){
     return `
@@ -380,21 +336,21 @@ function plotGeoJSONs(geoJSONObject, _id, plot_id,_resourceServerGroup,_resource
     
     if(geoJSONObject["type"]=="Polygon"){
         
-        console.log(_resourceServerGroup)
+        console.log("Printing Polygon....")
         color_count=color_count+1
         var _color=getRandomColor()
         
         var div = $('div.info.legend');
 
         //console.log(_resourceServerGroup, div)
-        if(_resourceServerGroup=="crowd-sourced-changebhai"||_resourceServerGroup=="changeBhai" ){
+        if(_resourceServerGroup=="crowd-sourced-changebhai"){
         // loop through our density intervals and generate a label with a colored square for each interval
             console.log("changeBhai")
             div.innerHTML +=  
             '<span style="background:' + _color + '"></span> ' +
               'ChangeBhai' + '<br>';
 
-        }else if(_resourceServerGroup=="safetipin"){
+        }else if(_resourceServerGroup=="crowd-sourced-safetipin"){
             div.innerHTML +=  
             '<span style="background:' + _color + '"></span> ' +
               'safetiPin' + '<br>';
@@ -462,7 +418,7 @@ function plotGeoJSONs(geoJSONObject, _id, plot_id,_resourceServerGroup,_resource
                         _marker.bindPopup(customPopup)
                         return _marker;
                         }
-                        if(_resourceServerGroup==='ptz-video camera'){
+                        if(_resourceServerGroup==='itms'){
                             //console.log("itms")
                             var _marker = L.marker(latlng,{icon: getITMSIcon()}).addTo(map);
                             _marker.itemUUID = _id;
@@ -519,7 +475,7 @@ function plotGeoJSONs(geoJSONObject, _id, plot_id,_resourceServerGroup,_resource
            // console.log("Printing Point....")
             L.geoJSON(geoJSONObject, {
                 pointToLayer: function (feature, latlng) {
-                    console.log(_resourceServerGroup)
+                    
                         // return L.marker(latlng, {icon: getOfficeIcon()});
                        
                         // <a href='/catalogue/v1/items/"+plot_id+"'>Get Catalogue-item-details</a><br/>
@@ -560,7 +516,7 @@ function plotGeoJSONs(geoJSONObject, _id, plot_id,_resourceServerGroup,_resource
                         _marker.bindPopup(customPopup)
                         return _marker;
                         }
-                        if(_resourceServerGroup==='ptz-video camera'){
+                        if(_resourceServerGroup==='itms'){
                             //console.log("itms")
                             var _marker = L.marker(latlng,{icon: getITMSIcon()}).addTo(map);
                             _marker.itemUUID = _id;
@@ -569,24 +525,24 @@ function plotGeoJSONs(geoJSONObject, _id, plot_id,_resourceServerGroup,_resource
                         _marker.bindPopup(customPopup)
                         return _marker;
                         }
-                        // if(_resourceServerGroup==='changebhai'){
-                        //     //console.log("change")
-                        //     var _marker = L.marker(latlng,{icon: getChangebhaiIcon()}).addTo(map);
-                        //     _marker.itemUUID = _id;
-                        // ////console.log(_marker.itemUUID);
-                        // _marker.on('click', markerOnClick);
-                        // _marker.bindPopup(customPopup)
-                        // return _marker;
-                        // }
-                        // if(_resourceServerGroup==='safetypin'){
-                        //     //console.log("safety")
-                        //     var _marker = L.marker(latlng,{icon: getSafetypinIcon()}).addTo(map);
-                        //     _marker.itemUUID = _id;
-                        // ////console.log(_marker.itemUUID);
-                        // _marker.on('click', markerOnClick);
-                        // _marker.bindPopup(customPopup)
-                        // return _marker;
-                        // }
+                        if(_resourceServerGroup==='changebhai'){
+                            //console.log("change")
+                            var _marker = L.marker(latlng,{icon: getChangebhaiIcon()}).addTo(map);
+                            _marker.itemUUID = _id;
+                        ////console.log(_marker.itemUUID);
+                        _marker.on('click', markerOnClick);
+                        _marker.bindPopup(customPopup)
+                        return _marker;
+                        }
+                        if(_resourceServerGroup==='safetypin'){
+                            //console.log("safety")
+                            var _marker = L.marker(latlng,{icon: getSafetypinIcon()}).addTo(map);
+                            _marker.itemUUID = _id;
+                        ////console.log(_marker.itemUUID);
+                        _marker.on('click', markerOnClick);
+                        _marker.bindPopup(customPopup)
+                        return _marker;
+                        }
                         
                         // //console.log(_marker)
                         // ////console.log(_id);
@@ -726,7 +682,7 @@ function getWifiHotspotIcon(){
 
 function getITMSIcon(){
     var ITMSIcon = L.icon({
-        iconUrl: 'https://img.icons8.com/color/48/000000/marker.png',
+        iconUrl: 'https://img.icons8.com/ultraviolet/40/000000/marker.png',
         // shadowUrl: 'leaf-shadow.png',
         iconSize:      [25, 41], // size of the icon
         iconAnchor:    [12, 41], // point of the icon which will correspond to marker's location
@@ -738,7 +694,7 @@ function getITMSIcon(){
 
 function getChangebhaiIcon(){
     var changebhaiIcon = L.icon({
-        iconUrl: 'https://img.icons8.com/ultraviolet/40/000000/marker.png',
+        iconUrl: 'https://img.icons8.com/color/48/000000/marker.png',
         // shadowUrl: 'leaf-shadow.png',
 
         iconSize:      [25, 41], // size of the icon

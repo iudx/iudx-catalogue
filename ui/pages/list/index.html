@@ -69,7 +69,9 @@
                 <!-- <label for="attribute">Attributes</label> -->
                 <select class="custom-select d-block w-100" id="attribute" required="">
                   <option value="">Choose Attribute</option>
-                  <option value="tags">Tags</option>
+                  <option value="tags">Tag</option>
+                  <option value="resourceServerGroup">Resource Server Group</option>
+                  <option value="provider">Provider</option>
                   <!-- <option>Some attribute</option>
                   <option>Some attribute</option>
                   <option>Some attribute</option>
@@ -98,7 +100,7 @@
               <div class="col-lg-2">
                 <!-- <label for="state">State</label> -->
                 
-                <button class="btn btn-primary btn-block" type="submit" onclick="get_items($('#attribute :selected').text(),$('#value').val())">Search</button>
+                <button class="btn btn-primary btn-block" type="submit" onclick="get_items($('#attribute :selected').val(),$('#value').val())">Search</button>
                 
                 <!-- <button class="btn btn-primary btn-block" type="submit" onclick="display_search_section($('#attribute :selected').text(),$('#value').val())">Search</button> -->
                 
@@ -115,8 +117,8 @@
             <br>
 
            <p class="lead text-muted">
-                   <!-- Also checkout the <a href="/ui/map" style="color:#dddddd; text-decoration: underline">Geo Query Interface</a>. -->
-                   Also checkout the <a href="/ui/map">Geo Query Interface</a>.
+                   <!-- Also checkout the <a href="/map" style="color:#dddddd; text-decoration: underline">Geo Query Interface</a>. -->
+                   Also checkout the <a href="/map">Geo Query Interface</a>.
            </p>
         
           
@@ -136,7 +138,9 @@
                 <!-- <label for="attribute">Attributes</label> -->
                 <select class="custom-select d-block w-100" id="_attribute" required="">
                   <option value="">Choose Attribute</option>
-                  <option value="tags">Tags</option>
+                  <option value="tags">Tag</option>
+                  <option value="resourceServerGroup">Resource Server Group</option>
+                  <option value="provider">Provider</option>
                   <!-- <option>Some attribute</option>
                   <option>Some attribute</option>
                   <option>Some attribute</option>
@@ -163,7 +167,7 @@
             
               <div class="col-lg-2">
                 <!-- <label for="state">State</label> -->
-                <button class="btn btn-primary btn-block" type="submit" onclick="get_items($('#_attribute :selected').text(),$('#_value').val())">Search</button>
+                <button class="btn btn-primary btn-block" type="submit" onclick="get_items($('#_attribute :selected').val(),$('#_value').val())">Search</button>
                 <!-- <div class="invalid-feedback">
                   Please provide a valid state.
                 </div> -->

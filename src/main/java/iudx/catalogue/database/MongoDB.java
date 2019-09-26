@@ -34,8 +34,8 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   /**
    * Constructor for MongoDB
    *
-   * @param item_database Name of the Item Collection
-   * @param schema_database Name of the Schema Collection
+   * @param //item_database Name of the Item Collection
+   * @param //schema_database Name of the Schema Collection
    */
   public Future<Void> initDB(Vertx vertx, JsonObject mongoconfig) {
 
@@ -57,10 +57,10 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   /**
    * Searches the Mongo DB
    *
-   * @param collection Name of the collection
-   * @param query Query to the MongoDB
-   * @param options Options specify the fields that will (not) be displayed
-   * @param message The message to which the result will be replied to
+   * @param //collection Name of the collection
+   * @param //query Query to the MongoDB
+   * @param //options Options specify the fields that will (not) be displayed
+   * @param //message The message to which the result will be replied to
    */
   private JsonObject addFieldsWithDOll(JsonObject res) {
     JsonObject temp = new JsonObject();
@@ -343,7 +343,48 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 		return query;
 	}
 
-	private JsonObject geo_within_search_query(JsonObject location) {
+	private JsonObject attributeQuerySearch(JsonObject requestBody){
+
+      JsonObject query = new JsonObject();
+      JsonObject tagQuery = new JsonObject();
+      JsonObject otherThanTagQuery = new JsonObject();
+      JsonArray expressions = new JsonArray();
+      JsonArray attributeNames = new JsonArray();
+      JsonArray attributeValues;
+
+      /**
+       * Attribute-names = (tags,resourceGroup,provider)
+       * Attribute-values = ((streetlight,flood),(aqm_bosch_climo, changebhai), (pscdcl, itms))
+       *
+       * CASES-
+       * 1. attribute-name: {type: "Property"/"Relationship", value: attribute-value}
+       * 2. attribute-name: tags, attribute-value=[.....,.....,.....]**/
+
+        String[] attrNameSA = requestBody.getString("attribute-name").replaceAll("\\(|\\)","").split(",");
+        for(String attrN:attrNameSA){
+            attributeNames.add(attrN);
+        }
+        attributeValues = extractElements(requestBody.getString("attribute-value"));
+        if(attributeNames.size()!=attributeValues.size())
+            return null;
+
+      for(int i = 0; i<attributeNames.size(); i++){
+          String key = attributeNames.getString(i);
+          JsonArray values = attributeValues.getJsonArray(i);
+          if(key.equalsIgnoreCase("tags")){
+              tagQuery.put("_tags", new JsonObject().put("$in",values));
+          }
+          else {
+              otherThanTagQuery.put(key+".value",new JsonObject().put("$in",values));
+          }
+      }
+
+      expressions.add(tagQuery).add(otherThanTagQuery);
+      query.put("$and",expressions);
+      return query;
+    }
+
+    private JsonObject geo_within_search_query(JsonObject location) {
 		JsonObject query = new JsonObject();
 		double latitude = Double.parseDouble(location.getString("lat"));
 		double longitude = Double.parseDouble(location.getString("lon"));
@@ -430,6 +471,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     } else
         query=null;
 
+
     return query;
   }
   
@@ -482,18 +524,13 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     JsonArray expressions = new JsonArray();
     System.out.println(requestBody);
 
-    String geometry="", relation="",coordinatesS="";
-    String[] coordinatesArr;
-    Double distance=0.0;
-    JsonArray coordinates=new JsonArray();
-
 		if (requestBody.containsKey("attribute-name") && requestBody.containsKey("attribute-value")
 				&& !requestBody.containsKey("lat") && !requestBody.containsKey("lon")
 				&& !requestBody.containsKey("radius")
                 && !requestBody.containsKey("bbox")
                 && !requestBody.containsKey("geometry")) {
 		System.out.println("ATTRIBUTE Query");
-		attribute_query = attribute_search_query(requestBody);
+        attribute_query = attributeQuerySearch(requestBody);
 		query = attribute_query;
 		
 		} else if (requestBody.containsKey("lat") && requestBody.containsKey("lon") && requestBody.containsKey("radius")
@@ -513,7 +550,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 		}  else if (requestBody.containsKey("lat") && requestBody.containsKey("lon") && requestBody.containsKey("radius")
 				&& requestBody.containsKey("attribute-name") && requestBody.containsKey("attribute-value")) {
 			System.out.println("GEO-SPATIAL with ATTRIBUTE Query");
-			attribute_query = attribute_search_query(requestBody);
+			attribute_query = attributeQuerySearch(requestBody);
 			expressions.add(attribute_query);
 			geo_query = geo_within_search_query(requestBody);
 			expressions.add(geo_query);
@@ -521,7 +558,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 			
 		} else if(requestBody.containsKey("bbox") || requestBody.containsKey("geometry") && requestBody.containsKey("attribute-name") && requestBody.containsKey("attribute-value")){
             System.out.println("GEO-SPATIAL (BBOX/POLYGON/LINESTRING) WITH ATTRIBUTE QUERY");
-			attribute_query = attribute_search_query(requestBody);
+			attribute_query = attributeQuerySearch(requestBody);
 			expressions.add(attribute_query);
 			geo_query = geoSearchQuery(requestBody);
 			expressions.add(geo_query);
@@ -533,11 +570,10 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
         }else if (!requestBody.containsKey("attribute-name")
             && requestBody.containsKey("attribute-value")) {
             query = null;
-
-    } else {
+		} else {
       query = new JsonObject();
     }
-
+    System.out.println("Final Query: "+ query.toString());
     return query;
   }
 
