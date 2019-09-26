@@ -61,7 +61,6 @@ L.control.watermark = function (opts,opts1) {
 L.control.watermark({ position: 'bottomright' }).addTo(map);
 
 
-// var attribution2 = L.control.attribution({prefix: '<span class="AttributionClass">Icons made from<span><a href="https://www.icons8.com"> icons8.com</a></span></span>'}).addTo(map);
 // Find and store a variable reference to the list of filters.
 var filters = document.getElementById('taglist');
 //console.log("filters:::",filters);
