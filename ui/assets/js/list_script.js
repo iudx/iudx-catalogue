@@ -41,7 +41,7 @@ function display_paginated_search_results(page_num){
 	for (var i=from;i < to; i++) {
 		$("#searched_items").append(json_to_htmlcard(global_data[i]));	
 	}
-	// console.log("dislpaying item from:"+from+" to:"+to + " " + (global_data.length/get_page_limit() + ((global_data.length%get_page_limit())>0) ? 1 : 0));
+	// //console.log("dislpaying item from:"+from+" to:"+to + " " + (global_data.length/get_page_limit() + ((global_data.length%get_page_limit())>0) ? 1 : 0));
 }
 
 function populate_pagination_section(){
@@ -118,7 +118,6 @@ function display_search_section(){
 }
 
 function get_items(_attr_name,_attr_value){
-	// console.log(_attr_name,_attr_value)
 	if(is_attr_empty(_attr_name,_attr_value)){
 		return;
 	}
@@ -127,8 +126,6 @@ function get_items(_attr_name,_attr_value){
 		first_get_item_call_done=true;
 		display_search_section();
 	}
-
-	console.log(first_get_item_call_done)
 
 	$.get("/catalogue/v1/search?attribute-name=("+_attr_name+")&attribute-value=("+_attr_value+")", function(data) {
             // $("#searched_items").text(data);
@@ -163,13 +160,12 @@ function getFooterContent(){
 }
 
 function set_attr_value(__attr_name,__attr_value) {
-	// //console.log("v:",$( "#value" ).is(':visible'))
-	// //console.log("_v:",$( "#_value" ).is(':visible'))
+	// ////console.log("v:",$( "#value" ).is(':visible'))
+	// ////console.log("_v:",$( "#_value" ).is(':visible'))
 	if($( "#value" ).is(':visible')){
 			$( "#value" ).autocomplete({
 				source: __attr_value,
 				select: function( event, ui ) {
-					console.log(ui["item"]['label'])
 					get_items(__attr_name, ui["item"]['label'])
 				}
 				// ,
@@ -186,7 +182,6 @@ function set_attr_value(__attr_name,__attr_value) {
 		$( "#_value" ).autocomplete({
 			source: __attr_value,
 			select: function( event, ui ) {
-				console.log(ui);
 				get_items(__attr_name, ui["item"]['label'])
 			}
 		});
@@ -231,19 +226,19 @@ function display_json_response_in_modal(json_obj){
 function show_details(_id){
 	$.get("/catalogue/v1/items/" + _id , function(data) {
 		data=JSON.parse(data)
-		// console.log(data)
-		// console.log(data[0]["resourceId"]["value"])
-		// console.log(data[0]["itemDescription"])
-		// console.log(data[0]["itemType"]["value"])
-		// console.log(data[0]["provider"]["value"])
-		// console.log(data[0]["createdAt"]["value"])
-		// console.log(data[0]["resourceServerGroup"]["value"])
-		// console.log(data[0]["itemStatus"]["value"])
-		// console.log(data[0]["refBaseSchema"]["value"])
-		// console.log(data[0]["refDataModel"]["value"])
+		// //console.log(data)
+		// //console.log(data[0]["resourceId"]["value"])
+		// //console.log(data[0]["itemDescription"])
+		// //console.log(data[0]["itemType"]["value"])
+		// //console.log(data[0]["provider"]["value"])
+		// //console.log(data[0]["createdAt"]["value"])
+		// //console.log(data[0]["resourceServerGroup"]["value"])
+		// //console.log(data[0]["itemStatus"]["value"])
+		// //console.log(data[0]["refBaseSchema"]["value"])
+		// //console.log(data[0]["refDataModel"]["value"])
 
 		var id = resource_id_to_html_id(_id)
-		//console.log(id);
+		////console.log(id);
 		
 		$("#_tbody_"+id).html(`
 			<tr>
@@ -316,7 +311,7 @@ function display_swagger_ui(_openapi_url){
 function json_to_htmlcard(json_obj){
 	var openapi_url = json_obj["accessInformation"]["value"][0]["accessObject"]["value"]
 	// var openapi_url = json_obj["accessInformation"]["value"][0]["accessObject"]["value"]
-	// console.log(openapi_url)
+	// //console.log(openapi_url)
 	var is_public = (json_obj['secure']||[]).length === 0;
 	var rat_btn_html=`<button class="btn btn-success" onclick="request_access_token('` + json_obj.id + `', '`+ json_obj["resourceServerGroup"]["value"] + `', '`+ json_obj["resourceId"]["value"] + `')" style="background-color:green">Request Access Token</button>`
 	var s = json_obj["id"].split("/")
@@ -378,9 +373,9 @@ $(document).ready(function(){
 	let seen_provider_set = [];
 	$.get("/catalogue/v1/search", function(data) {
 			// $("#searched_items").text(data);
-			//console.log("RRRRRRRR1");
+			////console.log("RRRRRRRR1");
 			data=JSON.parse(data)
-			//console.log("RRRRRRRR");
+			////console.log("RRRRRRRR");
             for (var i = 0; i < data.length; i++) {                
                 for (var tag_i = 0; tag_i < data[i]['tags']['value'].length - 1; tag_i++) {
 	                if (!seen_tags_set.includes(data[i]['tags']['value'][tag_i].toLowerCase())) {
@@ -411,7 +406,7 @@ $(document).ready(function(){
 
 
 
-// Capture select on change effect for populating tags autosuggest 
+// Capture select on change effect for populating autosuggest with attribute values 
 $('select').on('change', function() {
 	var _arr = []
 	if(this.value == "tags"){
@@ -421,9 +416,7 @@ $('select').on('change', function() {
 	}else if(this.value == "provider"){
 		_arr = provider_set
 	}
-	console.log(this.value, _arr)
 	set_attr_value(this.value, _arr)
-//console.log( this.value );
 });
 
 
@@ -431,7 +424,7 @@ $('select').on('change', function() {
 
 // Capture search input click
 $(".ui-menu").on('click',function(){
-	//console.log("s",this.value)
+	////console.log("s",this.value)
 });
 
 
