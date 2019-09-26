@@ -51,15 +51,20 @@ function get_api_encoded_attribute_values(__tags, __rsg, __pvdr){
     return "("+str.join(",")+")"
 }
 
-function __get_latest_data(url, __rid) {
+function __get_latest_data(__url, __rid) {
   return new Promise((resolve, reject) => {
     $.ajax({
-      url: encodeURI(url),
-      type: 'POST',
-      data: {
+      "url": __url,
+      "async": true,
+      "crossDomain": true,
+      "processData": false,
+      "method": 'POST',
+      "headers": {"Content-Type": "application/json"},
+      "data": JSON.stringify({
         "id": __rid,
         "options": "latest"
-      },
+      }),
+      // dataType: 'json',
       success: function(data) {
         resolve(data)
       },
@@ -69,6 +74,30 @@ function __get_latest_data(url, __rid) {
       timeout: 30000 // sets timeout to 30 seconds
     })
   })
+}
+
+function _get_latest_data(_resource_id, _token){
+    //console.log(_token)
+    $.ajax({
+      "url": "https://pune.iudx.org.in/resource-server/pscdcl/v1/search",
+      "async": true,
+      "processData": false,
+      "crossDomain": true,
+      "method": 'POST',
+      "headers": {"token": _token, "Content-Type": "application/json"},
+      "data": JSON.stringify({
+        "id": _resource_id,
+        "options": "latest"
+      }),
+      // dataType: 'json',
+      success: function (data) {
+        // alert("Success! \n"+data)
+        // display_json_response_in_modal(data)
+        _alertify("Success!!!", '<pre id="custom_alertbox">'+jsonPrettyHighlightToId(data)+'</pre>');
+      },
+      error: _alertify("Error!!!", '<pre id="custom_alertbox">: Please try some time later. Server is facing some problems at this moment.</pre>'),
+      timeout: 30000 // sets timeout to 30 seconds
+    })
 }
 
 function _alertify(header_msg, body_msg){
@@ -81,10 +110,11 @@ function display_latest_data(e, ele, _rid) {
     _alertify("Getting Data...", get_spinner_html())
     __get_latest_data("https://pune.iudx.org.in/resource-server/pscdcl/v1/search", _rid)
       .then(data => {
-        _alertify("Success!!!", '<pre id="custom_alertbox">'+jsonPrettyHighlightToId(JSON.parse(data))+'</pre>')
+        _alertify("Success!!!", '<pre id="custom_alertbox">'+jsonPrettyHighlightToId(data)+'</pre>')
       })
       .catch(error => {
         _alertify("Error!!!",'<pre id="custom_alertbox">: ' + error["statusText"]+ '</pre>');
+        console.log(error)
       })
 }
 
@@ -201,25 +231,6 @@ function get_geo_shape_url(__geo_shape){
     }
 
     return _url;
-}
-
-function _get_latest_data(_resource_id, _token){
-    //console.log(_token)
-    $.ajax({
-      url: "https://pune.iudx.org.in/resource-server/pscdcl/v1/search",
-      type: 'post',
-      headers: {"token": _token},
-      data: {
-        "id": _resource_id,
-        "options": "latest"
-      },
-      success: function (data) {
-        // alert("Success! \n"+data)
-        // display_json_response_in_modal(data)
-        _alertify("Success!!!", '<pre id="custom_alertbox">'+jsonPrettyHighlightToId(JSON.parse(data))+'</pre>');
-      },
-      error: _alertify("Error!!!", '<pre id="custom_alertbox">: Please try some time later. Server is facing some problems at this moment.</pre>')
-    })
 }
 
 function _get_security_based_latest_data_link(_resource_id, _resourceServerGroup, _rid, token){
