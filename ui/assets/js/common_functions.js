@@ -51,11 +51,15 @@ function get_api_encoded_attribute_values(__tags, __rsg, __pvdr){
     return "("+str.join(",")+")"
 }
 
-function __get_latest_data(url) {
+function __get_latest_data(url, __rid) {
   return new Promise((resolve, reject) => {
     $.ajax({
       url: encodeURI(url),
-      type: 'GET',
+      type: 'POST',
+      data: {
+        "id": __rid,
+        "options": "latest"
+      },
       success: function(data) {
         resolve(data)
       },
@@ -72,10 +76,10 @@ function _alertify(header_msg, body_msg){
     $(".ajs-header").html(header_msg);
 }
 
-function display_latest_data(e, ele) {
+function display_latest_data(e, ele, _rid) {
     e.preventDefault();   // use this to NOT go to href site
     _alertify("Getting Data...", get_spinner_html())
-    __get_latest_data($(ele).attr("href"))
+    __get_latest_data("https://pune.iudx.org.in/resource-server/pscdcl/v1/search", _rid)
       .then(data => {
         _alertify("Success!!!", '<pre id="custom_alertbox">'+jsonPrettyHighlightToId(JSON.parse(data))+'</pre>')
       })
@@ -202,9 +206,13 @@ function get_geo_shape_url(__geo_shape){
 function _get_latest_data(_resource_id, _token){
     //console.log(_token)
     $.ajax({
-      url: "https://pune.iudx.org.in/api/1.0.0/resource/search/safetypin/18.56581555/73.77567708/10",
-      type: 'get',
+      url: "https://pune.iudx.org.in/resource-server/pscdcl/v1/search",
+      type: 'post',
       headers: {"token": _token},
+      data: {
+        "id": _resource_id,
+        "options": "latest"
+      },
       success: function (data) {
         // alert("Success! \n"+data)
         // display_json_response_in_modal(data)
@@ -215,11 +223,11 @@ function _get_latest_data(_resource_id, _token){
 }
 
 function _get_security_based_latest_data_link(_resource_id, _resourceServerGroup, _rid, token){
-    if(_resource_id=="rbccps.org/aa9d66a000d94a78895de8d4c0b3a67f3450e531/safetipin/safetipin/safetyIndex"){
+    // if(_resource_id=="rbccps.org/aa9d66a000d94a78895de8d4c0b3a67f3450e531/safetipin/safetipin/safetyIndex"){
         return `<button class="btn btn-secondary" onclick="_get_latest_data('`+_resource_id+`','`+token+`')">Get Full Latest Data</button>`
-    }else{
-        return `<a href="`+ get_latest_data_url(_resource_id,_resourceServerGroup,_rid) +`" class="data-modal"  onclick="display_latest_data(event, this)">Get Latest Data</a>`
-    }
+    // }else{
+    //     return `<a href="#" class="data-modal"  onclick="display_latest_data(event, this, '`+_resource_id+`')">Get Latest Data</a>`
+    // }
 }
 
 function request_access_token(resource_id, resourceServerGroup, rid) {
@@ -409,7 +417,7 @@ function plotGeoJSONs(geoJSONObject, _id, plot_id,_resourceServerGroup,_resource
                         // return L.marker(latlng, {icon: getOfficeIcon()});
                        
                         // <a href='/catalogue/v1/items/"+plot_id+"'>Get Catalogue-item-details</a><br/>
-                        var customPopup = "<a href='https://pune.iudx.org.in/api/1.0.0/resource/latest/"+_resourceServerGroup+"/"+_resourceId +"' class='data-modal'  onclick='display_latest_data(event, this)'>Get latest-data</a>";
+                        var customPopup = `<a href='#' class='data-modal'  onclick="display_latest_data(event, this, '`+_id+`')">Get latest-data</a>`;
                         if(_resourceServerGroup==='streetlight-feeder-sree'){
                             ////console.log("street")
                             var _marker = L.marker(latlng,{icon: getStreetlightIcon()}).addTo(map);
@@ -510,7 +518,7 @@ function plotGeoJSONs(geoJSONObject, _id, plot_id,_resourceServerGroup,_resource
                         // return L.marker(latlng, {icon: getOfficeIcon()});
                        
                         // <a href='/catalogue/v1/items/"+plot_id+"'>Get Catalogue-item-details</a><br/>
-                        var customPopup = "<a href='https://pune.iudx.org.in/api/1.0.0/resource/latest/"+_resourceServerGroup+"/"+_resourceId+"' class='data-modal'  onclick='display_latest_data(event, this)'>Get latest-data</a>";
+                        var customPopup = `<a href='#' class='data-modal'  onclick="display_latest_data(event, this, '`+_id+`')">Get latest-data</a>`;
                         if(_resourceServerGroup==='streetlight-feeder-sree'){
                             ////console.log("street")
                             var _marker = L.marker(latlng,{icon: getStreetlightIcon()}).addTo(map);
@@ -593,10 +601,11 @@ function plotGeoJSONs(geoJSONObject, _id, plot_id,_resourceServerGroup,_resource
 
 
 function get_latest_data_url(id, rsg, rid){
+
     if(id=="rbccps.org/aa9d66a000d94a78895de8d4c0b3a67f3450e531/safetipin/safetipin/safetyIndex"){
-        return 'https://pune.iudx.org.in/api/1.0.0/resource/search/safetypin/18.56581555/73.77567708/10'
+        return `https://pune.iudx.org.in/resource-server/pscdcl/v1/search`
     }else{
-        return `https://pune.iudx.org.in/api/1.0.0/resource/latest/`+rsg+`/`+rid
+        return `https://pune.iudx.org.in/resource-server/pscdcl/v1/search`
     }
 }
 
