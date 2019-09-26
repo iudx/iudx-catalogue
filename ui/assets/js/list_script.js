@@ -222,68 +222,69 @@ function display_json_response_in_modal(json_obj){
 }
 
 function show_details(_id){
-	$.get("/catalogue/v1/items/" + _id , function(data) {
-		data=JSON.parse(data)
-		// //console.log(data)
-		// //console.log(data[0]["resourceId"]["value"])
-		// //console.log(data[0]["itemDescription"])
-		// //console.log(data[0]["itemType"]["value"])
-		// //console.log(data[0]["provider"]["value"])
-		// //console.log(data[0]["createdAt"]["value"])
-		// //console.log(data[0]["resourceServerGroup"]["value"])
-		// //console.log(data[0]["itemStatus"]["value"])
-		// //console.log(data[0]["refBaseSchema"]["value"])
-		// //console.log(data[0]["refDataModel"]["value"])
-
-		var id = resource_id_to_html_id(_id)
-		////console.log(id);
-		
-		$("#_tbody_"+id).html(`
-			<tr>
-			      <th scope="row">Resource-Id</th>
-			      <td>`+ data[0]["resourceId"]["value"] +`</td>
-		    </tr>
-		    <tr>
-			      <th scope="row">Description</th>
-			      <td>`+ data[0]["itemDescription"] +`</td>
-		    </tr>
-		    <tr>
-			      <th scope="row">Type</th>
-			      <td>`+ data[0]["itemType"]["value"] +`</td>
-		    </tr>
-		    <tr>
-			      <th scope="row">Provider</th>
-			      <td>`+ data[0]["provider"]["value"] +`</td>
-		    </tr>
-		    <tr>
-			      <th scope="row">Created-On</th>
-			      <td>`+ data[0]["createdAt"]["value"] +`</td>
-		    </tr>
-		    <tr>
-			      <th scope="row">Resource Server Group</th>
-			      <td>`+ data[0]["resourceServerGroup"]["value"] +`</td>
-		    </tr>
-		   
-		    <tr>
-			      <th scope="row">Status</th>
-			      <td>`+ data[0]["itemStatus"]["value"] +`</td>
-		    </tr>
-		`);
-		 // <tr>
-			//       <th scope="row">Authorization Server Info</th>
-			//       <td>`+ data[0]["authorizationServerInfo"]["value"]["authServer"] +` | Type: `+ data[0]["authorizationServerInfo"]["value"]["authType"] +`</td>
-		 //    </tr>
-
-			$("#extra_links_"+id).html(`
-			<p>
-				<!--<a href="`+ get_latest_data_url(_id,data[0]["resourceServerGroup"]["value"],data[0]["resourceId"]["value"]) +`">Latest Data</a>   |  -->
-				<a href="`+data[0]["refBaseSchema"]["value"]+`" target="_blank">Base Schema </a> |
-				<a href="`+data[0]["refDataModel"]["value"]+`" target="_blank">Data Model </a>
-			</p>
+	var id = resource_id_to_html_id(_id)
+	console.log($("#details_section_"+id).is(':visible'))
+	if(!($("#details_section_"+id).is(':visible'))) {
+    	$.get("/catalogue/v1/items/" + _id , function(data) {
+			data=JSON.parse(data)
+			// //console.log(data)
+			// //console.log(data[0]["resourceId"]["value"])
+			// //console.log(data[0]["itemDescription"])
+			// //console.log(data[0]["itemType"]["value"])
+			// //console.log(data[0]["provider"]["value"])
+			// //console.log(data[0]["createdAt"]["value"])
+			// //console.log(data[0]["resourceServerGroup"]["value"])
+			// //console.log(data[0]["itemStatus"]["value"])
+			// //console.log(data[0]["refBaseSchema"]["value"])
+			// //console.log(data[0]["refDataModel"]["value"])
+			////console.log(id);
+			
+			$("#_tbody_"+id).html(`
+				<tr>
+				      <th scope="row">Resource-Id</th>
+				      <td>`+ data[0]["resourceId"]["value"] +`</td>
+			    </tr>
+			    <tr>
+				      <th scope="row">Description</th>
+				      <td>`+ data[0]["itemDescription"] +`</td>
+			    </tr>
+			    <tr>
+				      <th scope="row">Type</th>
+				      <td>`+ data[0]["itemType"]["value"] +`</td>
+			    </tr>
+			    <tr>
+				      <th scope="row">Provider</th>
+				      <td>`+ data[0]["provider"]["value"] +`</td>
+			    </tr>
+			    <tr>
+				      <th scope="row">Created-On</th>
+				      <td>`+ data[0]["createdAt"]["value"] +`</td>
+			    </tr>
+			    <tr>
+				      <th scope="row">Resource Server Group</th>
+				      <td>`+ data[0]["resourceServerGroup"]["value"] +`</td>
+			    </tr>
+			   
+			    <tr>
+				      <th scope="row">Status</th>
+				      <td>`+ data[0]["itemStatus"]["value"] +`</td>
+			    </tr>
 			`);
-			// <a href="`+data[0]["latestResourceData"]["object"]+`" target="_blank">Latest Data </a>
-		$("#details_section_"+id).toggle();
-	});
+			 // <tr>
+				//       <th scope="row">Authorization Server Info</th>
+				//       <td>`+ data[0]["authorizationServerInfo"]["value"]["authServer"] +` | Type: `+ data[0]["authorizationServerInfo"]["value"]["authType"] +`</td>
+			 //    </tr>
+
+				$("#extra_links_"+id).html(`
+				<p>
+					<!--<a href="`+ get_latest_data_url(_id,data[0]["resourceServerGroup"]["value"],data[0]["resourceId"]["value"]) +`">Latest Data</a>   |  -->
+					<a href="`+data[0]["refBaseSchema"]["value"]+`" target="_blank">Base Schema </a> |
+					<a href="`+data[0]["refDataModel"]["value"]+`" target="_blank">Data Model </a>
+				</p>
+				`);
+		});
+	}
+	$("#details_section_"+id).toggle();
 }
 
 function display_swagger_ui(_openapi_url){
