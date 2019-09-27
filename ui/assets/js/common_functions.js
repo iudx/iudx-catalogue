@@ -77,29 +77,38 @@ function get_api_encoded_attribute_names(__tags, __rsg, __pvdr){
     } if(__pvdr.length != 0){
         str.push(get_api_encoded_attr_("provider"))
     }
-    console.log(str.join(","))
-    return str.join(",")
+    //console.log(str.join(","))
+    return "(" + str.join(",") +")"
     
 }
 
 function get_api_encoded_attribute_values(__tags, __rsg, __pvdr){
     var str = []
     if(__tags.length != 0){
-        str.push(get_api_encoded_attr_(__tags.join(",")))
+        str.push(get_api_encoded_attr_("("+__tags.join(",")+")"))
     } if(__rsg.length != 0){
-        str.push(get_api_encoded_attr_(__rsg.join(",")))
+        str.push(get_api_encoded_attr_("("+__rsg.join(",")+")"))
     } if(__pvdr.length != 0){
-        str.push(get_api_encoded_attr_(__pvdr.join(",")))
+        str.push(get_api_encoded_attr_("("+__pvdr.join(",")+")"))
     }
-    console.log(str.join(","))
-    return str.join(",")
+    //console.log(str.join(","))
+    return "("+str.join(",")+")"
 }
 
-function __get_latest_data(url) {
+function __get_latest_data(__url, __rid) {
   return new Promise((resolve, reject) => {
     $.ajax({
-      url: encodeURI(url),
-      type: 'GET',
+      "url": __url,
+      "async": true,
+      "crossDomain": true,
+      "processData": false,
+      "method": 'POST',
+      "headers": {"Content-Type": "application/json"},
+      "data": JSON.stringify({
+        "id": __rid,
+        "options": "latest"
+      }),
+      // dataType: 'json',
       success: function(data) {
         resolve(data)
       },
@@ -111,39 +120,64 @@ function __get_latest_data(url) {
   })
 }
 
+function _get_latest_data(_resource_id, _token){
+    //console.log(_token)
+    $.ajax({
+      "url": "https://pune.iudx.org.in/resource-server/pscdcl/v1/search",
+      "async": true,
+      "processData": false,
+      "crossDomain": true,
+      "method": 'POST',
+      "headers": {"token": _token, "Content-Type": "application/json"},
+      "data": JSON.stringify({
+        "id": _resource_id,
+        "options": "latest"
+      }),
+      // dataType: 'json',
+      success: function (data) {
+        // alert("Success! \n"+data)
+        // display_json_response_in_modal(data)
+        _alertify("Success!!!", '<pre id="custom_alertbox">'+jsonPrettyHighlightToId(data)+'</pre>');
+      },
+      error: _alertify("Error!!!", '<pre id="custom_alertbox">: Please try some time later. Server is facing some problems at this moment.</pre>'),
+      timeout: 30000 // sets timeout to 30 seconds
+    })
+}
+
 function _alertify(header_msg, body_msg){
     alertify.alert(body_msg);
     $(".ajs-header").html(header_msg);
 }
 
-function display_latest_data(e, ele) {
+function display_latest_data(e, ele, _rid) {
     e.preventDefault();   // use this to NOT go to href site
     _alertify("Getting Data...", get_spinner_html())
-    __get_latest_data($(ele).attr("href"))
+    __get_latest_data("https://pune.iudx.org.in/resource-server/pscdcl/v1/search", _rid)
       .then(data => {
-        _alertify("Success!!!", '<pre id="custom_alertbox">'+jsonPrettyHighlightToId(JSON.parse(data))+'</pre>')
+        _alertify("Success!!!", '<pre id="custom_alertbox">'+jsonPrettyHighlightToId(data)+'</pre>')
       })
       .catch(error => {
         _alertify("Error!!!",'<pre id="custom_alertbox">: ' + error["statusText"]+ '</pre>');
+        console.log(error)
       })
 }
 
 function get_filtered_url(__filter_url){
-    if(__filter_url == `attribute-name=((""))&attribute-value=((""))`){
+    if(__filter_url == `attribute-name=("")&attribute-value=((""))`){
         return ""
     }else{
         return "&" + __filter_url
     }
 }
 
-function toast_alert(__msg, __msg_type){
+function toast_alert(__msg, __msg_type, __bg_color){
     $.toast({
         text: __msg,
         position: 'mid-center',
         hideAfter: 1800,
         loader: false,  // Whether to show loader or not. True by default
         loaderBg: '#1abc9c',
-        bgColor: '#1abc9c',
+        bgColor: __bg_color,
         showHideTransition: 'fade', // fade, slide or plain
         allowToastClose: false, // Boolean value true or false
         icon: __msg_type // Type of toast icon  
@@ -163,10 +197,41 @@ function reset_filter(__input_name){
         category = "Provider"
     }
 
-    toast_alert(category + ' filter has been cleared', 'success')
+    var __filter_url =  "/catalogue/v1/search?" + get_selected_values_framed_url()
+
+    $.get(__filter_url, function (data, status) {
+      markersLayer.clearLayers();
+      data = JSON.parse(data)
+      //console.log(data)
+      for (var i = data.length - 1; i >= 0; i--) {
+        // //console.log(data[i])
+        if (data[i].hasOwnProperty('location')) {
+          
+          
+          plotGeoJSONs(data[i]["location"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
+        } else if (data[i].hasOwnProperty('coverageRegion')) {
+         
+          
+          plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
+          //console.log("2")
+        }
+      }
+    });
+
+    toast_alert(category + ' filter has been cleared', 'success','#1abc9c')
 }
+
+function toast_alert_for_response_data_length(__data){
+    var len = __data.length;
+    if(len == 0){
+        toast_alert('Zero items found for this query', 'warning','#c0392b');
+    }else{
+        toast_alert('Found ' + len + ' items for this query', 'success','#1abc9c');
+    }
+}
+
  function showDetails(){
-     console.log("print this...")
+     //console.log("print this...")
      $('#_batch').hide();
      $('#point').show();
  }
@@ -176,19 +241,19 @@ function get_selected_values_framed_url(){
     var tags = value.tags;
     var rsg = value.rsg;
     var provider = value.provider;
-    console.log(tags, rsg , provider)
+    //console.log(tags, rsg , provider)
 
     var __filter_url = ""
 
     if(tags.length == 0 && rsg.length == 0 && provider.length == 0){
-    __filter_url=`attribute-name=((""))&attribute-value=((""))`
+    __filter_url=`attribute-name=("")&attribute-value=((""))`
     }else{
-    // console.log("else...")
+    // //console.log("else...")
     var _attr_names = get_api_encoded_attribute_names(tags, rsg, provider) 
-    // console.log(_attr_names)
+    // //console.log(_attr_names)
     var _attr_values = get_api_encoded_attribute_values(tags, rsg, provider)
-    // console.log(_attr_values)
-    __filter_url=`attribute-name=((`+ _attr_names +`))&attribute-value=((`+ _attr_values +`))`+get_geo_shape_url(geo_shape)
+    // //console.log(_attr_values)
+    __filter_url=`attribute-name=`+ _attr_names +`&attribute-value=`+ _attr_values + get_geo_shape_url(geo_shape)
     }
     return __filter_url;
 }
@@ -212,31 +277,16 @@ function get_geo_shape_url(__geo_shape){
     return _url;
 }
 
-function _get_latest_data(_resource_id, _token){
-    console.log(_token)
-    $.ajax({
-      url: "https://pune.iudx.org.in/api/1.0.0/resource/search/safetypin/18.56581555/73.77567708/10",
-      type: 'get',
-      headers: {"token": _token},
-      success: function (data) {
-        // alert("Success! \n"+data)
-        // display_json_response_in_modal(data)
-        _alertify("Success!!!", '<pre id="custom_alertbox">'+jsonPrettyHighlightToId(JSON.parse(data))+'</pre>');
-      },
-      error: _alertify("Error!!!", '<pre id="custom_alertbox">: Please try some time later. Server is facing some problems at this moment.</pre>')
-    })
-}
-
 function _get_security_based_latest_data_link(_resource_id, _resourceServerGroup, _rid, token){
-    if(_resource_id=="rbccps.org/aa9d66a000d94a78895de8d4c0b3a67f3450e531/safetipin/safetipin/safetyIndex"){
+    // if(_resource_id=="rbccps.org/aa9d66a000d94a78895de8d4c0b3a67f3450e531/safetipin/safetipin/safetyIndex"){
         return `<button class="btn btn-secondary" onclick="_get_latest_data('`+_resource_id+`','`+token+`')">Get Full Latest Data</button>`
-    }else{
-        return `<a href="`+ get_latest_data_url(_resource_id,_resourceServerGroup,_rid) +`" class="data-modal"  onclick="display_latest_data(event, this)">Get Latest Data</a>`
-    }
+    // }else{
+    //     return `<a href="#" class="data-modal"  onclick="display_latest_data(event, this, '`+_resource_id+`')">Get Latest Data</a>`
+    // }
 }
 
 function request_access_token(resource_id, resourceServerGroup, rid) {
-    console.log(resource_id)
+    //console.log(resource_id)
     $.ajax({
       url: "https://auth.iudx.org.in/auth/v1/token",
       type: 'post',
@@ -244,7 +294,7 @@ function request_access_token(resource_id, resourceServerGroup, rid) {
       contentType: 'application/json',
       data: JSON.stringify({"resource-id": resource_id}),
       success: function (data) {
-        // console.log(data.token)
+        // //console.log(data.token)
         
         // $('#token_section_'+resource_id_to_html_id(resource_id)).html($('#token_section_'+resource_id_to_html_id(resource_id)).html());
         $('#token_section_'+resource_id_to_html_id(resource_id)).html(
@@ -286,7 +336,7 @@ function jsonPrettyHighlightToId(jsonobj) {
         } else if (/null/.test(match)) {
             cls = 'color: magenta;';
         }
-        // //console.log(cls, match)
+        // ////console.log(cls, match)
         return '<span style="' + cls + '">' + urlify(match) + '</span>';
     });
     // return urlify(json);
@@ -298,7 +348,7 @@ function jsonPrettyHighlightToIdwithBR(jsonobj) {
     var json = JSON.stringify(jsonobj, undefined, 2);
 
     json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    // console.log(json.replace(/\n/g, "<br />"))
+    // //console.log(json.replace(/\n/g, "<br />"))
     json=json.replace(/\n/g, "<br />")
     json = json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function(match) {
         var cls = 'color: darkorange;';
@@ -313,7 +363,7 @@ function jsonPrettyHighlightToIdwithBR(jsonobj) {
         } else if (/null/.test(match)) {
             cls = 'color: magenta;';
         }
-        // //console.log(cls, match)
+        // ////console.log(cls, match)
         return '<span style="' + cls + '">' + urlify(match) + '</span>';
     });
     // return urlify(json);
@@ -367,20 +417,20 @@ function getRandomColor(){
 }
 
 function plotGeoJSONs(geoJSONObject, _id, plot_id,_resourceServerGroup,_resourceId,_tags,_provider){
-    //console.log(_resourceServerGroup)
-    // //console.log("plotting "+ geoJSONObject, _id, _id["id"])
-    // // console.log(geoJSONObject, color_count)
+    ////console.log(_resourceServerGroup)
+    // ////console.log("plotting "+ geoJSONObject, _id, _id["id"])
+    // // //console.log(geoJSONObject, color_count)
     // _provider_data = _provider;
     // _tags_data = _tags;
     // _resourceServerGroup_data =_resourceServerGroup;
     // _geoJSONObject = geoJSONObject;
     // _resourceId_data = _resourceId;
 
-    //console.log(geoJSONObject)
+    ////console.log(geoJSONObject)
     
     if(geoJSONObject["type"]=="Polygon"){
         
-        console.log(_resourceServerGroup)
+        //console.log("Printing Polygon....")
         color_count=color_count+1
         var _color=getRandomColor()
         
@@ -389,7 +439,7 @@ function plotGeoJSONs(geoJSONObject, _id, plot_id,_resourceServerGroup,_resource
         //console.log(_resourceServerGroup, div)
         if(_resourceServerGroup=="crowd-sourced-changebhai"||_resourceServerGroup=="changeBhai" ){
         // loop through our density intervals and generate a label with a colored square for each interval
-            console.log("changeBhai")
+            //console.log("changeBhai")
             div.innerHTML +=  
             '<span style="background:' + _color + '"></span> ' +
               'ChangeBhai' + '<br>';
@@ -418,92 +468,92 @@ function plotGeoJSONs(geoJSONObject, _id, plot_id,_resourceServerGroup,_resource
                         fillOpacity: 0.5
                       },
                 pointToLayer: function (feature, latlng) {
-                        console.log(feature.properties);
+                        //console.log(feature.properties);
                         // return L.marker(latlng, {icon: getOfficeIcon()});
                        
                         // <a href='/catalogue/v1/items/"+plot_id+"'>Get Catalogue-item-details</a><br/>
-                        var customPopup = "<a href='https://pune.iudx.org.in/api/1.0.0/resource/latest/"+_resourceServerGroup+"/"+_resourceId+" class='data-modal'  onclick='display_latest_data(event, this)'>Get latest-data</a>";
+                        var customPopup = `<a href='#' class='data-modal'  onclick="display_latest_data(event, this, '`+_id+`')">Get latest-data</a>`;
                         if(_resourceServerGroup==='streetlight-feeder-sree'){
-                            //console.log("street")
+                            ////console.log("street")
                             var _marker = L.marker(latlng,{icon: getStreetlightIcon()}).addTo(map);
                             _marker.itemUUID = _id;
-                        ////console.log(_marker.itemUUID);
+                        //////console.log(_marker.itemUUID);
                         _marker.on('click', markerOnClick);
                         _marker.bindPopup(customPopup)
-                        console.log(_marker)
+                        //console.log(_marker)
                         return _marker;
                         }
                         if(_resourceServerGroup==='aqm-bosch-climo'){
-                            //console.log("aqm")
+                            ////console.log("aqm")
                             var _marker = L.marker(latlng,{icon: getAirQualityIcon()}).addTo(map);
                             _marker.itemUUID = _id;
-                        ////console.log(_marker.itemUUID);
+                        //////console.log(_marker.itemUUID);
                         _marker.on('click', markerOnClick);
                         _marker.bindPopup(customPopup)
-                        console.log(_marker)
+                        //console.log(_marker)
                         return _marker;
                         }
                         if(_resourceServerGroup==='flood-sensor'){
-                            //console.log("flood")
+                            ////console.log("flood")
                             var _marker = L.marker(latlng,{icon: getFloodSensorIcon()}).addTo(map);
                             _marker.itemUUID = _id;
-                        ////console.log(_marker.itemUUID);
+                        //////console.log(_marker.itemUUID);
                         _marker.on('click', markerOnClick);
                         _marker.bindPopup(customPopup)
-                        console.log(_marker)
+                        //console.log(_marker)
                         return _marker;
                         }
                         if(_resourceServerGroup==='wifi-hotspot'){
-                            //console.log("wifi")
+                            ////console.log("wifi")
                             var _marker = L.marker(latlng,{icon: getWifiHotspotIcon()}).addTo(map);
                             _marker.itemUUID = _id;
-                        ////console.log(_marker.itemUUID);
+                        //////console.log(_marker.itemUUID);
                         _marker.on('click', markerOnClick);
                         _marker.bindPopup(customPopup)
                         return _marker;
                         }
-                        if(_resourceServerGroup==='ptz-video camera'){
-                            //console.log("itms")
+                        if(_resourceServerGroup==='itms'){
+                            ////console.log("itms")
                             var _marker = L.marker(latlng,{icon: getITMSIcon()}).addTo(map);
                             _marker.itemUUID = _id;
-                        ////console.log(_marker.itemUUID);
+                        //////console.log(_marker.itemUUID);
                         _marker.on('click', markerOnClick);
                         _marker.bindPopup(customPopup)
                         return _marker;
                         }
                         if(_resourceServerGroup==='changebhai'){
-                            //console.log("change")
+                            ////console.log("change")
                             var _marker = L.marker(latlng,{icon: getChangebhaiIcon()}).addTo(map);
                             _marker.itemUUID = _id;
-                        ////console.log(_marker.itemUUID);
+                        //////console.log(_marker.itemUUID);
                         _marker.on('click', markerOnClick);
                         _marker.bindPopup(customPopup)
                         return _marker;
                         }
                         if(_resourceServerGroup==='safetypin'){
-                            //console.log("safety")
+                            ////console.log("safety")
                             var _marker = L.marker(latlng,{icon: getSafetypinIcon()}).addTo(map);
                             _marker.itemUUID = _id;
-                        ////console.log(_marker.itemUUID);
+                        //////console.log(_marker.itemUUID);
                         _marker.on('click', markerOnClick);
                         _marker.bindPopup(customPopup)
                         return _marker;
                         }
                         if(_resourceServerGroup==='traffic-incidents'){
-                            //console.log("aqm")
+                            ////console.log("aqm")
                             var _marker = L.marker(latlng,{icon: getAirQualityIcon()}).addTo(map);
                             _marker.itemUUID = _id;
-                        ////console.log(_marker.itemUUID);
+                        //////console.log(_marker.itemUUID);
                         _marker.on('click', markerOnClick);
                         _marker.bindPopup(customPopup)
                         return _marker;
                         }
                         
-                        // //console.log(_marker)
-                        // ////console.log(_id);
-                        // ////console.log(geoJSONObject);
+                        // ////console.log(_marker)
+                        // //////console.log(_id);
+                        // //////console.log(geoJSONObject);
                         // _marker.itemUUID = _id;
-                        // ////console.log(_marker.itemUUID);
+                        // //////console.log(_marker.itemUUID);
                         // _marker.on('click', markerOnClick);
                         // _marker.bindPopup(customPopup)
                         // return _marker;
@@ -515,46 +565,46 @@ function plotGeoJSONs(geoJSONObject, _id, plot_id,_resourceServerGroup,_resource
     
     }
     else if(geoJSONObject["type"]=="Point"){
-           // console.log("Printing Point....")
+           // //console.log("Printing Point....")
             L.geoJSON(geoJSONObject, {
                 pointToLayer: function (feature, latlng) {
                     // console.log(_resourceServerGroup)
                         // return L.marker(latlng, {icon: getOfficeIcon()});
                        
                         // <a href='/catalogue/v1/items/"+plot_id+"'>Get Catalogue-item-details</a><br/>
-                        var customPopup = "<a href='https://pune.iudx.org.in/api/1.0.0/resource/latest/"+_resourceServerGroup+"/"+_resourceId+" class='data-modal'  onclick='display_latest_data(event, this)'>Get latest-data</a>";
+                        var customPopup = `<a href='#' class='data-modal'  onclick="display_latest_data(event, this, '`+_id+`')">Get latest-data</a>`;
                         if(_resourceServerGroup==='streetlight-feeder-sree'){
-                            //console.log("street")
+                            ////console.log("street")
                             var _marker = L.marker(latlng,{icon: getStreetlightIcon()}).addTo(map);
                             _marker.itemUUID = _id;
-                        ////console.log(_marker.itemUUID);
+                        //////console.log(_marker.itemUUID);
                         _marker.on('click', markerOnClick);
                         _marker.bindPopup(customPopup)
                         return _marker;
                         }
                         if(_resourceServerGroup==='aqm-bosch-climo'){
-                            //console.log("aqm")
+                            ////console.log("aqm")
                             var _marker = L.marker(latlng,{icon: getAirQualityIcon()}).addTo(map);
                             _marker.itemUUID = _id;
-                        ////console.log(_marker.itemUUID);
+                        //////console.log(_marker.itemUUID);
                         _marker.on('click', markerOnClick);
                         _marker.bindPopup(customPopup)
                         return _marker;
                         }
                         if(_resourceServerGroup==='flood-sensor'){
-                            //console.log("flood")
+                            ////console.log("flood")
                             var _marker = L.marker(latlng,{icon: getFloodSensorIcon()}).addTo(map);
                             _marker.itemUUID = _id;
-                        ////console.log(_marker.itemUUID);
+                        //////console.log(_marker.itemUUID);
                         _marker.on('click', markerOnClick);
                         _marker.bindPopup(customPopup)
                         return _marker;
                         }
                         if(_resourceServerGroup==='wifi-hotspot'){
-                            //console.log("wifi")
+                            ////console.log("wifi")
                             var _marker = L.marker(latlng,{icon: getWifiHotspotIcon()}).addTo(map);
                             _marker.itemUUID = _id;
-                        ////console.log(_marker.itemUUID);
+                        //////console.log(_marker.itemUUID);
                         _marker.on('click', markerOnClick);
                         _marker.bindPopup(customPopup)
                         return _marker;
@@ -563,7 +613,7 @@ function plotGeoJSONs(geoJSONObject, _id, plot_id,_resourceServerGroup,_resource
                             //console.log("itms")
                             var _marker = L.marker(latlng,{icon: getITMSIcon()}).addTo(map);
                             _marker.itemUUID = _id;
-                        ////console.log(_marker.itemUUID);
+                        //////console.log(_marker.itemUUID);
                         _marker.on('click', markerOnClick);
                         _marker.bindPopup(customPopup)
                         return _marker;
@@ -587,11 +637,11 @@ function plotGeoJSONs(geoJSONObject, _id, plot_id,_resourceServerGroup,_resource
                         // return _marker;
                         // }
                         
-                        // //console.log(_marker)
-                        // ////console.log(_id);
-                        // ////console.log(geoJSONObject);
+                        // ////console.log(_marker)
+                        // //////console.log(_id);
+                        // //////console.log(geoJSONObject);
                         // _marker.itemUUID = _id;
-                        // ////console.log(_marker.itemUUID);
+                        // //////console.log(_marker.itemUUID);
                         // _marker.on('click', markerOnClick);
                         // _marker.bindPopup(customPopup)
                         // return _marker;
@@ -599,16 +649,17 @@ function plotGeoJSONs(geoJSONObject, _id, plot_id,_resourceServerGroup,_resource
                // filter: filter_byTags,
                 // onEachFeature: onEachFeature
             }).addTo(markersLayer);
-   // console.log("22222222222")
+   // //console.log("22222222222")
     }
 }
 
 
 function get_latest_data_url(id, rsg, rid){
+
     if(id=="rbccps.org/aa9d66a000d94a78895de8d4c0b3a67f3450e531/safetipin/safetipin/safetyIndex"){
-        return 'https://pune.iudx.org.in/api/1.0.0/resource/search/safetypin/18.56581555/73.77567708/10'
+        return `https://pune.iudx.org.in/resource-server/pscdcl/v1/search`
     }else{
-        return `https://pune.iudx.org.in/api/1.0.0/resource/latest/`+rsg+`/`+rid
+        return `https://pune.iudx.org.in/resource-server/pscdcl/v1/search`
     }
 }
 
@@ -623,15 +674,15 @@ function hide_menu_icon() {
 function activate_batch_mode() {
     $("#point").hide();
     $("#_batch").show();
-    //console.log("batch mode")
+    ////console.log("batch mode")
     hide_menu_icon();
 }
 
 function activate_point_mode(_id) {
-    // console.log(1,_id)
+    // //console.log(1,_id)
     $("#_batch").hide();
-    // console.log(2,_id)
-   // console.log("called")
+    // //console.log(2,_id)
+   // //console.log("called")
     show_details(_id)
     $("#point").show();
 }
@@ -643,12 +694,12 @@ function resource_id_to_html_id(resource_id){
 
 function markerOnClick(e) {
     // var attributes = e.layer.properties;
-    ////console.log(e.target.itemUUID)
+    //////console.log(e.target.itemUUID)
     
     activate_point_mode(e.target.itemUUID);  
     sidebar.show();
     // alert(e.target.itemUUID);
-    // //console.log(attributes);
+    // ////console.log(attributes);
     // do some stuff…
 }
 
@@ -673,7 +724,7 @@ function getOfficeIcon(){
 
 function getStreetlightIcon(){
     var streetlightIcon = L.icon({
-        iconUrl: 'https://img.icons8.com/color/48/000000/street-light.png',
+        iconUrl: 'https://image.flaticon.com/icons/svg/1339/1339969.svg',
         // shadowUrl: 'leaf-shadow.png',
 
         iconSize:      [25, 41], // size of the icon
@@ -686,7 +737,7 @@ function getStreetlightIcon(){
 
 function getAirQualityIcon(){
     var AirQualityIcon = L.icon({
-        iconUrl: 'https://img.icons8.com/color/48/000000/air-quality.png',
+        iconUrl: '../assets/img/icons/aqm.svg',
         // shadowUrl: 'leaf-shadow.png',
 
         iconSize:      [25, 41], // size of the icon
@@ -699,7 +750,7 @@ function getAirQualityIcon(){
 
 function getFloodSensorIcon(){
     var FloodSensorIcon = L.icon({
-        iconUrl: 'https://img.icons8.com/office/16/000000/sensor.png',
+        iconUrl: 'https://image.flaticon.com/icons/svg/1890/1890123.svg',
         // shadowUrl: 'leaf-shadow.png',
 
         iconSize:      [25, 41], // size of the icon
@@ -712,7 +763,7 @@ function getFloodSensorIcon(){
 
 function getWifiHotspotIcon(){
     var WifiHotspotIcon = L.icon({
-        iconUrl: 'https://img.icons8.com/flat_round/64/000000/wi-fi-connected.png',
+        iconUrl: 'https://image.flaticon.com/icons/svg/179/179428.svg',
         // shadowUrl: 'leaf-shadow.png',
 
         iconSize:      [25, 41], // size of the icon
