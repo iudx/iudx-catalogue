@@ -164,7 +164,7 @@ var drawPluginOptions = {
         polygon: true,
         polyline: true,
         rectangle: true,
-        marker: true,
+        marker: false,
     },
     edit: {
         featureGroup: drawnItems, //REQUIRED!!
