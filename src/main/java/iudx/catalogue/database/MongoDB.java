@@ -241,9 +241,22 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
           }
         });
   }
- 
+
+  @Override
   public void list(Message<Object> message) {
-	    mongoFind(new JsonObject(), new JsonObject(), message);
+      JsonObject request = (JsonObject) message.body();
+      String key = request.getString("item-type");
+      mongo.distinct(COLLECTION,key+".value", String.class.getName(),res->{
+         if(res.succeeded()){
+             //System.out.println("Response Distinct: "+res.result().getJsonArray(0).toString());
+             message.reply(res.result());
+         }else
+         {
+             message.fail(0, "Failure");
+         }
+      });
+
+	  //  mongoFind(new JsonObject(), new JsonObject(), message);
 	  }
   
   public void getItem(Message<Object> message) {
@@ -367,7 +380,6 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
         attributeValues = extractElements(requestBody.getString("attribute-value"));
         if(attributeNames.size()!=attributeValues.size())
             return null;
-
       for(int i = 0; i<attributeNames.size(); i++){
           String key = attributeNames.getString(i);
           JsonArray values = attributeValues.getJsonArray(i);
@@ -470,8 +482,6 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
         }
     } else
         query=null;
-
-
     return query;
   }
   
@@ -538,16 +548,18 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 		System.out.println("GEO-SPATIAL Query (CENTRE PT)");
 		geo_query = geo_within_search_query(requestBody);
 		query = geo_query;
-
 		} else if (requestBody.containsKey("bbox")	&& ! requestBody.containsKey("attribute-name") && ! requestBody.containsKey("attribute-value")){
             System.out.println("GEO-SPATIAL Query (BBOX)");
             query=geoSearchQuery(requestBody);
 
-        } else if(requestBody.containsKey("geometry") && ! requestBody.containsKey("attribute-name") && ! requestBody.containsKey("attribute-value")){ 
+        } else if(requestBody.containsKey("geometry") && ! requestBody.containsKey("attribute-name") && ! requestBody.containsKey("attribute-value")){
+            System.out.println("GEO-SPATIAL Query (POLYGON/LINESTRING)");
+            query=geoSearchQuery(requestBody);
+        } else if(requestBody.containsKey("geometry")){
             System.out.println("GEO-SPATIAL Query (POLYGON/LINESTRING)");
             query=geoSearchQuery(requestBody);
 
-		}  else if (requestBody.containsKey("lat") && requestBody.containsKey("lon") && requestBody.containsKey("radius")
+        } else if (requestBody.containsKey("lat") && requestBody.containsKey("lon") && requestBody.containsKey("radius")
 				&& requestBody.containsKey("attribute-name") && requestBody.containsKey("attribute-value")) {
 			System.out.println("GEO-SPATIAL with ATTRIBUTE Query");
 			attribute_query = attributeQuerySearch(requestBody);
@@ -555,7 +567,6 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 			geo_query = geo_within_search_query(requestBody);
 			expressions.add(geo_query);
 			query.put("$and", expressions);
-			
 		} else if(requestBody.containsKey("bbox") || requestBody.containsKey("geometry") && requestBody.containsKey("attribute-name") && requestBody.containsKey("attribute-value")){
             System.out.println("GEO-SPATIAL (BBOX/POLYGON/LINESTRING) WITH ATTRIBUTE QUERY");
 			attribute_query = attributeQuerySearch(requestBody);
@@ -563,7 +574,6 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 			geo_query = geoSearchQuery(requestBody);
 			expressions.add(geo_query);
 			query.put("$and", expressions);
-
 		} else if (requestBody.containsKey("attribute-name")
             && !requestBody.containsKey("attribute-value")) {
             query = null;
