@@ -9,7 +9,7 @@ var tags_set=[];
 const legends = {
     "streetlight-feeder-sree" : "https://img.icons8.com/color/48/000000/street-light.png",
     "aqm-bosch-climo": "https://img.icons8.com/color/48/000000/air-quality.png",
-    "flood-sensor": "https://img.icons8.com/office/16/000000/sensor.png",
+    "flood-sensor": "https://image.flaticon.com/icons/svg/1890/1890123.svg",
     "wifi-hotspot": "https://img.icons8.com/flat_round/64/000000/wi-fi-connected.png",
     "ptz-video camera": "https://img.icons8.com/color/48/000000/marker.png",
     "crowd-sourced-changebhai": "https://img.icons8.com/ultraviolet/40/000000/marker.png",
