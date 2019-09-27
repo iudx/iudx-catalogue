@@ -512,14 +512,13 @@ function plotGeoJSONs(geoJSONObject, _id, plot_id,_resourceServerGroup,_resource
                 //filter: filter_byTags,
                 // onEachFeature: onEachFeature
             }).addTo(markersLayer);
-            console.log("1111111111111111");
     
     }
     else if(geoJSONObject["type"]=="Point"){
            // console.log("Printing Point....")
             L.geoJSON(geoJSONObject, {
                 pointToLayer: function (feature, latlng) {
-                    console.log(_resourceServerGroup)
+                    // console.log(_resourceServerGroup)
                         // return L.marker(latlng, {icon: getOfficeIcon()});
                        
                         // <a href='/catalogue/v1/items/"+plot_id+"'>Get Catalogue-item-details</a><br/>

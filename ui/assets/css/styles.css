@@ -9,6 +9,97 @@
 	z-index: 9999;
 	background: url(../img/spinner.gif) center no-repeat #fff;
 }
+/* Slideshow container */
+.slideshow-container {
+  position: relative;
+  background: #3ed3f9;
+  padding-right:40px!important;
+}
+
+/* Slides */
+.mySlides {
+  display: none;
+  padding: 50px;
+  text-align: center;
+}
+
+/* Next & previous buttons */
+.prev, .next {
+  cursor: pointer;
+  position: absolute;
+  top: 50%;
+  width: auto;
+  margin-top: -30px;
+  padding: 16px;
+  color: #888;
+  font-weight: bold;
+  font-size: 20px;
+  border-radius: 0 3px 3px 0;
+  user-select: none;
+}
+
+/* Position the "next button" to the right */
+.next {
+  position: absolute;
+  right: 0;
+  border-radius: 3px 0 0 3px;
+}
+
+/* On hover, add a black background color with a little bit see-through */
+.prev:hover, .next:hover {
+  background-color: rgba(0,0,0,0.8);
+  color: white;
+}
+
+/* The dot/bullet/indicator container */
+.dot-container {
+  text-align: center;
+  padding: 20px;
+  background: #ddd;
+}
+
+/* The dots/bullets/indicators */
+.dot {
+  cursor: pointer;
+  height: 15px;
+  width: 15px;
+  margin: 0 2px;
+  background-color: #bbb;
+  border-radius: 50%;
+  display: inline-block;
+  transition: background-color 0.6s ease;
+}
+
+/* Add a background color to the active dot/circle */
+.active, .dot:hover {
+  background-color: #717171;
+}
+
+/* Add an italic font style to all quotes */
+q {font-style: italic;}
+
+/* Add a blue color to the author */
+.author {color: cornflowerblue;}
+
+#slideshow {
+  display:none;
+  position: fixed;
+  width: 50%;
+  z-index: 9999;
+  height: 50%;
+  left: 50%;
+  right: 50%;
+  bottom: 50%;
+  top: 10%;
+  width: 800px;
+}
+#button_slide{
+
+z-index:99999;
+position: fixed;
+    left: 50%;
+    top: 5%;
+}
 .btn-info{
 margin-left:5px;
 color:black!important;
@@ -31,9 +122,10 @@ color:black!important;
 label {display: block}
 
 .filter_box{
-  width: 250px !important;
-  height: 250px !important;
+  width: 350px !important;
+  height: 300px !important;
   overflow-y: auto !important;
+  
 }
 .details-css{
 /* font-size: 20px; */
@@ -288,17 +380,11 @@ color:rgb(0, 102, 255)
 	color: #777;
 }
 
-#taglist {
-  list-style-type: disc ;
-  padding: 0;
-  /* margin-left:50px; */
-}
-
 fieldset{
   line-height:1.8;
-    /* display: block; */
-    display:inline-block;
-    margin-left : 50px;
+  /* display: block; */
+  display:inline-block;
+  margin-left : 50px;
     
 }
 #filter_btn{
