@@ -241,9 +241,22 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
           }
         });
   }
- 
+
+  @Override
   public void list(Message<Object> message) {
-	    mongoFind(new JsonObject(), new JsonObject(), message);
+      JsonObject request = (JsonObject) message.body();
+      String key = request.getString("item-type");
+      mongo.distinct(COLLECTION,key+".value", String.class.getName(),res->{
+         if(res.succeeded()){
+             //System.out.println("Response Distinct: "+res.result().getJsonArray(0).toString());
+             message.reply(res.result());
+         }else
+         {
+             message.fail(0, "Failure");
+         }
+      });
+
+	  //  mongoFind(new JsonObject(), new JsonObject(), message);
 	  }
   
   public void getItem(Message<Object> message) {
