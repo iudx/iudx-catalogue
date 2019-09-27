@@ -67,7 +67,7 @@ var filters = document.getElementById('taglist');
 
 //Adding Legend to the map
 
-// var legend = L.control({ position: 'bottomright' });
+// var legen    d = L.control({ position: 'bottomright' });
 
 // legend.onAdd = function (map) {
 
@@ -209,10 +209,7 @@ map.on('draw:created', async function (e) {
             //$.get("/search/catalogue/attribute?bounding-type=circle&lat="+ center_point["lat"] +"&long="+ center_point["lng"] +"&radius="+radius, function(data) {
             
             data = JSON.parse(data);
-<<<<<<< HEAD
-=======
             toast_alert_for_response_data_length(data);
->>>>>>> 8952070c2e3e66ff04e3488cec4d8c620fd8d3e2
             //console.log(data)
             for (var i = data.length - 1; i >= 0; i--) {
                 
@@ -254,12 +251,9 @@ map.on('draw:created', async function (e) {
 
             data = JSON.parse(data);
             //console.log(data)
-<<<<<<< HEAD
-=======
 
             toast_alert_for_response_data_length(data);
 
->>>>>>> 8952070c2e3e66ff04e3488cec4d8c620fd8d3e2
             for (var i = data.length - 1; i >= 0; i--) {
                 
                 if (data[i].hasOwnProperty('location')) {
@@ -303,10 +297,7 @@ map.on('draw:created', async function (e) {
 
 
             data = JSON.parse(data);
-<<<<<<< HEAD
-=======
             toast_alert_for_response_data_length(data);
->>>>>>> 8952070c2e3e66ff04e3488cec4d8c620fd8d3e2
             //console.log(data)
             for (var i = data.length - 1; i >= 0; i--) {
 
@@ -349,10 +340,7 @@ map.on('draw:created', async function (e) {
 
 
             data = JSON.parse(data);
-<<<<<<< HEAD
-=======
             toast_alert_for_response_data_length(data);
->>>>>>> 8952070c2e3e66ff04e3488cec4d8c620fd8d3e2
             //console.log(data)
             for (var i = data.length - 1; i >= 0; i--) {
 
@@ -393,10 +381,7 @@ map.on('draw:created', async function (e) {
 
 
             data = JSON.parse(data);
-<<<<<<< HEAD
-=======
             toast_alert_for_response_data_length(data);
->>>>>>> 8952070c2e3e66ff04e3488cec4d8c620fd8d3e2
          //   //console.log(data)
             for (var i = data.length - 1; i >= 0; i--) {
 
