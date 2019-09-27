@@ -67,7 +67,7 @@ var filters = document.getElementById('taglist');
 
 //Adding Legend to the map
 
-// var legen    d = L.control({ position: 'bottomright' });
+// var legend = L.control({ position: 'bottomright' });
 
 // legend.onAdd = function (map) {
 
