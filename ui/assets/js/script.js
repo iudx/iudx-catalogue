@@ -22,7 +22,7 @@ L.control.zoom({
 // }).addTo(map);
 
 var tile_layer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions">CARTO</a><br><span class="AttributionClass">Icons made from<span><a href="https://www.icons8.com"> icons8.com</a></span></span>',
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions">CARTO</a><br><span class="AttributionClass">Icons made from<span><a href="https://www.icons8.com"> icons8.com</a></span> and <a href="https://flaticon.com"> flaticon.com</a></span>',
     subdomains: 'abcd',
     maxZoom: 100
 });
@@ -162,7 +162,7 @@ var drawPluginOptions = {
     draw: {
         // disable toolbar item by setting it to false
         polygon: true,
-        polyline: true,
+        polyline: false,
         rectangle: true,
         marker: false,
     },
