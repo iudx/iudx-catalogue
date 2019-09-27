@@ -22,7 +22,7 @@ L.control.zoom({
 // }).addTo(map);
 
 var tile_layer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions">CARTO</a><br><span class="AttributionClass">Icons made from<span><a href="https://www.icons8.com"><font color="blue"> icons8.com</font></a></span></span>',
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions">CARTO</a><br><span class="AttributionClass">Icons made from<span><a href="https://www.icons8.com"> icons8.com</a></span></span>',
     subdomains: 'abcd',
     maxZoom: 100
 });
@@ -67,7 +67,7 @@ var filters = document.getElementById('taglist');
 
 //Adding Legend to the map
 
-// var legen    d = L.control({ position: 'bottomright' });
+// var legend = L.control({ position: 'bottomright' });
 
 // legend.onAdd = function (map) {
 
@@ -164,7 +164,7 @@ var drawPluginOptions = {
         polygon: true,
         polyline: true,
         rectangle: true,
-        marker: true,
+        marker: false,
     },
     edit: {
         featureGroup: drawnItems, //REQUIRED!!
@@ -359,25 +359,38 @@ map.on('draw:created', async function (e) {
     }
 
     if (type === 'polyline') {
-        //console.log(layer);
+        console.log(layer);
         // here you got the boundingBox points
 
-        var bound_points = layer._bounds;
-
+        var points = layer._latlngs;
+        console.log(points.length -1)
         markersLayer.clearLayers();
-        var boundingPoints = [];
+        // var boundingPoints = [];
 
         // //console.log(bound_points)
-        var b1 = bound_points._northEast["lat"] + "," + bound_points._northEast["lng"]
-        var b2 = bound_points._southWest["lat"] + "," + bound_points._southWest["lng"]
-        boundingPoints.push(b1)
-        boundingPoints.push(b2)
-        boundingPoints.join(",")
+        // var b1 = bound_points._northEast["lat"] + "," + bound_points._northEast["lng"]
+        // var b2 = bound_points._southWest["lat"] + "," + bound_points._southWest["lng"]
+        // boundingPoints.push(b1)
+        // boundingPoints.push(b2)
+        // boundingPoints.join(",")
         //console.log("/catalogue/v1/search?bbox=" + boundingPoints + "&relation=within")
-        geo_shape = {"type": "polyline", "value": {"bbox_points": boundingPoints}}
+
+            var polylinePoints = [];
+            
+        for (i = 0; i < points.length ; i++) {
+            //console.log("print")
+            //console.log(points[0][i]['lat'], points[0][i]['lng']);
+            coordinates = (+ points[i]['lat'] + "," + points[i]['lng'])
+            console.log(coordinates)
+            // if(!polylinePoints.coordinates[])
+            polylinePoints.push(coordinates);
+            
+            polylinePoints.join(",")
+        }
+        geo_shape = {"type": "polyline", "value": {"bbox_points": polylinePoints}}
         __filter_url =  get_filtered_url(get_selected_values_framed_url());
 
-        $.get("/catalogue/v1/search?bbox=" + boundingPoints + "&relation=within" + __filter_url, function (data) {
+        $.get("/catalogue/v1/search?geometry=linestring((" + polylinePoints + "))&relation=intersects" + __filter_url, function (data) {
 
 
             data = JSON.parse(data);

@@ -6,49 +6,19 @@
 // var _resourceId_data ;
 var tags_set=[];
 
+const legends = {
+    "streetlight-feeder-sree" : "https://img.icons8.com/color/48/000000/street-light.png",
+    "aqm-bosch-climo": "https://img.icons8.com/color/48/000000/air-quality.png",
+    "flood-sensor": "https://image.flaticon.com/icons/svg/1890/1890123.svg",
+    "wifi-hotspot": "https://img.icons8.com/flat_round/64/000000/wi-fi-connected.png",
+    "ptz-video camera": "https://img.icons8.com/color/48/000000/marker.png",
+    "crowd-sourced-changebhai": "https://img.icons8.com/ultraviolet/40/000000/marker.png",
+    "safetipin": "https://img.icons8.com/flat_round/64/000000/safety-pin--v2.png",
+    "traffic-incidents": "https://image.flaticon.com/icons/svg/1167/1167993.svg"
+}
 
 function getImageRsg(_resourceServerGroup) {
-    if(_resourceServerGroup==='streetlight-feeder-sree'){
-       
-    return `
-    https://img.icons8.com/color/48/000000/street-light.png`;
-    }
-    if(_resourceServerGroup==='aqm-bosch-climo'){
-        return `
-        https://img.icons8.com/color/48/000000/air-quality.png`;
-   
-    }
-    if(_resourceServerGroup==='flood-sensor'){
-        return `
-        https://img.icons8.com/office/16/000000/sensor.png`; 
-  
-    }
-    if(_resourceServerGroup==='wifi-hotspot'){
-        
-        return `
-        https://img.icons8.com/flat_round/64/000000/wi-fi-connected.png`;
-    }
-    if(_resourceServerGroup==='ptz-video camera'){
-      
-        return `
-        https://img.icons8.com/color/48/000000/marker.png`;
-    }
-    if(_resourceServerGroup==='crowd-sourced-changebhai'){
-      
-        return `
-        https://img.icons8.com/ultraviolet/40/000000/marker.png
-        `;
-    }
-    if(_resourceServerGroup==='safetipin'){
-        return `
-        https://img.icons8.com/flat_round/64/000000/safety-pin--v2.png`;
-    }
-    if(_resourceServerGroup==='traffic-incidents'){
-        
-        return `
-        https://image.flaticon.com/icons/svg/1167/1167993.svg
-        `;
-    }
+    return legends[_resourceServerGroup]
 }
 
 // Spinner by https://tobiasahlin.com/spinkit/
@@ -196,7 +166,7 @@ function reset_filter(__input_name){
     }else if(__input_name == "provider"){
         category = "Provider"
     }
-
+    console.log(get_selected_values_framed_url())
     var __filter_url =  "/catalogue/v1/search?" + get_selected_values_framed_url()
 
     $.get(__filter_url, function (data, status) {
@@ -219,6 +189,16 @@ function reset_filter(__input_name){
     });
 
     toast_alert(category + ' filter has been cleared', 'success','#1abc9c')
+}
+
+function round_off(__arr, __decimal_places){
+    var x = 0;
+    var len = __arr.length
+    while(x < len){ 
+        __arr[x] = __arr[x].toFixed(__decimal_places); 
+        x++
+    }
+    return __arr;
 }
 
 function toast_alert_for_response_data_length(__data){
@@ -468,95 +448,15 @@ function plotGeoJSONs(geoJSONObject, _id, plot_id,_resourceServerGroup,_resource
                         fillOpacity: 0.5
                       },
                 pointToLayer: function (feature, latlng) {
-                        //console.log(feature.properties);
-                        // return L.marker(latlng, {icon: getOfficeIcon()});
-                       
-                        // <a href='/catalogue/v1/items/"+plot_id+"'>Get Catalogue-item-details</a><br/>
-                        var customPopup = `<a href='#' class='data-modal'  onclick="display_latest_data(event, this, '`+_id+`')">Get latest-data</a>`;
-                        if(_resourceServerGroup==='streetlight-feeder-sree'){
-                            ////console.log("street")
-                            var _marker = L.marker(latlng,{icon: getStreetlightIcon()}).addTo(map);
-                            _marker.itemUUID = _id;
-                        //////console.log(_marker.itemUUID);
-                        _marker.on('click', markerOnClick);
-                        _marker.bindPopup(customPopup)
-                        //console.log(_marker)
-                        return _marker;
-                        }
-                        if(_resourceServerGroup==='aqm-bosch-climo'){
-                            ////console.log("aqm")
-                            var _marker = L.marker(latlng,{icon: getAirQualityIcon()}).addTo(map);
-                            _marker.itemUUID = _id;
-                        //////console.log(_marker.itemUUID);
-                        _marker.on('click', markerOnClick);
-                        _marker.bindPopup(customPopup)
-                        //console.log(_marker)
-                        return _marker;
-                        }
-                        if(_resourceServerGroup==='flood-sensor'){
-                            ////console.log("flood")
-                            var _marker = L.marker(latlng,{icon: getFloodSensorIcon()}).addTo(map);
-                            _marker.itemUUID = _id;
-                        //////console.log(_marker.itemUUID);
-                        _marker.on('click', markerOnClick);
-                        _marker.bindPopup(customPopup)
-                        //console.log(_marker)
-                        return _marker;
-                        }
-                        if(_resourceServerGroup==='wifi-hotspot'){
-                            ////console.log("wifi")
-                            var _marker = L.marker(latlng,{icon: getWifiHotspotIcon()}).addTo(map);
-                            _marker.itemUUID = _id;
-                        //////console.log(_marker.itemUUID);
-                        _marker.on('click', markerOnClick);
-                        _marker.bindPopup(customPopup)
-                        return _marker;
-                        }
-                        if(_resourceServerGroup==='itms'){
-                            ////console.log("itms")
-                            var _marker = L.marker(latlng,{icon: getITMSIcon()}).addTo(map);
-                            _marker.itemUUID = _id;
-                        //////console.log(_marker.itemUUID);
-                        _marker.on('click', markerOnClick);
-                        _marker.bindPopup(customPopup)
-                        return _marker;
-                        }
-                        if(_resourceServerGroup==='changebhai'){
-                            ////console.log("change")
-                            var _marker = L.marker(latlng,{icon: getChangebhaiIcon()}).addTo(map);
-                            _marker.itemUUID = _id;
-                        //////console.log(_marker.itemUUID);
-                        _marker.on('click', markerOnClick);
-                        _marker.bindPopup(customPopup)
-                        return _marker;
-                        }
-                        if(_resourceServerGroup==='safetypin'){
-                            ////console.log("safety")
-                            var _marker = L.marker(latlng,{icon: getSafetypinIcon()}).addTo(map);
-                            _marker.itemUUID = _id;
-                        //////console.log(_marker.itemUUID);
-                        _marker.on('click', markerOnClick);
-                        _marker.bindPopup(customPopup)
-                        return _marker;
-                        }
-                        if(_resourceServerGroup==='traffic-incidents'){
-                            ////console.log("aqm")
-                            var _marker = L.marker(latlng,{icon: getAirQualityIcon()}).addTo(map);
-                            _marker.itemUUID = _id;
-                        //////console.log(_marker.itemUUID);
-                        _marker.on('click', markerOnClick);
-                        _marker.bindPopup(customPopup)
-                        return _marker;
-                        }
                         
-                        // ////console.log(_marker)
-                        // //////console.log(_id);
-                        // //////console.log(geoJSONObject);
-                        // _marker.itemUUID = _id;
-                        // //////console.log(_marker.itemUUID);
-                        // _marker.on('click', markerOnClick);
-                        // _marker.bindPopup(customPopup)
-                        // return _marker;
+                    var customPopup = `<a href='#' class='data-modal'  onclick="display_latest_data(event, this, '`+_id+`')">Get latest-data</a>`;
+
+                        var _marker = L.marker(latlng,{icon: getMarkerIcon(_resourceServerGroup)}).addTo(map);
+                        _marker.itemUUID = _id;
+                        //////console.log(_marker.itemUUID);
+                        _marker.on('click', markerOnClick);
+                        _marker.bindPopup(customPopup)
+                        return _marker;
                         
                 },
                 //filter: filter_byTags,
@@ -573,78 +473,12 @@ function plotGeoJSONs(geoJSONObject, _id, plot_id,_resourceServerGroup,_resource
                        
                         // <a href='/catalogue/v1/items/"+plot_id+"'>Get Catalogue-item-details</a><br/>
                         var customPopup = `<a href='#' class='data-modal'  onclick="display_latest_data(event, this, '`+_id+`')">Get latest-data</a>`;
-                        if(_resourceServerGroup==='streetlight-feeder-sree'){
-                            ////console.log("street")
-                            var _marker = L.marker(latlng,{icon: getStreetlightIcon()}).addTo(map);
-                            _marker.itemUUID = _id;
+                        var _marker = L.marker(latlng,{icon: getMarkerIcon(_resourceServerGroup)}).addTo(map);
+                        _marker.itemUUID = _id;
                         //////console.log(_marker.itemUUID);
                         _marker.on('click', markerOnClick);
                         _marker.bindPopup(customPopup)
                         return _marker;
-                        }
-                        if(_resourceServerGroup==='aqm-bosch-climo'){
-                            ////console.log("aqm")
-                            var _marker = L.marker(latlng,{icon: getAirQualityIcon()}).addTo(map);
-                            _marker.itemUUID = _id;
-                        //////console.log(_marker.itemUUID);
-                        _marker.on('click', markerOnClick);
-                        _marker.bindPopup(customPopup)
-                        return _marker;
-                        }
-                        if(_resourceServerGroup==='flood-sensor'){
-                            ////console.log("flood")
-                            var _marker = L.marker(latlng,{icon: getFloodSensorIcon()}).addTo(map);
-                            _marker.itemUUID = _id;
-                        //////console.log(_marker.itemUUID);
-                        _marker.on('click', markerOnClick);
-                        _marker.bindPopup(customPopup)
-                        return _marker;
-                        }
-                        if(_resourceServerGroup==='wifi-hotspot'){
-                            ////console.log("wifi")
-                            var _marker = L.marker(latlng,{icon: getWifiHotspotIcon()}).addTo(map);
-                            _marker.itemUUID = _id;
-                        //////console.log(_marker.itemUUID);
-                        _marker.on('click', markerOnClick);
-                        _marker.bindPopup(customPopup)
-                        return _marker;
-                        }
-                        if(_resourceServerGroup==='ptz-video camera'){
-                            //console.log("itms")
-                            var _marker = L.marker(latlng,{icon: getITMSIcon()}).addTo(map);
-                            _marker.itemUUID = _id;
-                        //////console.log(_marker.itemUUID);
-                        _marker.on('click', markerOnClick);
-                        _marker.bindPopup(customPopup)
-                        return _marker;
-                        }
-                        // if(_resourceServerGroup==='changebhai'){
-                        //     //console.log("change")
-                        //     var _marker = L.marker(latlng,{icon: getChangebhaiIcon()}).addTo(map);
-                        //     _marker.itemUUID = _id;
-                        // ////console.log(_marker.itemUUID);
-                        // _marker.on('click', markerOnClick);
-                        // _marker.bindPopup(customPopup)
-                        // return _marker;
-                        // }
-                        // if(_resourceServerGroup==='safetypin'){
-                        //     //console.log("safety")
-                        //     var _marker = L.marker(latlng,{icon: getSafetypinIcon()}).addTo(map);
-                        //     _marker.itemUUID = _id;
-                        // ////console.log(_marker.itemUUID);
-                        // _marker.on('click', markerOnClick);
-                        // _marker.bindPopup(customPopup)
-                        // return _marker;
-                        // }
-                        
-                        // ////console.log(_marker)
-                        // //////console.log(_id);
-                        // //////console.log(geoJSONObject);
-                        // _marker.itemUUID = _id;
-                        // //////console.log(_marker.itemUUID);
-                        // _marker.on('click', markerOnClick);
-                        // _marker.bindPopup(customPopup)
-                        // return _marker;
                 },
                // filter: filter_byTags,
                 // onEachFeature: onEachFeature
@@ -708,6 +542,18 @@ function getPuneLatLng(){
     return [18.5204, 73.8567]
 }
 
+function getMarkerIconOptions(__rsg){
+    return {
+        iconUrl: legends[__rsg],
+        // shadowUrl: 'leaf-shadow.png',
+
+        iconSize:      [25, 41], // size of the icon
+        iconAnchor:    [12, 41], // point of the icon which will correspond to marker's location
+        popupAnchor:   [1, -34], // point from which the popup should open relative to the iconAnchor
+        shadowSize:    [41, 41]  // size of the shadow
+    }
+}
+
 function getOfficeIcon(){
     var officeIcon = L.icon({
         iconUrl: 'https://image.flaticon.com/icons/svg/167/167707.svg',
@@ -722,94 +568,9 @@ function getOfficeIcon(){
     return officeIcon;
 }
 
-function getStreetlightIcon(){
-    var streetlightIcon = L.icon({
-        iconUrl: 'https://image.flaticon.com/icons/svg/1339/1339969.svg',
-        // shadowUrl: 'leaf-shadow.png',
 
-        iconSize:      [25, 41], // size of the icon
-        iconAnchor:    [12, 41], // point of the icon which will correspond to marker's location
-        popupAnchor:   [1, -34], // point from which the popup should open relative to the iconAnchor
-        shadowSize:    [41, 41]  // size of the shadow
-    });
-    return streetlightIcon;
-}
-
-function getAirQualityIcon(){
-    var AirQualityIcon = L.icon({
-        iconUrl: '../assets/img/icons/aqm.svg',
-        // shadowUrl: 'leaf-shadow.png',
-
-        iconSize:      [25, 41], // size of the icon
-        iconAnchor:    [12, 41], // point of the icon which will correspond to marker's location
-        popupAnchor:   [1, -34], // point from which the popup should open relative to the iconAnchor
-        shadowSize:    [41, 41]  // size of the shadow
-    });
-    return AirQualityIcon;
-}
-
-function getFloodSensorIcon(){
-    var FloodSensorIcon = L.icon({
-        iconUrl: 'https://image.flaticon.com/icons/svg/1890/1890123.svg',
-        // shadowUrl: 'leaf-shadow.png',
-
-        iconSize:      [25, 41], // size of the icon
-        iconAnchor:    [12, 41], // point of the icon which will correspond to marker's location
-        popupAnchor:   [1, -34], // point from which the popup should open relative to the iconAnchor
-        shadowSize:    [41, 41]  // size of the shadow
-    });
-    return FloodSensorIcon;
-}
-
-function getWifiHotspotIcon(){
-    var WifiHotspotIcon = L.icon({
-        iconUrl: 'https://image.flaticon.com/icons/svg/179/179428.svg',
-        // shadowUrl: 'leaf-shadow.png',
-
-        iconSize:      [25, 41], // size of the icon
-        iconAnchor:    [12, 41], // point of the icon which will correspond to marker's location
-        popupAnchor:   [1, -34], // point from which the popup should open relative to the iconAnchor
-        shadowSize:    [41, 41]  // size of the shadow
-    });
-    return WifiHotspotIcon;
-}
-
-function getITMSIcon(){
-    var ITMSIcon = L.icon({
-        iconUrl: 'https://img.icons8.com/color/48/000000/marker.png',
-        // shadowUrl: 'leaf-shadow.png',
-        iconSize:      [25, 41], // size of the icon
-        iconAnchor:    [12, 41], // point of the icon which will correspond to marker's location
-        popupAnchor:   [1, -34], // point from which the popup should open relative to the iconAnchor
-        shadowSize:    [41, 41]  // size of the shadow
-    });
-    return ITMSIcon;
-}
-
-function getChangebhaiIcon(){
-    var changebhaiIcon = L.icon({
-        iconUrl: 'https://img.icons8.com/ultraviolet/40/000000/marker.png',
-        // shadowUrl: 'leaf-shadow.png',
-
-        iconSize:      [25, 41], // size of the icon
-        iconAnchor:    [12, 41], // point of the icon which will correspond to marker's location
-        popupAnchor:   [1, -34], // point from which the popup should open relative to the iconAnchor
-        shadowSize:    [41, 41]  // size of the shadow
-    });
-    return changebhaiIcon;
-}
-
-function getSafetypinIcon(){
-    var safetypinIcon = L.icon({
-        iconUrl: 'https://img.icons8.com/flat_round/64/000000/safety-pin--v2.png',
-        // shadowUrl: 'leaf-shadow.png',
-
-        iconSize:      [25, 41], // size of the icon
-        iconAnchor:    [12, 41], // point of the icon which will correspond to marker's location
-        popupAnchor:   [1, -34], // point from which the popup should open relative to the iconAnchor
-        shadowSize:    [41, 41]  // size of the shadow
-    });
-    return safetypinIcon;
+function getMarkerIcon(__rsg){
+    return L.icon(getMarkerIconOptions(__rsg));
 }
 
 
