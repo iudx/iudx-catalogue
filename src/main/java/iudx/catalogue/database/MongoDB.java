@@ -555,9 +555,6 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
         } else if(requestBody.containsKey("geometry") && ! requestBody.containsKey("attribute-name") && ! requestBody.containsKey("attribute-value")){
             System.out.println("GEO-SPATIAL Query (POLYGON/LINESTRING)");
             query=geoSearchQuery(requestBody);
-        } else if(requestBody.containsKey("geometry")){
-            System.out.println("GEO-SPATIAL Query (POLYGON/LINESTRING)");
-            query=geoSearchQuery(requestBody);
 
         } else if (requestBody.containsKey("lat") && requestBody.containsKey("lon") && requestBody.containsKey("radius")
 				&& requestBody.containsKey("attribute-name") && requestBody.containsKey("attribute-value")) {

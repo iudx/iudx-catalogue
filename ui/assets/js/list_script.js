@@ -367,32 +367,21 @@ function json_to_htmlcard(json_obj){
 $(document).ready(function(){
 	$("body").fadeIn(1000);
 	$("#landing_section").fadeIn();
-	let seen_tags_set = [];
-	let seen_rsg_set = [];
-	let seen_provider_set = [];
-	$.get("/catalogue/v1/search", function(data) {
+	$.get("/catalogue/internal_apis/list/tags", function(data) {
 			// $("#searched_items").text(data);
 			////console.log("RRRRRRRR1");
-			data=JSON.parse(data)
-			////console.log("RRRRRRRR");
-            for (var i = 0; i < data.length; i++) {                
-                for (var tag_i = 0; tag_i < data[i]['tags']['value'].length - 1; tag_i++) {
-	                if (!seen_tags_set.includes(data[i]['tags']['value'][tag_i].toLowerCase())) {
-	                    seen_tags_set.push(data[i]['tags']['value'][tag_i].toLowerCase())
-	                }
-            	}
-
-            	if (data[i]['resourceServerGroup']['value'] != undefined && !seen_rsg_set.includes(data[i]['resourceServerGroup']['value'].toLowerCase())) {
-					seen_rsg_set.push(data[i]['resourceServerGroup']['value'].toLowerCase())
-	            }
-	            if (data[i]['provider']['value'] != undefined && !seen_provider_set.includes(data[i]['provider']['value'].toLowerCase())) {
-					seen_provider_set.push(data[i]['provider']['value'].toLowerCase())
-	            }
-            }
-        });
-	tags_set=seen_tags_set;
-    rsg_set = seen_rsg_set;
-    provider_set = seen_provider_set;
+			tags_set=JSON.parse(data)
+    });
+    $.get("/catalogue/internal_apis/list/resourceServerGroup", function(data) {
+			// $("#searched_items").text(data);
+			////console.log("RRRRRRRR1");
+			rsg_set=JSON.parse(data)
+    });
+    $.get("/catalogue/internal_apis/list/provider", function(data) {
+			// $("#searched_items").text(data);
+			////console.log("RRRRRRRR1");
+			provider_set=JSON.parse(data)
+    });
 
 	$("#landing_footer, #normal_footer").html(getFooterContent()	);
 	$.get("/catalogue/v1/count", function(data) {

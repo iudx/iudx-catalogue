@@ -12,9 +12,10 @@ const legends = {
     "flood-sensor": "https://image.flaticon.com/icons/svg/1890/1890123.svg",
     "wifi-hotspot": "https://img.icons8.com/flat_round/64/000000/wi-fi-connected.png",
     "ptz-video camera": "https://img.icons8.com/color/48/000000/marker.png",
-    "crowd-sourced-changebhai": "https://img.icons8.com/ultraviolet/40/000000/marker.png",
+    "changebhai": "https://img.icons8.com/ultraviolet/40/000000/marker.png",
     "safetipin": "https://img.icons8.com/flat_round/64/000000/safety-pin--v2.png",
-    "traffic-incidents": "https://image.flaticon.com/icons/svg/1167/1167993.svg"
+    "traffic-incidents": "https://image.flaticon.com/icons/svg/1167/1167993.svg",
+    "itms-mobility": "https://image.flaticon.com/icons/svg/2073/2073073.svg"
 }
 
 function getImageRsg(_resourceServerGroup) {
