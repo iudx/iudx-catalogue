@@ -22,7 +22,7 @@ L.control.zoom({
 // }).addTo(map);
 
 var tile_layer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions">CARTO</a><br><span class="AttributionClass">Icons made from<span><a href="https://www.icons8.com"><font color="blue"> icons8.com</font></a></span></span>',
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions">CARTO</a><br><span class="AttributionClass">Icons made from<span><a href="https://www.icons8.com"> icons8.com</a></span></span>',
     subdomains: 'abcd',
     maxZoom: 100
 });
@@ -376,8 +376,8 @@ map.on('draw:created', async function (e) {
         //console.log("/catalogue/v1/search?bbox=" + boundingPoints + "&relation=within")
         geo_shape = {"type": "polyline", "value": {"bbox_points": boundingPoints}}
         __filter_url =  get_filtered_url(get_selected_values_framed_url());
-
-        $.get("/catalogue/v1/search?bbox=" + boundingPoints + "&relation=within" + __filter_url, function (data) {
+        // boundingPoints = round_off(boundingPoints, 2)
+        $.get("/catalogue/v1/search?geometry=linestring(" + boundingPoints + ")&relation=intersects" + __filter_url, function (data) {
 
 
             data = JSON.parse(data);

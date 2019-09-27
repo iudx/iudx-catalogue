@@ -166,7 +166,7 @@ function reset_filter(__input_name){
     }else if(__input_name == "provider"){
         category = "Provider"
     }
-
+    console.log(get_selected_values_framed_url())
     var __filter_url =  "/catalogue/v1/search?" + get_selected_values_framed_url()
 
     $.get(__filter_url, function (data, status) {
@@ -189,6 +189,16 @@ function reset_filter(__input_name){
     });
 
     toast_alert(category + ' filter has been cleared', 'success','#1abc9c')
+}
+
+function round_off(__arr, __decimal_places){
+    var x = 0;
+    var len = __arr.length
+    while(x < len){ 
+        __arr[x] = __arr[x].toFixed(__decimal_places); 
+        x++
+    }
+    return __arr;
 }
 
 function toast_alert_for_response_data_length(__data){
