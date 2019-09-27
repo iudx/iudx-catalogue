@@ -108,7 +108,7 @@ public class APIServerVerticle extends AbstractVerticle {
     router.get("/catalogue/v1/count").handler(this::count);
     
     // NEW APIs
-    router.get("/list/catalogue/:itemtype").handler(this::list);
+    router.get("/catalogue/internal_apis/list/:itemtype").handler(this::list);
     router.get("/search/catalogue/attribute").handler(this::searchAttribute);
     router.post("/create/catalogue/:itemtype").handler(this::create);
     router.put("/update/catalogue/:itemtype/:id").handler(this::update);
@@ -287,9 +287,26 @@ public class APIServerVerticle extends AbstractVerticle {
 	}
 
   private void list(RoutingContext routingContext) {
-    String currentType = routingContext.request().getParam("item-type");
+    String currentType = routingContext.request().getParam("itemtype");
 
-    if (currentType.equals("item-types")) {
+    /**
+     * New code-
+     * Added as a part to provide List of Tags, Provider, ResourceServerGroup APIs for UI
+     **/
+    JsonObject requestBody = new JsonObject();
+    if(currentType.equalsIgnoreCase("tags")){
+        requestBody.put("item-type","tags");
+        databaseHandler("list",routingContext,requestBody);
+    } else if (currentType.equalsIgnoreCase("provider")){
+        requestBody.put("item-type","provider");
+        databaseHandler("list",routingContext,requestBody);
+    }else if (currentType.equalsIgnoreCase("resourceservergroup")){
+          requestBody.put("item-type","resourceServerGroup");
+          databaseHandler("list",routingContext,requestBody);
+    }
+    /**-----------------------------ends here-----------------------------------**/
+
+    else if(currentType.equals("item-types")) {
       JsonArray allTypes = new JsonArray(itemTypes);
       JsonObject reply = new JsonObject().put("item-types", allTypes);
       handle200(routingContext, reply);
@@ -602,6 +619,7 @@ public class APIServerVerticle extends AbstractVerticle {
                 switch (action) {
                   case "getItem":
                   case "list":
+                    handle200(routingContext, (JsonArray) database_reply.result().body());
                   case "get-tags":
                   case "search-attribute":
                     handle200(routingContext, (JsonArray) database_reply.result().body());
