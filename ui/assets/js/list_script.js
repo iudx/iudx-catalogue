@@ -368,19 +368,14 @@ $(document).ready(function(){
 	$("body").fadeIn(1000);
 	$("#landing_section").fadeIn();
 	$.get("/catalogue/internal_apis/list/tags", function(data) {
-			// $("#searched_items").text(data);
-			////console.log("RRRRRRRR1");
 			tags_set=JSON.parse(data)
     });
     $.get("/catalogue/internal_apis/list/resourceServerGroup", function(data) {
-			// $("#searched_items").text(data);
-			////console.log("RRRRRRRR1");
 			rsg_set=JSON.parse(data)
     });
     $.get("/catalogue/internal_apis/list/provider", function(data) {
-			// $("#searched_items").text(data);
-			////console.log("RRRRRRRR1");
 			provider_set=JSON.parse(data)
+			$("#provider_count").html(provider_set.length);
     });
 
 	$("#landing_footer, #normal_footer").html(getFooterContent()	);
