@@ -10,7 +10,7 @@ var map = L.map('map', {
     //  loadingControl: true
 });
 
-map.setView(getPuneLatLng(), 12);
+map.setView(getMapDefaultViewLatLng(), 12);
 //add zoom control with your options
 L.control.zoom({
     position: 'topright'
@@ -102,7 +102,7 @@ var sidebar = L.control.sidebar('sidebar', {
 
 map.addControl(sidebar);
 
-var marker = L.marker(getPuneLatLng(), { icon: getOfficeIcon() }).addTo(map).on('click', function (event) {
+var marker = L.marker(getMapDefaultViewLatLng(), { icon: getOfficeIcon() }).addTo(map).on('click', function (event) {
     sidebar.show(1000);
 });
 

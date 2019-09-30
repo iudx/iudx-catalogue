@@ -270,11 +270,11 @@ function _get_security_based_latest_data_link(_resource_id, _resourceServerGroup
 function request_access_token(resource_id, resourceServerGroup, rid) {
     //console.log(resource_id)
     $.ajax({
-      url: "https://auth.iudx.org.in/auth/v1/token",
+      url: cat_conf['auth_base_URL']+"/token",
       type: 'post',
       dataType: 'json',
       contentType: 'application/json',
-      data: JSON.stringify({"resource-id": resource_id}),
+      data: JSON.stringify({"request":{"resource-id": resource_id}}),
       success: function (data) {
         // //console.log(data.token)
         
@@ -540,8 +540,8 @@ function markerOnClick(e) {
 }
 
 
-function getPuneLatLng(){
-    return [18.5204, 73.8567]
+function getMapDefaultViewLatLng(){
+    return cat_conf['map_default_view_lat_lng']
 }
 
 function getMarkerIconOptions(__rsg){
