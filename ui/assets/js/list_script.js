@@ -154,7 +154,7 @@ function get_items(_attr_name,_attr_value){
 
 
 function getFooterContent(){
-	return `<p>&copy; 2019 <a href="https://iudx.org.in" target="_blank">IUDX </a> | Read the  <a href="https://apidocs.iudx.org.in" target="_blank">Doc</a> <br> <span style="font-size: 15px;">Icon made by <a href="https://www.flaticon.com/authors/freepik" target="_blank">Freepik</a> from <a href="https://www.flaticon.com" target="_blank">flaticon.com</a>.</span></p>`
+	return `<p>&copy; 2019 <a href="https://iudx.org.in" target="_blank">IUDX </a> | Read the  <a href="`+ cat_conf['api_docs_link'] +`" target="_blank">Doc</a> <br> ` + get_icon_attribution_html("list_icon_attr") + `</p>`
 }
 
 function set_attr_value(__attr_name,__attr_value) {
@@ -277,7 +277,7 @@ function show_details(_id){
 
 				$("#extra_links_"+id).html(`
 				<p>
-					<!--<a href="`+ get_latest_data_url(_id,data[0]["resourceServerGroup"]["value"],data[0]["resourceId"]["value"]) +`">Latest Data</a>   |  -->
+					<!--<a href="`+ get_latest_data_url() +`">Latest Data</a>   |  -->
 					<a href="`+data[0]["refBaseSchema"]["value"]+`" target="_blank">Base Schema </a> |
 					<a href="`+data[0]["refDataModel"]["value"]+`" target="_blank">Data Model </a>
 				</p>
