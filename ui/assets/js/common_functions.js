@@ -591,7 +591,6 @@ function getSelectedValuesCheckbox(){
 }
 
 $(document).ready(function(){
-  // document.title = cat_conf['smart_city_name'] + " IUDX | Indian Urban Data Exchange Catalogue";
   $("#smartcity_name").html(cat_conf['smart_city_name'] + " IUDX | Indian Urban Data Exchange Catalogue ")
   $("#smart_city_link").html(cat_conf['smart_city_name'])
   $("#smart_city_link").attr('href',cat_conf['smart_city_url'])
