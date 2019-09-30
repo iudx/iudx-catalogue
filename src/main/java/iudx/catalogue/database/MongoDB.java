@@ -246,6 +246,9 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   public void list(Message<Object> message) {
       JsonObject request = (JsonObject) message.body();
       String key = request.getString("item-type");
+      if(key.equalsIgnoreCase("resourceItem"))
+	    mongoFind(new JsonObject(), new JsonObject(), message);
+    else{
       mongo.distinct(COLLECTION,key+".value", String.class.getName(),res->{
          if(res.succeeded()){
              //System.out.println("Response Distinct: "+res.result().getJsonArray(0).toString());
@@ -256,8 +259,9 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
          }
       });
 
-	  //  mongoFind(new JsonObject(), new JsonObject(), message);
 	  }
+  }
+
   
   public void getItem(Message<Object> message) {
     JsonObject request_body = (JsonObject) message.body();
