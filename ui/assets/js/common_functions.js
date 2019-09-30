@@ -5,8 +5,6 @@
 // var _geoJSONObject;
 // var _resourceId_data ;
 
-const resoureServerBaseURL="https://pune.iudx.org.in/resource-server/pscdcl/v1";
-
 var tags_set=[];
 
 const legends = {
@@ -126,7 +124,7 @@ function _alertify(header_msg, body_msg){
 function display_latest_data(e, ele, _rid) {
     e.preventDefault();   // use this to NOT go to href site
     _alertify("Getting Data...", get_spinner_html())
-    __get_latest_data(resoureServerBaseURL+"/search", _rid)
+    __get_latest_data(cat_conf['resoure_server_base_URL']+"/search", _rid)
       .then(data => {
         _alertify("Success!!!", '<pre id="custom_alertbox">'+jsonPrettyHighlightToId(data)+'</pre>')
       })
@@ -495,9 +493,9 @@ function plotGeoJSONs(geoJSONObject, _id, plot_id,_resourceServerGroup,_resource
 function get_latest_data_url(id, rsg, rid){
 
     if(id=="rbccps.org/aa9d66a000d94a78895de8d4c0b3a67f3450e531/safetipin/safetipin/safetyIndex"){
-        return resoureServerBaseURL+`/search`
+        return cat_conf['resoure_server_base_URL']+`/search`
     }else{
-        return resoureServerBaseURL+`/search`
+        return cat_conf['resoure_server_base_URL']+`/search`
     }
 }
 
