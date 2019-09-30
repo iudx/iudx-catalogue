@@ -33,7 +33,7 @@ L.Control.Watermark = L.Control.extend({
     onAdd: function (map) {
         var img = L.DomUtil.create('img');
 
-        img.src = '../assets/img/iudx_pscdcl.png';
+        img.src = cat_conf['smart_city_iudx_logo'];
         img.style.width = '250px';
         
         return img;
