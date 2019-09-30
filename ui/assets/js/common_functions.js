@@ -4,6 +4,7 @@
 // var _resourceServerGroup_data;
 // var _geoJSONObject;
 // var _resourceId_data ;
+
 var tags_set=[];
 
 const legends = {
@@ -94,7 +95,7 @@ function __get_latest_data(__url, __rid) {
 function _get_latest_data(_resource_id, _token){
     //console.log(_token)
     $.ajax({
-      "url": "https://pune.iudx.org.in/resource-server/pscdcl/v1/search",
+      "url": "/search",
       "async": true,
       "processData": false,
       "crossDomain": true,
@@ -123,7 +124,7 @@ function _alertify(header_msg, body_msg){
 function display_latest_data(e, ele, _rid) {
     e.preventDefault();   // use this to NOT go to href site
     _alertify("Getting Data...", get_spinner_html())
-    __get_latest_data("https://pune.iudx.org.in/resource-server/pscdcl/v1/search", _rid)
+    __get_latest_data(cat_conf['resoure_server_base_URL']+"/search", _rid)
       .then(data => {
         _alertify("Success!!!", '<pre id="custom_alertbox">'+jsonPrettyHighlightToId(data)+'</pre>')
       })
@@ -492,9 +493,9 @@ function plotGeoJSONs(geoJSONObject, _id, plot_id,_resourceServerGroup,_resource
 function get_latest_data_url(id, rsg, rid){
 
     if(id=="rbccps.org/aa9d66a000d94a78895de8d4c0b3a67f3450e531/safetipin/safetipin/safetyIndex"){
-        return `https://pune.iudx.org.in/resource-server/pscdcl/v1/search`
+        return cat_conf['resoure_server_base_URL']+`/search`
     }else{
-        return `https://pune.iudx.org.in/resource-server/pscdcl/v1/search`
+        return cat_conf['resoure_server_base_URL']+`/search`
     }
 }
 
@@ -601,3 +602,11 @@ function getSelectedValuesCheckbox(){
     }
 
 }
+
+$(document).ready(function(){
+  // document.title = cat_conf['smart_city_name'] + " IUDX | Indian Urban Data Exchange Catalogue";
+  $("#smartcity_name").html(cat_conf['smart_city_name'] + " IUDX | Indian Urban Data Exchange Catalogue ")
+  $("#smart_city_link").html(cat_conf['smart_city_name'])
+  $("#smart_city_link").attr('href',cat_conf['smart_city_url'])
+  $("#smart_iudx_city_logo").attr('src',cat_conf['smart_city_iudx_logo'])
+});
