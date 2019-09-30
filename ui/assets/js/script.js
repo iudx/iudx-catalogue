@@ -10,7 +10,7 @@ var map = L.map('map', {
     //  loadingControl: true
 });
 
-map.setView(getPuneLatLng(), 12);
+map.setView(getMapDefaultViewLatLng(), cat_conf['map_default_zoom']);
 //add zoom control with your options
 L.control.zoom({
     position: 'topright'
@@ -22,7 +22,7 @@ L.control.zoom({
 // }).addTo(map);
 
 var tile_layer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions">CARTO</a><br><span class="AttributionClass">Icons made from<span><a href="https://www.icons8.com"> icons8.com</a></span> and <a href="https://flaticon.com"> flaticon.com</a></span>',
+    attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions" target="_blank">CARTO</a><br>' + get_icon_attribution_html("map_icon_attr"),
     subdomains: 'abcd',
     maxZoom: 100
 });
@@ -50,11 +50,6 @@ L.Control.Watermark = L.Control.extend({
 L.control.watermark = function (opts,opts1) {
     return new L.Control.Watermark(opts,opts1);
 }
-// var anchor = L.DomUtil.create('a');
-
-//         anchor.href = 'https://www.icons8.com';
-//         anchor.style.width = '250px';
-//         anchor.innerHTML="Icons made from icons8.com";
         
 
 
@@ -102,12 +97,12 @@ var sidebar = L.control.sidebar('sidebar', {
 
 map.addControl(sidebar);
 
-var marker = L.marker(getPuneLatLng(), { icon: getOfficeIcon() }).addTo(map).on('click', function (event) {
+var marker = L.marker(getMapDefaultViewLatLng(), { icon: getOfficeIcon() }).addTo(map).on('click', function (event) {
     sidebar.show(1000);
 });
 
 
-marker.itemUUID = "Pune Office"
+marker.itemUUID = cat_conf['map_default_lat_lng_name']
 //Create a marker layer 
 var markersLayer = L.featureGroup().addTo(map);
 marker.on("click", markerOnClick);
