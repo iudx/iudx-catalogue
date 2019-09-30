@@ -7,16 +7,8 @@
 
 var tags_set=[];
 
-const legends = {
-    "streetlight-feeder-sree" : "https://img.icons8.com/color/48/000000/street-light.png",
-    "aqm-bosch-climo": "https://img.icons8.com/color/48/000000/air-quality.png",
-    "flood-sensor": "https://image.flaticon.com/icons/svg/1890/1890123.svg",
-    "wifi-hotspot": "https://img.icons8.com/flat_round/64/000000/wi-fi-connected.png",
-    "ptz-video camera": "https://img.icons8.com/color/48/000000/marker.png",
-    "changebhai": "https://img.icons8.com/ultraviolet/40/000000/marker.png",
-    "safetipin": "https://img.icons8.com/flat_round/64/000000/safety-pin--v2.png",
-    "traffic-incidents": "https://image.flaticon.com/icons/svg/1167/1167993.svg",
-    "itms-mobility": "https://image.flaticon.com/icons/svg/2073/2073073.svg"
+function get_icon_attribution_html(map_icon_attr){
+  return `<span class="` + map_icon_attr + `">Icons made by <a href="`+icon_attribution['author_link']+`" target="_blank">`+icon_attribution['author']+`</a> from <a href="`+icon_attribution['site_link']+`" target="_blank">`+icon_attribution['site']+`</a>.</span>`
 }
 
 function getImageRsg(_resourceServerGroup) {
@@ -270,11 +262,11 @@ function _get_security_based_latest_data_link(_resource_id, _resourceServerGroup
 function request_access_token(resource_id, resourceServerGroup, rid) {
     //console.log(resource_id)
     $.ajax({
-      url: "https://auth.iudx.org.in/auth/v1/token",
+      url: cat_conf['auth_base_URL']+"/token",
       type: 'post',
       dataType: 'json',
       contentType: 'application/json',
-      data: JSON.stringify({"resource-id": resource_id}),
+      data: JSON.stringify({"request":{"resource-id": resource_id}}),
       success: function (data) {
         // //console.log(data.token)
         
@@ -490,13 +482,8 @@ function plotGeoJSONs(geoJSONObject, _id, plot_id,_resourceServerGroup,_resource
 }
 
 
-function get_latest_data_url(id, rsg, rid){
-
-    if(id=="rbccps.org/aa9d66a000d94a78895de8d4c0b3a67f3450e531/safetipin/safetipin/safetyIndex"){
+function get_latest_data_url(){
         return cat_conf['resoure_server_base_URL']+`/search`
-    }else{
-        return cat_conf['resoure_server_base_URL']+`/search`
-    }
 }
 
 function show_menu_icon() {
@@ -540,8 +527,8 @@ function markerOnClick(e) {
 }
 
 
-function getPuneLatLng(){
-    return [18.5204, 73.8567]
+function getMapDefaultViewLatLng(){
+    return cat_conf['map_default_view_lat_lng']
 }
 
 function getMarkerIconOptions(__rsg){
@@ -549,7 +536,7 @@ function getMarkerIconOptions(__rsg){
         iconUrl: legends[__rsg],
         // shadowUrl: 'leaf-shadow.png',
 
-        iconSize:      [25, 41], // size of the icon
+        iconSize:      [38, 95], // size of the icon
         iconAnchor:    [12, 41], // point of the icon which will correspond to marker's location
         popupAnchor:   [1, -34], // point from which the popup should open relative to the iconAnchor
         shadowSize:    [41, 41]  // size of the shadow
