@@ -4,6 +4,10 @@ body {
   font-size: 20px !important;
 }
 
+#resource_item_details, button, .leaflet-popup-content-wrapper, .sidebar-catergory{
+  font-size: 20px !important;
+}
+
 .toast_msg{
   font-size: 20px !important;
 }
