@@ -39,6 +39,8 @@
 
   <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <!-- Google Fonts  -->
+  <link href="https://fonts.googleapis.com/css?family=Darker+Grotesque&display=swap" rel="stylesheet">
   <!-- <link rel="stylesheet" href="../assets/css/leaflet-sidebar.css"/> -->
   
  
@@ -86,17 +88,17 @@
           <h2 style="font-family:roboto;font-size:30px;color:rgb(0, 102, 255);" class="center_align"><strong>Filter
               Results</strong><button class="btn btn-primary" onclick="showDetails()">Go To Details</button></h2>
 
-          <div style="height:100px;" class="form-group row">
+          <div style="height:100px;" class="sidebar form-group row">
 
             <br>
            
-            <label class="col-sm-10 col-form-label label-margin label-size"> <i class="icon-tags"></i>Tags <button class="btn btn-info" onclick="reset_filter('taglists')"> Clear</button></label>
+            <label class="col-sm-10 col-form-label label-margin label-size"> <img width="10%" height="10%" src="https://image.flaticon.com/icons/svg/138/138238.svg">Tags <button class="btn btn-info bold" onclick="reset_filter('taglists')"> Clear</button></label>
             <fieldset id="taglist"></fieldset>
             <br>
-            <label class="col-sm-10 col-form-label label-margin label-size"><img width=10% height=10% src= "../../assets/img/icons/server.png"></i> Resource Server Group<button class="btn btn-info" onclick="reset_filter('resource_server_group')">Clear</button></label>
+            <label class="col-sm-10 col-form-label label-margin label-size"><img width=10% height=10% src= "../../assets/img/icons/server.png"></i> Resource Server Group<button class="btn btn-info bold" onclick="reset_filter('resource_server_group')">Clear</button></label>
             <fieldset id="rsglist"> </fieldset>
             <br>
-            <label class="col-sm-10 col-form-label label-margin label-size"><img width="10%" height="10%" src="../../assets/img/icons/service.png"> Provider<button class="btn btn-info" onclick="reset_filter('provider')">Clear</button></label>
+            <label class="col-sm-10 col-form-label label-margin label-size"><img width="10%" height="10%" src="https://image.flaticon.com/icons/svg/1692/1692466.svg"> Provider<button class="btn btn-info bold" onclick="reset_filter('provider')">Clear</button></label>
             <fieldset id="providerlist"></fieldset>
           </div>
         </div>
