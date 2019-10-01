@@ -22,13 +22,17 @@ const legends = {
     "changebhai": "https://image.flaticon.com/icons/svg/252/252025.svg",
     "crowd-sourced-safetipin": "https://image.flaticon.com/icons/svg/148/148845.svg",
     "traffic-incidents": "https://image.flaticon.com/icons/svg/1167/1167993.svg",
-    "itms-mobility": "https://image.flaticon.com/icons/svg/2073/2073073.svg"
+    "itms-mobility": "https://image.flaticon.com/icons/svg/2089/2089885.svg"
 }
 
 //set attribution for used icons -> prefer flaticon as it has a wide range of options and icons are appealling
 const icon_attribution = {
-	"author":"freepik",
-	"author_link":"https://www.flaticon.com/authors/freepik",
+	"author": [
+				{"freepik":"https://www.flaticon.com/authors/freepik"}, 
+				{"smashicons":"https://www.flaticon.com/authors/smashicons"}, 
+				{"flat-icons":"https://www.flaticon.com/authors/flat-icons"}, 
+				{"itim2101":"https://www.flaticon.com/authors/itim2101"}
+			],
 	"site":"flaticon.com",
 	"site_link":"https://flaticon.com"
 }
