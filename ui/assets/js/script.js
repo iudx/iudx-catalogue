@@ -1,12 +1,12 @@
 var DATA;
-var geo_shape=null;
+var geo_shape = null;
 
 //disable zoomControl when initializing map (which is topleft by default)
 var map = L.map('map', {
     zoomControl: false
     //... other options
 
-     // Tell the map to use a loading control
+    // Tell the map to use a loading control
     //  loadingControl: true
 });
 
@@ -38,17 +38,17 @@ L.Control.Watermark = L.Control.extend({
         
         return img;
     },
-    
-       
-    
+
+
+
 
     onRemove: function (map) {
         // Nothing to do here
     }
 });
 
-L.control.watermark = function (opts,opts1) {
-    return new L.Control.Watermark(opts,opts1);
+L.control.watermark = function (opts, opts1) {
+    return new L.Control.Watermark(opts, opts1);
 }
         
 
@@ -175,66 +175,155 @@ map.addControl(drawControl);
 //     edit: { featureGroup: drawnItems }
 // }).addTo(map);
 
+// Listen to when a layer is in delete mode
+map.on('draw:deleted', function (e) {
+    markersLayer.clearLayers();
+       
+});
+
 // listen to when a layer is changed in edit mode
 map.on('draw:edited', function (e) {
-    var layers = e.layers;
-    console.log(layers)
+
     drawnItems.eachLayer(function (layer) {
-        if (layer instanceof L.Circle){
-            console.log("plot circle")
-           var __obj = Object.keys(layers._layers)[0]
-           var _center_point = {
-               "lat":layers._layers[__obj]['_latlng']['lat'],
-               "lng":layers._layers[__obj]['_latlng']['lng']
-           }
-           var _radius = layers._layers[__obj]['_mRadius']
-           geo_shape = {"type": "circle", "value": {"center_point": _center_point, "radius": _radius}}
-           __filter_url =  get_filtered_url(get_selected_values_framed_url());
-            // Do marker specific actions here
-            $.get("/catalogue/v1/search?lat=" + _center_point["lat"] + "&lon=" + _center_point["lng"] + "&radius=" + _radius + __filter_url, function (data) {
+        var layers = e.layers;
+        console.log(Object.keys(layers._layers)[0])
+        console.log(layers)
+        if (layer instanceof L.Circle) {
+
+            var center_point = layer.getLatLng();
+            var radius = layer.getRadius();
+
+            geo_shape = { "type": "circle", "value": { "center_point": center_point, "radius": radius } }
+            __filter_url = get_filtered_url(get_selected_values_framed_url());
+            ////console.log(radius)
+            ////console.log(layer)
+            ////console.log(center_point["lat"], center_point["lng"])
+            markersLayer.clearLayers();
+            // activate_batch_mode();
+
+            ////console.log("/catalogue/v1/search?lat=" + center_point["lat"] + "&lon=" + center_point["lng"] + "&radius=" + radius)
+
+            $.get("/catalogue/v1/search?lat=" + center_point["lat"] + "&lon=" + center_point["lng"] + "&radius=" + radius + __filter_url, function (data) {
                 //$.get("/catalogue/v1/search?lat=12.273737&lon=78.37475&radius=200000", function(data) {
                 //$.get("/search/catalogue/attribute?bounding-type=circle&lat="+ center_point["lat"] +"&long="+ center_point["lng"] +"&radius="+radius, function(data) {
-                
+
                 data = JSON.parse(data);
                 toast_alert_for_response_data_length(data);
                 //console.log(data)
                 for (var i = data.length - 1; i >= 0; i--) {
-                    
+
                     // //console.log(data[i]["tags"]["value"])
                     if (data[i].hasOwnProperty('location')) {
                         // myLayer.addData(data[i]['geoJsonLocation']);
                         plotGeoJSONs(data[i]["location"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"], data[i]["tags"]["value"], data[i]["provider"]["value"]);
-    
+
                     } else if (data[i].hasOwnProperty('coverageRegion')) {
                         // myLayer.addData(data[i]['geoJsonLocation']);
                         ////console.log("1")
                         plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
                         ////console.log("2")
                     }
-                   
+
                 }
-    
-    
-                });
-    
+
+
+            });
         }
-        else if ((layer instanceof L.Polygon) && ! (layer instanceof L.Rectangle)) {
+        else if ((layer instanceof L.Polygon) && !(layer instanceof L.Rectangle)) {
             console.log("plot polygon")
+            var layers = e.layers;
+            console.log(layers)
+            var __obj = Object.keys(layers._layers)[0]
+            console.log(__obj)
+            var polyPoints = [];
+            points = layers._layers[__obj]['_latlngs'][0]
+            for (i = 0; i < points.length - 1; i += 2) {
+                //console.log("print")
+                //console.log(points[0][i]['lat'], points[0][i]['lng']);
+                coordinates = (+ points[i]['lat'] + "," + points[i]['lng'])
+                polyPoints.push(coordinates);
+
+                polyPoints.join(",")
+            }
+
+            geo_shape = { "type": "polygon", "value": { "points": polyPoints } }
+            __filter_url = get_filtered_url(get_selected_values_framed_url());
+            //console.log("/catalogue/v1/search?geometry=polygon(("+ polyPoints + ","+polyPoints[0]+"))&relation=within")
+            markersLayer.clearLayers();
+            $.get("/catalogue/v1/search?geometry=polygon((" + polyPoints + "," + polyPoints[0] + "))&relation=within" + __filter_url, function (data) {
+
+
+                data = JSON.parse(data);
+                toast_alert_for_response_data_length(data);
+                //console.log(data)
+                for (var i = data.length - 1; i >= 0; i--) {
+
+                    if (data[i].hasOwnProperty('location')) {
+
+                        plotGeoJSONs(data[i]["location"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
+                    }
+                    else if (data[i].hasOwnProperty('coverageRegion')) {
+
+                        plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
+
+                    }
+                }
+
+            });
         }
-            
-            //Do marker specific actions here
-        
-        else if (layer instanceof L.Rectangle){
+
+        //Do marker specific actions here
+
+        else if (layer instanceof L.Rectangle) {
             console.log("plot rec")
             //Do marker specific actions here
+            console.log(layer)
+            var bound_points = layer._bounds;
+            console.log(bound_points)
+            markersLayer.clearLayers();
+            var boundingPoints = [];
+
+            // //console.log(bound_points)
+            var b1 = bound_points._northEast["lat"] + "," + bound_points._northEast["lng"]
+            var b2 = bound_points._southWest["lat"] + "," + bound_points._southWest["lng"]
+            boundingPoints.push(b1)
+            boundingPoints.push(b2)
+            boundingPoints.join(",")
+
+            geo_shape = { "type": "rectangle", "value": { "bbox_points": boundingPoints } }
+            __filter_url = get_filtered_url(get_selected_values_framed_url());
+
+            //console.log("/catalogue/v1/search?bbox=" + boundingPoints + "&relation=within")
+
+
+            $.get("/catalogue/v1/search?bbox=" + boundingPoints + "&relation=within" + __filter_url, function (data) {
+
+
+                data = JSON.parse(data);
+                toast_alert_for_response_data_length(data);
+                //console.log(data)
+                for (var i = data.length - 1; i >= 0; i--) {
+
+                    if (data[i].hasOwnProperty('location')) {
+
+                        plotGeoJSONs(data[i]["location"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
+                    }
+                    else if (data[i].hasOwnProperty('coverageRegion')) {
+
+                        plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
+
+                    }
+                }
+
+            });
         }
-        else if ((layer instanceof L.Polyline) && ! (layer instanceof L.Polygon)) {
+        else if ((layer instanceof L.Polyline) && !(layer instanceof L.Polygon)) {
             console.log("plot polyline")
             //Do marker specific actions here
         }
 
     });
-   
+
 });
 
 map.on('draw:created', async function (e) {
@@ -251,25 +340,25 @@ map.on('draw:created', async function (e) {
         var center_point = layer.getLatLng();
         var radius = layer.getRadius();
 
-        geo_shape = {"type": "circle", "value": {"center_point": center_point, "radius": radius}}
-        __filter_url =  get_filtered_url(get_selected_values_framed_url());
+        geo_shape = { "type": "circle", "value": { "center_point": center_point, "radius": radius } }
+        __filter_url = get_filtered_url(get_selected_values_framed_url());
         ////console.log(radius)
-         ////console.log(layer)
+        ////console.log(layer)
         ////console.log(center_point["lat"], center_point["lng"])
         markersLayer.clearLayers();
-       // activate_batch_mode();
+        // activate_batch_mode();
 
         ////console.log("/catalogue/v1/search?lat=" + center_point["lat"] + "&lon=" + center_point["lng"] + "&radius=" + radius)
 
         $.get("/catalogue/v1/search?lat=" + center_point["lat"] + "&lon=" + center_point["lng"] + "&radius=" + radius + __filter_url, function (data) {
             //$.get("/catalogue/v1/search?lat=12.273737&lon=78.37475&radius=200000", function(data) {
             //$.get("/search/catalogue/attribute?bounding-type=circle&lat="+ center_point["lat"] +"&long="+ center_point["lng"] +"&radius="+radius, function(data) {
-            
+
             data = JSON.parse(data);
             toast_alert_for_response_data_length(data);
             //console.log(data)
             for (var i = data.length - 1; i >= 0; i--) {
-                
+
                 // //console.log(data[i]["tags"]["value"])
                 if (data[i].hasOwnProperty('location')) {
                     // myLayer.addData(data[i]['geoJsonLocation']);
@@ -281,15 +370,15 @@ map.on('draw:created', async function (e) {
                     plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
                     ////console.log("2")
                 }
-               
+
             }
 
 
-            });
+        });
 
-            
-        
-        
+
+
+
 
 
         // await geoquery_circle(center_point["lat"],center_point["lng"], radius)
@@ -297,8 +386,8 @@ map.on('draw:created', async function (e) {
 
     if (type === 'marker') {
         var center_point = layer.getLatLng();
-        geo_shape = {"type": "marker", "value": {"center_point": center_point}}
-        __filter_url =  get_filtered_url(get_selected_values_framed_url());
+        geo_shape = { "type": "marker", "value": { "center_point": center_point } }
+        __filter_url = get_filtered_url(get_selected_values_framed_url());
         //var radius = layer.getRadius();
         //console.log(layer.getLatLng());
         // //console.log(radius);
@@ -312,7 +401,7 @@ map.on('draw:created', async function (e) {
             toast_alert_for_response_data_length(data);
 
             for (var i = data.length - 1; i >= 0; i--) {
-                
+
                 if (data[i].hasOwnProperty('location')) {
                     // myLayer.addData(data[i]['geoJsonLocation']);
                     plotGeoJSONs(data[i]["location"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
@@ -329,7 +418,7 @@ map.on('draw:created', async function (e) {
     }
 
     if (type === 'polygon') {
-         //console.log(layer);
+        console.log(layer);
         // here you got the polygon points
 
         var points = layer._latlngs;
@@ -337,20 +426,20 @@ map.on('draw:created', async function (e) {
         //console.log(points)
         var polyPoints = [];
 
-        for (i = 0; i < points[0].length -1; i+=2) {
+        for (i = 0; i < points[0].length - 1; i += 2) {
             //console.log("print")
             //console.log(points[0][i]['lat'], points[0][i]['lng']);
             coordinates = (+ points[0][i]['lat'] + "," + points[0][i]['lng'])
             polyPoints.push(coordinates);
-            
+
             polyPoints.join(",")
         }
         //console.log(polyPoints);
-        geo_shape = {"type": "polygon", "value": {"points": polyPoints}}
-        __filter_url =  get_filtered_url(get_selected_values_framed_url());
+        geo_shape = { "type": "polygon", "value": { "points": polyPoints } }
+        __filter_url = get_filtered_url(get_selected_values_framed_url());
         //console.log("/catalogue/v1/search?geometry=polygon(("+ polyPoints + ","+polyPoints[0]+"))&relation=within")
 
-        $.get("/catalogue/v1/search?geometry=polygon(("+ polyPoints +","+polyPoints[0]+"))&relation=within" + __filter_url, function (data) {
+        $.get("/catalogue/v1/search?geometry=polygon((" + polyPoints + "," + polyPoints[0] + "))&relation=within" + __filter_url, function (data) {
 
 
             data = JSON.parse(data);
@@ -387,8 +476,8 @@ map.on('draw:created', async function (e) {
         boundingPoints.push(b2)
         boundingPoints.join(",")
 
-        geo_shape = {"type": "rectangle", "value": {"bbox_points": boundingPoints}}
-        __filter_url =  get_filtered_url(get_selected_values_framed_url());
+        geo_shape = { "type": "rectangle", "value": { "bbox_points": boundingPoints } }
+        __filter_url = get_filtered_url(get_selected_values_framed_url());
 
         //console.log("/catalogue/v1/search?bbox=" + boundingPoints + "&relation=within")
 
@@ -420,7 +509,7 @@ map.on('draw:created', async function (e) {
         // here you got the boundingBox points
 
         var points = layer._latlngs;
-        console.log(points.length -1)
+        console.log(points.length - 1)
         markersLayer.clearLayers();
         // var boundingPoints = [];
 
@@ -432,27 +521,27 @@ map.on('draw:created', async function (e) {
         // boundingPoints.join(",")
         //console.log("/catalogue/v1/search?bbox=" + boundingPoints + "&relation=within")
 
-            var polylinePoints = [];
-            
-        for (i = 0; i < points.length ; i++) {
+        var polylinePoints = [];
+
+        for (i = 0; i < points.length; i++) {
             //console.log("print")
             //console.log(points[0][i]['lat'], points[0][i]['lng']);
             coordinates = (+ points[i]['lat'] + "," + points[i]['lng'])
             console.log(coordinates)
             // if(!polylinePoints.coordinates[])
             polylinePoints.push(coordinates);
-            
+
             polylinePoints.join(",")
         }
-        geo_shape = {"type": "polyline", "value": {"bbox_points": polylinePoints}}
-        __filter_url =  get_filtered_url(get_selected_values_framed_url());
+        geo_shape = { "type": "polyline", "value": { "bbox_points": polylinePoints } }
+        __filter_url = get_filtered_url(get_selected_values_framed_url());
 
         $.get("/catalogue/v1/search?geometry=linestring((" + polylinePoints + "))&relation=intersects" + __filter_url, function (data) {
 
 
             data = JSON.parse(data);
             toast_alert_for_response_data_length(data);
-         //   //console.log(data)
+            //   //console.log(data)
             for (var i = data.length - 1; i >= 0; i--) {
 
                 if (data[i].hasOwnProperty('location')) {
@@ -472,7 +561,7 @@ map.on('draw:created', async function (e) {
     drawnItems.addLayer(layer);
     activate_batch_mode();
     sidebar.show();
-    
+
 });
 
 

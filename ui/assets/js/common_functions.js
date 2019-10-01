@@ -466,21 +466,6 @@ function plotGeoJSONs(geoJSONObject, _id, plot_id,_resourceServerGroup,_resource
 
                       }
 
-                    //   ,
-                // pointToLayer: function (feature, latlng) {
-                        
-                //     var customPopup = `<a href='#' class='data-modal'  onclick="display_latest_data(event, this, '`+_id+`')">Get latest-data</a>`;
-
-                //         var _marker = L.marker(latlng,{icon: getMarkerIcon(_resourceServerGroup)}).addTo(map);
-                //         _marker.itemUUID = _id;
-                //         //////console.log(_marker.itemUUID);
-                //         _marker.on('click', markerOnClick);
-                //         _marker.bindPopup(customPopup)
-                //         return _marker;
-                        
-                // },
-                //filter: filter_byTags,
-                // onEachFeature: onEachFeature
             }).addTo(markersLayer);
     }
     else if(geoJSONObject["type"]=="Point"){
