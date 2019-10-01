@@ -1,7 +1,29 @@
+html,
+body {
+  height: 100%;
+}
+
+
 .list_icon_attr{
   font-size: 15px !important;
 }
 
+.sidebar{
+  font-size: 20px;
+}
+
+*{
+  font-family: 'Darker Grotesque', sans-serif !important;
+}
+
+.bold{
+  font-weight: bold !important;
+}
+
+./*map_icon_attr{
+  font-size: 7px !important;
+}
+*/
 .copy-btn{
   color: white !important;
   background-color: #3ec0a6 !important;
