@@ -108,7 +108,7 @@ function _get_latest_data(_resource_id, _token){
       "processData": false,
       "crossDomain": true,
       "method": 'POST',
-      "headers": {"auth-token": _token, "Content-Type": "application/json"},
+      "headers": {"token": _token, "Content-Type": "application/json"},
       "data": JSON.stringify({
         "id": _resource_id,
         "options": "latest"
