@@ -22,7 +22,7 @@ L.control.zoom({
 // }).addTo(map);
 
 var tile_layer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-    attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions" target="_blank">CARTO</a><br>' + get_icon_attribution_html("map_icon_attr"),
+    attribution: '<span id="map_attr">© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions" target="_blank">CARTO</a><br>' + get_icon_attribution_html("map_icon_attr")+'</span>',
     subdomains: 'abcd',
     maxZoom: 100
 });
@@ -34,7 +34,7 @@ L.Control.Watermark = L.Control.extend({
         var img = L.DomUtil.create('img');
 
         img.src = cat_conf['smart_city_iudx_logo'];
-        img.style.width = '250px';
+        img.style.width = '200px';
         
         return img;
     },

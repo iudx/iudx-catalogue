@@ -7,8 +7,24 @@
 
 var tags_set=[];
 
+function get_icon_credits(){
+
+  var str=`Various icons used in this web app have been taken from <a href="`+icon_attribution['site_link']+`" target="_blank">`+icon_attribution['site']+`</a> and belong to the following authors.<br><ul>`
+
+  for (var i = 0; i < icon_attribution['author'].length; i++) {
+    for(var key in icon_attribution['author'][i]){
+      str+=`<li><a href="`+ icon_attribution['author'][i][key] +`" target="_blank">` + key + `</a></li>`;
+    }
+  }
+
+  str+="</ul>"
+
+  _alertify("Icon Credits",str);
+}
+
 function get_icon_attribution_html(map_icon_attr){
-  return `<span class="` + map_icon_attr + `">Icons made by <a href="`+icon_attribution['author_link']+`" target="_blank">`+icon_attribution['author']+`</a> from <a href="`+icon_attribution['site_link']+`" target="_blank">`+icon_attribution['site']+`</a>.</span>`
+  // return `<span class="` + map_icon_attr + `">Icons made by <a href="`+icon_attribution['author_link']+`" target="_blank">`+icon_attribution['author']+`</a> from <a href="`+icon_attribution['site_link']+`" target="_blank">`+icon_attribution['site']+`</a>.</span>`
+  return `<span class ="` + map_icon_attr + `">Icons from <a href="`+icon_attribution['site_link']+`" target="_blank">`+icon_attribution['site']+`</a> | <a href="#" onclick="get_icon_credits()">Credits</a></span>`
 }
 
 function getImageRsg(_resourceServerGroup) {
@@ -92,7 +108,7 @@ function _get_latest_data(_resource_id, _token){
       "processData": false,
       "crossDomain": true,
       "method": 'POST',
-      "headers": {"token": _token, "Content-Type": "application/json"},
+      "headers": {"auth-token": _token, "Content-Type": "application/json"},
       "data": JSON.stringify({
         "id": _resource_id,
         "options": "latest"
@@ -136,7 +152,7 @@ function get_filtered_url(__filter_url){
 
 function toast_alert(__msg, __msg_type, __bg_color){
     $.toast({
-        text: __msg,
+        text: "<b>"+__msg+"</b>",
         position: 'mid-center',
         hideAfter: 1800,
         loader: false,  // Whether to show loader or not. True by default
