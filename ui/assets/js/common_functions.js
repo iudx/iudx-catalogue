@@ -103,7 +103,7 @@ function __get_latest_data(__url, __rid) {
 function _get_latest_data(_resource_id, _token){
     //console.log(_token)
     $.ajax({
-      "url": "/search",
+      "url": cat_conf['resoure_server_base_URL']+"/search",
       "async": true,
       "processData": false,
       "crossDomain": true,
@@ -152,7 +152,7 @@ function get_filtered_url(__filter_url){
 
 function toast_alert(__msg, __msg_type, __bg_color){
     $.toast({
-        text: "<b>"+__msg+"</b>",
+        text: `<b class="toast_msg">`+__msg+`</b>`,
         position: 'mid-center',
         hideAfter: 1800,
         loader: false,  // Whether to show loader or not. True by default
