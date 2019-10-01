@@ -175,6 +175,68 @@ map.addControl(drawControl);
 //     edit: { featureGroup: drawnItems }
 // }).addTo(map);
 
+// listen to when a layer is changed in edit mode
+map.on('draw:edited', function (e) {
+    var layers = e.layers;
+    console.log(layers)
+    drawnItems.eachLayer(function (layer) {
+        if (layer instanceof L.Circle){
+            console.log("plot circle")
+           var __obj = Object.keys(layers._layers)[0]
+           var _center_point = {
+               "lat":layers._layers[__obj]['_latlng']['lat'],
+               "lng":layers._layers[__obj]['_latlng']['lng']
+           }
+           var _radius = layers._layers[__obj]['_mRadius']
+           geo_shape = {"type": "circle", "value": {"center_point": _center_point, "radius": _radius}}
+           __filter_url =  get_filtered_url(get_selected_values_framed_url());
+            // Do marker specific actions here
+            $.get("/catalogue/v1/search?lat=" + _center_point["lat"] + "&lon=" + _center_point["lng"] + "&radius=" + _radius + __filter_url, function (data) {
+                //$.get("/catalogue/v1/search?lat=12.273737&lon=78.37475&radius=200000", function(data) {
+                //$.get("/search/catalogue/attribute?bounding-type=circle&lat="+ center_point["lat"] +"&long="+ center_point["lng"] +"&radius="+radius, function(data) {
+                
+                data = JSON.parse(data);
+                toast_alert_for_response_data_length(data);
+                //console.log(data)
+                for (var i = data.length - 1; i >= 0; i--) {
+                    
+                    // //console.log(data[i]["tags"]["value"])
+                    if (data[i].hasOwnProperty('location')) {
+                        // myLayer.addData(data[i]['geoJsonLocation']);
+                        plotGeoJSONs(data[i]["location"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"], data[i]["tags"]["value"], data[i]["provider"]["value"]);
+    
+                    } else if (data[i].hasOwnProperty('coverageRegion')) {
+                        // myLayer.addData(data[i]['geoJsonLocation']);
+                        ////console.log("1")
+                        plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
+                        ////console.log("2")
+                    }
+                   
+                }
+    
+    
+                });
+    
+        }
+        else if ((layer instanceof L.Polygon) && ! (layer instanceof L.Rectangle)) {
+            console.log("plot polygon")
+        }
+            
+            //Do marker specific actions here
+        
+        else if (layer instanceof L.Rectangle){
+            console.log("plot rec")
+            //Do marker specific actions here
+        }
+        else if ((layer instanceof L.Polyline) && ! (layer instanceof L.Polygon)) {
+            console.log("plot polyline")
+            //Do marker specific actions here
+        }
+
+    });
+   
+});
+
 map.on('draw:created', async function (e) {
     drawnItems.clearLayers();
     // settimeout(1000);
