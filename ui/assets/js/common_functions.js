@@ -294,7 +294,9 @@ function request_access_token(resource_id, resourceServerGroup, rid) {
         
         _alertify("Success!!!", "Token received.<br>You are now authenticated to access the non-public data.")
         // _alertify("Success!!!", "Token received: " + data.token)
-        $('#token_section_'+resource_id_to_html_id(resource_id)).toggle();
+        if(!($('#token_section_'+resource_id_to_html_id(resource_id)).is(':visible'))) {
+          $('#token_section_'+resource_id_to_html_id(resource_id)).toggle();
+        }
             
       },
       error: function (jqXHR, exception) {
