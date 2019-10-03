@@ -1,5 +1,10 @@
 .no-js #loader { display: none;  }
 .js #loader { display: block; position: absolute; left: 100px; top: 0; }
+
+.myclass {
+/* margin-right:34px!important; */
+font-size:14px!important;
+}
 .se-pre-con {
 	position: fixed;
 	left: 0px;
