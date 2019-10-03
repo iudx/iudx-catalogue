@@ -41,13 +41,6 @@
   color:green;
 }
 
-html,
-body {
-  height: 100%;
-  font-family: 'Darker Grotesque', sans-serif !important;
-  font-size: 20px;
-}
-
 body{
   /*background-color: #f6f6f6;*/
   /*background-color: #ffffff;

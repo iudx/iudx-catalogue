@@ -1,6 +1,37 @@
+html,
+body {
+  height: 100%;
+  font-size: 20px !important;
+}
+
+#resource_item_details, button, .leaflet-popup-content-wrapper, .sidebar-catergory{
+  font-size: 20px !important;
+}
+
+.toast_msg{
+  font-size: 20px !important;
+}
+
 .list_icon_attr{
   font-size: 15px !important;
 }
+
+.sidebar{
+  font-size: 20px !important;
+}
+
+*{
+  font-family: 'Darker Grotesque', sans-serif !important;
+}
+
+.bold{
+  font-weight: bold !important;
+}
+
+/*.map_icon_attr{
+  font-size: 7px !important;
+}
+*/
 
 .copy-btn{
   color: white !important;
