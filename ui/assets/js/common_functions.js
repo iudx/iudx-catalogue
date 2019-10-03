@@ -227,7 +227,7 @@ function toast_alert_for_response_data_length(__data){
  }
 
 function get_selected_values_framed_url(){
-    var value = getSelectedValuesCheckbox();
+    var value = get_selected_values_checkbox();
     var tags = value.tags;
     var rsg = value.rsg;
     var provider = value.provider;
@@ -573,7 +573,7 @@ function getMarkerIcon(__rsg){
 }
 
 
-function getSelectedValuesCheckbox(){
+function get_selected_values_checkbox(){
     var _tags = [];
     var _rsg = [];
     var _pr = [];

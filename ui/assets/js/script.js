@@ -177,9 +177,10 @@ map.addControl(drawControl);
 
 // Listen to when a layer is in delete mode
 map.on('draw:deleted', function (e) {
-    markersLayer.clearLayers();
-       
-});
+    
+     markersLayer.clearLayers();
+    
+ });
 
 // listen to when a layer is changed in edit mode
 map.on('draw:edited', function (e) {
