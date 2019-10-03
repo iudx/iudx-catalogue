@@ -154,7 +154,8 @@ function get_items(_attr_name,_attr_value){
 
 
 function getFooterContent(){
-	return `<p>&copy; 2019 <a href="https://iudx.org.in" target="_blank">IUDX </a> | Read the  <a href="`+ cat_conf['api_docs_link'] +`" target="_blank">Doc</a> <br> ` + get_icon_attribution_html("list_icon_attr") + `</p>`
+	return `<p>&copy; 2019 <a href="https://iudx.org.in" target="_blank">IUDX </a></p>`
+	// return `<p>&copy; 2019 <a href="https://iudx.org.in" target="_blank">IUDX </a> | Read the  <a href="`+ cat_conf['api_docs_link'] +`" target="_blank">Doc</a> <br> ` + get_icon_attribution_html("list_icon_attr") + `</p>`
 }
 
 function set_attr_value(__attr_name,__attr_value) {
@@ -378,7 +379,7 @@ $(document).ready(function(){
 			$("#provider_count").html(provider_set.length);
     });
 
-	$("#landing_footer, #normal_footer").html(getFooterContent()	);
+	$("#landing_footer, #normal_footer").html(getFooterContent());
 	$.get("/catalogue/v1/count", function(data) {
 		$("#resource_item_count").html(JSON.parse(data)["Count"]);
 	});

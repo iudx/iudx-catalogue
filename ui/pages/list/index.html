@@ -108,20 +108,26 @@
 
               </div>
 
-            </div>
+          </div>
      
             <br>
             <br>
             <br>
-
-           <p class="lead text-muted">
-                   <!-- Also checkout the <a href="/map" style="color:#dddddd; text-decoration: underline">Geo Query Interface</a>. -->
-                   Also checkout the <a href="/map" target="_blank">Geo Query Interface</a>.
-           </p>
+          <div class="row">
+            <div class="col-lg-6">
+                <p style="text-align:right;"class="lead text-muted">Also checkout the</p>
+            </div>
+            <div class="col-lg-6">
+                   <ul>
+                     <li><a href="/map" target="_self">Geo Query Interface</a>.</li>
+                     <li><a href="https://apidocs.iudx.org.in" target="_blank">API Documentation</a>.</li>
+                   </ul>
+            </div>       
+           </div>
         
           
           </div>
-          </div>
+        </div>
           <!-- <footer class="text-muted landing_footer"> -->
           <!-- <div id="landing_footer" class="container landing_footer"> -->
           <div id="normal_footer" class="container normal_footer">
@@ -176,7 +182,10 @@
 
             
             <div class="row">
-              <div id="retrieved_items_count" class="col-12 card-margin-top"></div>
+              <div id="retrieved_items_count" class="col-lg-8 col-md-4 card-margin-top"></div>
+              <div class = "col-lg-4 col-md-4">
+                <button id="btn-back" class="btn btn-primary" onclick="location.href='https://localhost:8443/'">Go Back</button>
+              </div>
             </div>
              
             <div id="searched_items" class="row"></div>
