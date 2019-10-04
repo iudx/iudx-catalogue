@@ -4,6 +4,10 @@
   border-color: #007bff !important;
 }
 
+#btn-back{
+  margin-top:10px;
+}
+
 #custom_alertbox{
   width: 100% !important;
   height: 100% !important;

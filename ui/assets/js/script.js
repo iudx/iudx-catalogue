@@ -29,6 +29,14 @@ var tile_layer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voya
 
 tile_layer.addTo(map);
 
+  //link position: bottomright, topright, topleft, bottomleft
+  var link = L.control({position: 'bottomright'});
+  link.onAdd = function(map){
+      var div = L.DomUtil.create('div','myclass');
+      div.innerHTML=`Also Checkout <a href='https://apidocs.iudx.org.in/' target="_blank">API Documentation here</a>`;
+      return div;
+  }
+  link.addTo(map);
 L.Control.Watermark = L.Control.extend({
     onAdd: function (map) {
         var img = L.DomUtil.create('img');

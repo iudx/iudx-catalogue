@@ -17,7 +17,7 @@ const legends = {
     "streetlight-feeder-sree" : "https://image.flaticon.com/icons/svg/1245/1245929.svg",
     "aqm-bosch-climo": "https://image.flaticon.com/icons/svg/1808/1808701.svg",
     "flood-sensor": "https://image.flaticon.com/icons/svg/1890/1890123.svg",
-    "wifi-hotspot": "https://image.flaticon.com/icons/svg/254/254046.svg",
+    "wifi-hotspot": "https://image.flaticon.com/icons/svg/179/179428.svg",
     "ptz-video camera": "https://image.flaticon.com/icons/svg/1111/1111407.svg",
     "changebhai": "https://image.flaticon.com/icons/svg/252/252025.svg",
     "crowd-sourced-safetipin": "https://image.flaticon.com/icons/svg/148/148845.svg",
