@@ -22,28 +22,28 @@ L.control.zoom({
 // }).addTo(map);
 
 var tile_layer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-    attribution: '<span id="map_attr">© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions" target="_blank">CARTO</a><br>' + get_icon_attribution_html("map_icon_attr")+'</span>',
+    attribution: '<span id="map_attr">© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions" target="_blank">CARTO</a><br>' + get_icon_attribution_html("map_icon_attr") + '</span>',
     subdomains: 'abcd',
     maxZoom: 100
 });
 
 tile_layer.addTo(map);
 
-  //link position: bottomright, topright, topleft, bottomleft
-  var link = L.control({position: 'bottomright'});
-  link.onAdd = function(map){
-      var div = L.DomUtil.create('div','myclass');
-      div.innerHTML=`Also Checkout <a href='https://apidocs.iudx.org.in/' target="_blank">API Documentation here</a>`;
-      return div;
-  }
-  link.addTo(map);
+//link position: bottomright, topright, topleft, bottomleft
+var link = L.control({ position: 'bottomright' });
+link.onAdd = function (map) {
+    var div = L.DomUtil.create('div', 'myclass');
+    div.innerHTML = `Also Checkout <a href='https://apidocs.iudx.org.in/' target="_blank">API Documentation here</a>`;
+    return div;
+}
+link.addTo(map);
 L.Control.Watermark = L.Control.extend({
     onAdd: function (map) {
         var img = L.DomUtil.create('img');
 
         img.src = cat_conf['smart_city_iudx_logo'];
         img.style.width = '200px';
-        
+
         return img;
     },
 
@@ -58,7 +58,7 @@ L.Control.Watermark = L.Control.extend({
 L.control.watermark = function (opts, opts1) {
     return new L.Control.Watermark(opts, opts1);
 }
-        
+
 
 
 L.control.watermark({ position: 'bottomright' }).addTo(map);
@@ -185,10 +185,21 @@ map.addControl(drawControl);
 
 // Listen to when a layer is in delete mode
 map.on('draw:deleted', function (e) {
-    
-     markersLayer.clearLayers();
-    
- });
+
+    markersLayer.clearLayers();
+    $.each($(`input[name='taglists']:checked`), function () {
+        console.log("pppp")
+        $(this).removeAttr("checked");
+    });
+    $.each($(`input[name='resource_server_group']:checked`), function () {
+        $(this).removeAttr("checked");
+    });
+    $.each($(`input[name='provider']:checked`), function () {
+        $(this).removeAttr("checked");
+    });
+    //  reset_filter('taglists');
+
+});
 
 // listen to when a layer is changed in edit mode
 map.on('draw:edited', function (e) {
