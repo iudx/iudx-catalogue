@@ -19,9 +19,9 @@ const legends = {
     "flood-sensor": "https://image.flaticon.com/icons/svg/1890/1890123.svg",
     "wifi-hotspot": "https://image.flaticon.com/icons/svg/179/179428.svg",
     "ptz-video camera": "https://image.flaticon.com/icons/svg/1111/1111407.svg",
-    "changebhai": "https://image.flaticon.com/icons/svg/252/252025.svg",
-    "crowd-sourced-safetipin": "https://image.flaticon.com/icons/svg/148/148845.svg",
-    "traffic-incidents": "https://image.flaticon.com/icons/svg/1167/1167993.svg",
+    "crowd-sourced-changebhai": "https://image.flaticon.com/icons/svg/1200/1200848.svg",
+    "safetipin": "https://image.flaticon.com/icons/svg/541/541384.svg",
+    "traffic-incidents": "https://image.flaticon.com/icons/svg/401/401434.svg",
     "itms-mobility": "https://image.flaticon.com/icons/svg/2089/2089885.svg"
 }
 

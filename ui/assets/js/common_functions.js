@@ -399,15 +399,44 @@ function onEachFeature(feature, layer) {
     layer.bindPopup(feature.properties.name);
 }
 
-var colors=["#1abc9c", '#f1c40f']//, '#9b59b6']//, '#e67e22', '#f39c12']
+function getColorsForPolygon(_resourceServerGroup) {
 
-var color_count=-1;
+// var colors=["#1abc9c", '#f1c40f']//, '#9b59b6']//, '#e67e22', '#f39c12']
+var colors = ['#1abc9c', '#f1c40f', '#FF0000'];
 
-function getRandomColor(){
- var color =  "#" + (Math.random() * 0xFFFFFF << 0).toString(16);
- return color;
+if(_resourceServerGroup=="crowd-sourced-changebhai"||_resourceServerGroup=="changeBhai" ){
+    // loop through our density intervals and generate a label with a colored square for each interval
+        //console.log("changeBhai")
+        // div.innerHTML +=  
+        // '<span style="background-color:' + colors[0] + '"></span> ' +
+        //   'ChangeBhai' + '<br>';
+        console.log("changebhai")
+        return colors[0];
+    }else if(_resourceServerGroup=="safetipin"){
+        // div.innerHTML +=  
+        // '<span style="background-color:' + colors[1] + '"></span> ' +
+        //   'safetiPin' + '<br>';
+        console.log("safetipin")
+          return colors[1]
+
+    }else if(_resourceServerGroup=="traffic-incidents"){
+        // div.innerHTML +=  
+        // '<span style="background-color:' + colors[2] + '"></span> ' +
+        //   'TomTom' + '<br>';
+        console.log("tomtom")
+          return colors[2]
+    }
+
 }
 
+
+// var color_count=-1;
+
+// function getRandomColor(){
+//  var color =  "#" + (Math.random() * 0xFFFFFF << 0).toString(16);
+//  return color;
+// }
+// function getColorForPolygon()
 function plotGeoJSONs(geoJSONObject, _id, plot_id,_resourceServerGroup,_resourceId,_tags,_provider){
     ////console.log(_resourceServerGroup)
     // ////console.log("plotting "+ geoJSONObject, _id, _id["id"])
@@ -419,40 +448,24 @@ function plotGeoJSONs(geoJSONObject, _id, plot_id,_resourceServerGroup,_resource
     // _resourceId_data = _resourceId;
 
     ////console.log(geoJSONObject)
+   
     
     if(geoJSONObject["type"]=="Polygon"){
         
         //console.log("Printing Polygon....")
-        color_count=color_count+1
-        var _color=getRandomColor()
+        // color_count=color_count+1
+        // var _color=getRandomColor()
         
         var div = $('div.info.legend');
 
         //console.log(_resourceServerGroup, div)
-        if(_resourceServerGroup=="crowd-sourced-changebhai"||_resourceServerGroup=="changeBhai" ){
-        // loop through our density intervals and generate a label with a colored square for each interval
-            //console.log("changeBhai")
-            div.innerHTML +=  
-            '<span style="background:' + _color + '"></span> ' +
-              'ChangeBhai' + '<br>';
-
-        }else if(_resourceServerGroup=="safetipin"){
-            div.innerHTML +=  
-            '<span style="background:' + _color + '"></span> ' +
-              'safetiPin' + '<br>';
-
-        }else if(_resourceServerGroup=="traffic-incidents"){
-            div.innerHTML +=  
-            '<span style="background:' + _color + '"></span> ' +
-              'TomTom' + '<br>';
-        }
-
+        
 
         L.geoJSON(geoJSONObject, {
                 style: {
                         // fillColor: colors[color_count],
                         // fillColor: _color,
-                        fillColor: colors[color_count%3],
+                        fillColor: getColorsForPolygon(_resourceServerGroup),
                         weight: 2,
                         opacity: 1,
                         // color: 'white',
