@@ -41,6 +41,7 @@
     <!-- ***** Header Area End ***** -->
 
     <hr>
+    <div class="se-pre-con"></div>
 
         <section id="landing_section" class="container section">
         <div class="row style_list">
@@ -217,6 +218,7 @@
 
 </body>
 <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
 <script type="text/javascript" src="../assets/js/bootstrap.min.js"></script>
 <script src="../assets/js/jquery-ui.js"></script>
 <script type="text/javascript" src="../assets/js/swagger/swagger-ui-bundle.js"></script>
@@ -229,4 +231,10 @@
 <script type="text/javascript" src="../assets/conf.js"></script>
 <script type="text/javascript" src="../assets/js/common_functions.js"></script>
 <script type="text/javascript" src="../assets/js/list_script.js"></script>
+<script>
+ $(window).load(function() {
+     // Animate loader off screen
+     $(".se-pre-con").fadeOut("slow");;
+   });
+</script>
 </html>
