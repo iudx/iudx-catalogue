@@ -211,7 +211,9 @@ map.on('draw:edited', function (e) {
         if (layer instanceof L.Circle) {
 
             var center_point = layer.getLatLng();
+            console.log(center_point)
             var radius = layer.getRadius();
+            console.log(radius)
 
             geo_shape = { "type": "circle", "value": { "center_point": center_point, "radius": radius } }
             __filter_url = get_filtered_url(get_selected_values_framed_url());
@@ -221,7 +223,7 @@ map.on('draw:edited', function (e) {
             markersLayer.clearLayers();
             // activate_batch_mode();
 
-            ////console.log("/catalogue/v1/search?lat=" + center_point["lat"] + "&lon=" + center_point["lng"] + "&radius=" + radius)
+          console.log("/catalogue/v1/search?lat=" + center_point["lat"] + "&lon=" + center_point["lng"] + "&radius=" + radius)
 
             $.get("/catalogue/v1/search?lat=" + center_point["lat"] + "&lon=" + center_point["lng"] + "&radius=" + radius + __filter_url, function (data) {
                 //$.get("/catalogue/v1/search?lat=12.273737&lon=78.37475&radius=200000", function(data) {
@@ -375,6 +377,7 @@ map.on('draw:created', async function (e) {
             //$.get("/search/catalogue/attribute?bounding-type=circle&lat="+ center_point["lat"] +"&long="+ center_point["lng"] +"&radius="+radius, function(data) {
 
             data = JSON.parse(data);
+            console.log(data)
             toast_alert_for_response_data_length(data);
             //console.log(data)
             for (var i = data.length - 1; i >= 0; i--) {

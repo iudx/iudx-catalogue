@@ -212,7 +212,9 @@ function round_off(__arr, __decimal_places){
 }
 
 function toast_alert_for_response_data_length(__data){
+    console.log(__data)
     var len = __data.length;
+    console.log(len)
     if(len == 0){
         toast_alert('Zero items found for this query', 'warning','#c0392b');
     }else{
@@ -402,30 +404,34 @@ function onEachFeature(feature, layer) {
 function getColorsForPolygon(_resourceServerGroup) {
 
 // var colors=["#1abc9c", '#f1c40f']//, '#9b59b6']//, '#e67e22', '#f39c12']
-var colors = ['#1abc9c', '#f1c40f', '#FF0000'];
+var colors = ['#1abc9c', '#f1c40f', '#FF0000','#ffffff00'];
 
-if(_resourceServerGroup=="crowd-sourced-changebhai"||_resourceServerGroup=="changeBhai" ){
+if(_resourceServerGroup=="crowd-sourced-changebhai"||_resourceServerGroup=="changebhai" ){
     // loop through our density intervals and generate a label with a colored square for each interval
         //console.log("changeBhai")
         // div.innerHTML +=  
         // '<span style="background-color:' + colors[0] + '"></span> ' +
         //   'ChangeBhai' + '<br>';
-        console.log("changebhai")
+        // console.log("changebhai")
         return colors[0];
     }else if(_resourceServerGroup=="safetipin"){
         // div.innerHTML +=  
         // '<span style="background-color:' + colors[1] + '"></span> ' +
         //   'safetiPin' + '<br>';
-        console.log("safetipin")
+        // console.log("safetipin")
           return colors[1]
 
-    }else if(_resourceServerGroup=="traffic-incidents"){
+    }else if(_resourceServerGroup=="traffic-incidents" || _resourceServerGroup=="tomtom"){
         // div.innerHTML +=  
         // '<span style="background-color:' + colors[2] + '"></span> ' +
         //   'TomTom' + '<br>';
-        console.log("tomtom")
+        // console.log("tomtom")
           return colors[2]
+    }else if(_resourceServerGroup=="itms-mobility"){
+        //   console.log("itms-mobility")
+          return colors[3]
     }
+
 
 }
 
