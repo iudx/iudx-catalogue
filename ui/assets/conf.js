@@ -17,12 +17,14 @@ const legends = {
     "streetlight-feeder-sree" : "https://image.flaticon.com/icons/svg/1245/1245929.svg",
     "aqm-bosch-climo": "https://image.flaticon.com/icons/svg/1808/1808701.svg",
     "flood-sensor": "https://image.flaticon.com/icons/svg/1890/1890123.svg",
-    "wifi-hotspot": "https://image.flaticon.com/icons/svg/179/179428.svg",
+    "wifi-hotspot": "https://image.flaticon.com/icons/svg/660/660488.svg",
     "ptz-video camera": "https://image.flaticon.com/icons/svg/1111/1111407.svg",
-    "crowd-sourced-changebhai": "https://image.flaticon.com/icons/svg/1200/1200848.svg",
+	"crowd-sourced-changebhai": "https://image.flaticon.com/icons/svg/1200/1200848.svg",
+	"changebhai": "https://image.flaticon.com/icons/svg/1200/1200848.svg",
     "safetipin": "https://image.flaticon.com/icons/svg/541/541384.svg",
-    "traffic-incidents": "https://image.flaticon.com/icons/svg/401/401434.svg",
-    "itms-mobility": "https://image.flaticon.com/icons/svg/2089/2089885.svg"
+	"traffic-incidents": "https://image.flaticon.com/icons/svg/401/401434.svg",
+	"tomtom": "https://image.flaticon.com/icons/svg/401/401434.svg",
+    "itms-mobility": "https://image.flaticon.com/icons/svg/32/32425.svg"
 }
 
 //set attribution for used icons -> prefer flaticon as it has a wide range of options and icons are appealling
