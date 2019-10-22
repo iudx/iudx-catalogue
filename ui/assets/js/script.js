@@ -237,12 +237,12 @@ map.on('draw:edited', function (e) {
                     // //console.log(data[i]["tags"]["value"])
                     if (data[i].hasOwnProperty('location')) {
                         // myLayer.addData(data[i]['geoJsonLocation']);
-                        plotGeoJSONs(data[i]["location"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"], data[i]["tags"]["value"], data[i]["provider"]["value"]);
+                        plotGeoJSONs(data[i]["location"]["value"]["geometry"], data[i]["id"], data[i], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"], data[i]["tags"]["value"], data[i]["provider"]["value"]);
 
                     } else if (data[i].hasOwnProperty('coverageRegion')) {
                         // myLayer.addData(data[i]['geoJsonLocation']);
                         ////console.log("1")
-                        plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
+                        plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], data[i]["id"], data[i], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
                         ////console.log("2")
                     }
 
@@ -282,11 +282,11 @@ map.on('draw:edited', function (e) {
 
                     if (data[i].hasOwnProperty('location')) {
 
-                        plotGeoJSONs(data[i]["location"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
+                        plotGeoJSONs(data[i]["location"]["value"]["geometry"], data[i]["id"], data[i], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
                     }
                     else if (data[i].hasOwnProperty('coverageRegion')) {
 
-                        plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
+                        plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], data[i]["id"], data[i], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
 
                     }
                 }
@@ -328,11 +328,11 @@ map.on('draw:edited', function (e) {
 
                     if (data[i].hasOwnProperty('location')) {
 
-                        plotGeoJSONs(data[i]["location"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
+                        plotGeoJSONs(data[i]["location"]["value"]["geometry"], data[i]["id"], data[i], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
                     }
                     else if (data[i].hasOwnProperty('coverageRegion')) {
 
-                        plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
+                        plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], data[i]["id"], data[i], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
 
                     }
                 }
@@ -385,12 +385,12 @@ map.on('draw:created', async function (e) {
                 // //console.log(data[i]["tags"]["value"])
                 if (data[i].hasOwnProperty('location')) {
                     // myLayer.addData(data[i]['geoJsonLocation']);
-                    plotGeoJSONs(data[i]["location"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"], data[i]["tags"]["value"], data[i]["provider"]["value"]);
+                    plotGeoJSONs(data[i]["location"]["value"]["geometry"], data[i]["id"], data[i], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"], data[i]["tags"]["value"], data[i]["provider"]["value"]);
 
                 } else if (data[i].hasOwnProperty('coverageRegion')) {
                     // myLayer.addData(data[i]['geoJsonLocation']);
                     ////console.log("1")
-                    plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
+                    plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], data[i]["id"], data[i], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
                     ////console.log("2")
                 }
 
@@ -427,12 +427,12 @@ map.on('draw:created', async function (e) {
 
                 if (data[i].hasOwnProperty('location')) {
                     // myLayer.addData(data[i]['geoJsonLocation']);
-                    plotGeoJSONs(data[i]["location"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
+                    plotGeoJSONs(data[i]["location"]["value"]["geometry"], data[i]["id"], data[i], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
                 }
                 else if (data[i].hasOwnProperty('coverageRegion')) {
                     // myLayer.addData(data[i]['geoJsonLocation']);
                     ////console.log("1")
-                    plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
+                    plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], data[i]["id"], data[i], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
                     ////console.log("2")
                 }
             }
@@ -472,11 +472,11 @@ map.on('draw:created', async function (e) {
 
                 if (data[i].hasOwnProperty('location')) {
 
-                    plotGeoJSONs(data[i]["location"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
+                    plotGeoJSONs(data[i]["location"]["value"]["geometry"], data[i]["id"], data[i], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
                 }
                 else if (data[i].hasOwnProperty('coverageRegion')) {
 
-                    plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
+                    plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], data[i]["id"], data[i], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
 
                 }
             }
@@ -515,11 +515,11 @@ map.on('draw:created', async function (e) {
 
                 if (data[i].hasOwnProperty('location')) {
 
-                    plotGeoJSONs(data[i]["location"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
+                    plotGeoJSONs(data[i]["location"]["value"]["geometry"], data[i]["id"], data[i], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
                 }
                 else if (data[i].hasOwnProperty('coverageRegion')) {
 
-                    plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
+                    plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], data[i]["id"], data[i], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
 
                 }
             }
@@ -569,11 +569,11 @@ map.on('draw:created', async function (e) {
 
                 if (data[i].hasOwnProperty('location')) {
 
-                    plotGeoJSONs(data[i]["location"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
+                    plotGeoJSONs(data[i]["location"]["value"]["geometry"], data[i]["id"], data[i], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
                 }
                 else if (data[i].hasOwnProperty('coverageRegion')) {
 
-                    plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
+                    plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], data[i]["id"], data[i], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
 
                 }
             }
@@ -715,11 +715,11 @@ $(document).ready(function () {
             // }
             if (data[i].hasOwnProperty('location')) {
                 // myLayer.addData(data[i]['geoJsonLocation']);
-                plotGeoJSONs(data[i]["location"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
+                plotGeoJSONs(data[i]["location"]["value"]["geometry"], data[i]["id"], data[i], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
             } else if (data[i].hasOwnProperty('coverageRegion')) {
                 // myLayer.addData(data[i]['geoJsonLocation']);
                 ////console.log("1")
-                plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
+                plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], data[i]["id"], data[i], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
                 // //console.log("2")
             }
         }

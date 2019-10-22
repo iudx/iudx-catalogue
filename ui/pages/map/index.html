@@ -90,15 +90,21 @@
 
           <div style="height:100px;" class="sidebar form-group row">
 
+            <br><br>
+            
+            <label style="margin-left: -10px;"class="col-sm-10 col-form-label label-margin label-size sidebar-catergory"> <img width="10%" height="40%" src="https://image.flaticon.com/icons/svg/138/138238.svg">Tags <button style="margin-right: 24px;"class="btn btn-info bold" onclick="reset_filter('taglists')"> Clear</button><span>Select All Tags<input style="margin-left: 10px;"type="checkbox" id="ckbCheckAll"/></span></label>
+            
             <br>
-           
-            <label class="col-sm-10 col-form-label label-margin label-size sidebar-catergory"> <img width="10%" height="10%" src="https://image.flaticon.com/icons/svg/138/138238.svg">Tags <button class="btn btn-info bold" onclick="reset_filter('taglists')"> Clear</button></label>
             <fieldset id="taglist"></fieldset>
+            <br><br>
+            
+            <label class="col-sm-10 dp-contents col-form-label label-margin label-size sidebar-catergory"><img width=10% height=40% src= "../../assets/img/icons/server.png"></i> ResourceServerGroup<button class="btn btn-info bold" onclick="reset_filter('resource_server_group')">Clear</button></label>
             <br>
-            <label class="col-sm-10 col-form-label label-margin label-size sidebar-catergory"><img width=10% height=10% src= "../../assets/img/icons/server.png"></i> Resource Server Group<button class="btn btn-info bold" onclick="reset_filter('resource_server_group')">Clear</button></label>
             <fieldset id="rsglist"> </fieldset>
+            <br><br>
+            
+            <label class="col-sm-10 dp-contents col-form-label label-margin label-size sidebar-catergory"><img width="10%" height="40%" src="https://image.flaticon.com/icons/svg/1692/1692466.svg"> Provider<button class="btn btn-info bold" onclick="reset_filter('provider')">Clear</button></label>
             <br>
-            <label class="col-sm-10 col-form-label label-margin label-size sidebar-catergory"><img width="10%" height="10%" src="https://image.flaticon.com/icons/svg/1692/1692466.svg"> Provider<button class="btn btn-info bold" onclick="reset_filter('provider')">Clear</button></label>
             <fieldset id="providerlist"></fieldset>
           </div>
         </div>
@@ -222,6 +228,33 @@
    });
    </script>
 <script>
+  // -------------------------------------------------------
+  
+    $("#ckbCheckAll").click(function () {
+        $(".checkBoxClass").prop('checked', $(this).prop('checked'));
+        var __filter_url =  "/catalogue/v1/search?" + get_selected_values_framed_url();
+        $.get(__filter_url, function (data, status) {
+      markersLayer.clearLayers();
+      data = JSON.parse(data)
+      //console.log(data)
+      for (var i = data.length - 1; i >= 0; i--) {
+        // console.log(data[i])
+        if (data[i].hasOwnProperty('location')) {
+          
+          
+          plotGeoJSONs(data[i]["location"]["value"]["geometry"], data[i]["id"], data[i], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
+        } else if (data[i].hasOwnProperty('coverageRegion')) {
+         
+          
+          plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], data[i]["id"], data[i], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
+          // console.log("2")
+        }
+      }
+      });
+        
+    });
+    
+  
 
   $(document).ready(function () {
     // var state = document.readyState
@@ -233,7 +266,7 @@
       var _d;
       for (var i = 0; i < data.length; i++) {
         _d = data[i].toLowerCase()
-        tlist += `<label for="` + _d + `"><input type="checkbox" id="` + _d + `" name="taglists"  class="filter_input_box" value="` + _d + `"> ` + _d + `</label>`;
+        tlist += `<label for="` + _d + `"><input type="checkbox" id="` + _d + `" name="taglists"  class="filter_input_box checkBoxClass" value="` + _d + `"> ` + _d + `</label>`;
       }
       tlist += '</div>';
       $("#taglist").append(tlist);
@@ -244,17 +277,17 @@
     $.get(__filter_url, function (data, status) {
       markersLayer.clearLayers();
       data = JSON.parse(data)
-      console.log(data)
+      //console.log(data)
       for (var i = data.length - 1; i >= 0; i--) {
         // console.log(data[i])
         if (data[i].hasOwnProperty('location')) {
           
           
-          plotGeoJSONs(data[i]["location"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
+          plotGeoJSONs(data[i]["location"]["value"]["geometry"], data[i]["id"], data[i], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
         } else if (data[i].hasOwnProperty('coverageRegion')) {
          
           
-          plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
+          plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], data[i]["id"], data[i], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
           // console.log("2")
         }
       }
@@ -281,18 +314,18 @@
     $.get(__filter_url, function (data, status) {
       markersLayer.clearLayers();
       data = JSON.parse(data)
-      console.log(data)
+      //console.log(data)
       for (var i = data.length - 1; i >= 0; i--) {
-        // console.log(data[i])
+         //console.log(data[i])
         if (data[i].hasOwnProperty('location')) {
           
           
-          plotGeoJSONs(data[i]["location"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
+          plotGeoJSONs(data[i]["location"]["value"]["geometry"], data[i]["id"], data[i], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
         } else if (data[i].hasOwnProperty('coverageRegion')) {
          
           
-          plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
-          console.log("2")
+          plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], data[i]["id"], data[i], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
+          //console.log("2")
         }
       }
       });
@@ -319,18 +352,18 @@
     $.get(__filter_url, function (data, status) {
       markersLayer.clearLayers();
       data = JSON.parse(data)
-      console.log(data)
+      //console.log(data)
       for (var i = data.length - 1; i >= 0; i--) {
         // console.log(data[i])
         if (data[i].hasOwnProperty('location')) {
           
           
-          plotGeoJSONs(data[i]["location"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
+          plotGeoJSONs(data[i]["location"]["value"]["geometry"], data[i]["id"], data[i], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
         } else if (data[i].hasOwnProperty('coverageRegion')) {
          
           
-          plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
-          console.log("2")
+          plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], data[i]["id"], data[i], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
+          //console.log("2")
         }
       }
       });
