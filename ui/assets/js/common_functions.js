@@ -168,6 +168,7 @@ function reset_filter(__input_name) {
     $.each($(`input[name='` + __input_name + `']:checked`), function () {
         $(this).removeAttr("checked");
     });
+    $('#ckbCheckAll').removeAttr("checked");
     var category = "";
     if (__input_name == "taglists") {
         category = "Tag"
@@ -188,11 +189,11 @@ function reset_filter(__input_name) {
             if (data[i].hasOwnProperty('location')) {
 
 
-                plotGeoJSONs(data[i]["location"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
+                plotGeoJSONs(data[i]["location"]["value"]["geometry"], data[i]["id"], data[i], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
             } else if (data[i].hasOwnProperty('coverageRegion')) {
 
 
-                plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], data[i]["id"], data[i]["id"], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
+                plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], data[i]["id"], data[i], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
                 //console.log("2")
             }
         }
@@ -441,12 +442,12 @@ function getColorsForPolygon(_resourceServerGroup) {
 // function getRandomColor(){
 //  var color =  "#" + (Math.random() * 0xFFFFFF << 0).toString(16);
 //  return color;
-// }
+// }data[i]["id"]
 // function getColorForPolygon()
-function plotGeoJSONs(geoJSONObject, _id, plot_id, _resourceServerGroup, _resourceId, _tags, _provider) {
+function plotGeoJSONs(geoJSONObject, _id, _json_object, _resourceServerGroup, _resourceId, _tags, _provider) {
     ////console.log(_resourceServerGroup)
     // ////console.log("plotting "+ geoJSONObject, _id, _id["id"])
-    // // //console.log(geoJSONObject, color_count)
+    //console.log(geoJSONObject, _id, _json_object, _resourceServerGroup, _resourceId ,_tags , _provider)
     // _provider_data = _provider;
     // _tags_data = _tags;
     // _resourceServerGroup_data =_resourceServerGroup;
@@ -465,6 +466,8 @@ function plotGeoJSONs(geoJSONObject, _id, plot_id, _resourceServerGroup, _resour
         var div = $('div.info.legend');
 
         //console.log(_resourceServerGroup, div)
+        var is_public = (_json_object['secure']||[]).length === 0;
+        var is_secure = (_json_object['secure']||[]).length !== 0;;
 
 
         L.geoJSON(geoJSONObject, {
@@ -484,13 +487,20 @@ function plotGeoJSONs(geoJSONObject, _id, plot_id, _resourceServerGroup, _resour
                     show_details(_id)
 
                 });
-                layer.bindPopup(`<a href='#' class='data-modal'  onclick="display_latest_data(event, this, '` + _id + `')">Get latest-data</a>`).addTo(map);
+                layer.bindPopup(`<span class="float-left" style="padding-right:7.5px;"><img src='`+
+                ((is_public) ? "../assets/img/icons/green_unlock.svg" : "../assets/img/icons/red_lock.svg")
+                +`' class='img-fluid secure_icon'></span><a href='#' class='data-modal'  onclick="display_latest_data(event, this, '` + _id + `')">Get latest-data</a><br>`+
+                ((is_secure) ? `<a href='#' class='data-modal'  onclick="request_access_token('` + _json_object.id + `', '`+ _json_object["resourceServerGroup"]["value"] + `', '`+ _json_object["resourceId"]["value"] + `')">Request Access Token</a>` : ``)
+                ).addTo(map);
+                
             }
 
         }).addTo(markersLayer);
 
     }
     else if (geoJSONObject["type"] == "Point") {
+
+        var is_public = (_json_object['secure']||[]).length === 0;
         // //console.log("Printing Point....")
         L.geoJSON(geoJSONObject, {
             pointToLayer: function (feature, latlng) {
@@ -498,7 +508,9 @@ function plotGeoJSONs(geoJSONObject, _id, plot_id, _resourceServerGroup, _resour
                 // return L.marker(latlng, {icon: getOfficeIcon()});
 
                 // <a href='/catalogue/v1/items/"+plot_id+"'>Get Catalogue-item-details</a><br/>
-                var customPopup = `<a href='#' class='data-modal'  onclick="display_latest_data(event, this, '` + _id + `')">Get latest-data</a>`;
+                var customPopup = `<span class="float-left" style="padding-right:7.5px;"><img src='`+
+                ((is_public) ? "../assets/img/icons/green_unlock.svg" : "../assets/img/icons/red_lock.svg")
+                +`' class='img-fluid secure_icon'></span><a href='#' class='data-modal'  onclick="display_latest_data(event, this, '` + _id + `')">Get latest-data</a>`;
                 var _marker = L.marker(latlng, { icon: getMarkerIcon(_resourceServerGroup) }).addTo(map);
                 _marker.itemUUID = _id;
                 // console.log(_id,this,event)
@@ -603,7 +615,7 @@ function get_selected_values_checkbox() {
 
     $.each($("input[name='taglists']:checked"), function () {
         _tags.push($(this).val());
-    });
+    });  
 
     $.each($("input[name='resource_server_group']:checked"), function () {
         _rsg.push($(this).val());
