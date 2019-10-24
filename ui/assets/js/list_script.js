@@ -329,10 +329,10 @@ function json_to_htmlcard(json_obj){
 		    <strong>Access</strong>: `+ (is_public ? "Public": "Requires Authentication") +`<br>
 		    <div id="btn_`+resource_id_to_html_id(json_obj.id)+`">
 		    <button class="btn btn-primary" onclick="show_details('`+ json_obj.id +`')">Details</button>
-		    <button class="btn btn-info" onclick="display_swagger_ui('` + openapi_url + `')">APIs Details</button>
+		    <button class="btn btn-success" onclick="display_swagger_ui('` + openapi_url + `')">APIs Details</button>
 		    `+ ((is_public)?"":rat_btn_html) +`
-		    <a href="#" style="color:white"  class="data-modal" onclick="display_latest_data(event, this, '`+json_obj['id']+`')"><button class="btn btn-secondary">Get Latest Data</button></a>
-		    
+		    <a href="#" style="color:white"  class="data-modal" onclick="display_latest_data(event, this, '`+json_obj['id']+`')"><button class="btn btn-danger">Get Latest Data</button></a>
+		    <a href="#" style="color:white"  class="data-modal" onclick="display_temporal_data(event, this, '`+json_obj['id']+`')"><button class="btn btn-warning">Get Temporal Data</button></a>
 		    </div>
 		     <div id="token_section_`+resource_id_to_html_id(json_obj.id)+`" class="token_section"></div>
 		  </div>

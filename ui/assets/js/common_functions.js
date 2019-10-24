@@ -100,6 +100,52 @@ function __get_latest_data(__url, __rid) {
     })
 }
 
+new Date('2015-03-04T00:00:00.000Z'); // Valid Date
+
+function get_temporal_query_time_in_iso_8601_format(__days){
+    return new Promise((resolve, reject) => {
+        var today = new Date();
+        var last = new Date(today.getTime() - (__days * 24 * 60 * 60 * 1000));
+        resolve(last.toISOString()+"/"+today.toISOString())
+    })
+}
+
+function __get_temporal_data(__url, __rid, __days) {
+    var time;
+    return new Promise((resolve, reject) => {
+        var time;
+        get_temporal_query_time_in_iso_8601_format(__days)
+        .then(data => {
+            time = data
+            $.ajax({
+                "url": __url,
+                "async": true,
+                "crossDomain": true,
+                "processData": false,
+                "method": 'POST',
+                "headers": { "Content-Type": "application/json" },
+                "data": JSON.stringify({
+                    "id": __rid,
+                    "time": time,
+                    "TRelation": "during"
+                }),
+                // dataType: 'json',
+                success: function (data) {
+                    resolve(data)
+                },
+                error: function (error) {
+                    reject(error)
+                },
+                timeout: 30000 // sets timeout to 30 seconds
+            })
+        })
+        .catch(error => {
+            _alertify("Error!!!", '<pre id="custom_alertbox">: ' + error["statusText"] + '</pre>');
+            // console.log(error)
+        })
+    })
+}
+
 function _get_latest_data(_resource_id, _token) {
     //console.log(_token)
     $.ajax({
@@ -135,6 +181,150 @@ function display_latest_data(e, ele, _rid) {
     __get_latest_data(cat_conf['resoure_server_base_URL'] + "/search", _rid)
         .then(data => {
             _alertify("Success!!!", '<pre id="custom_alertbox">' + jsonPrettyHighlightToId(data) + '</pre>')
+        })
+        .catch(error => {
+            _alertify("Error!!!", '<pre id="custom_alertbox">: ' + error["statusText"] + '</pre>');
+            console.log(error)
+        })
+}
+
+function get_temporal_data_alert_html(){
+    return `
+        <input type="hidden" id="rid_in_hidden" name="rid_in_hidden" value="">
+        <div class="form-group">
+          <label for="data_keys">Select Y-Axis:</label>
+          <select class="form-control" id="data_keys" onchange="update_temporal_data()">
+          </select>
+          <label for="duration">Select Duration:</label>
+          <select class="form-control" id="duration" onchange="update_temporal_data()">
+            <option value="7">1 Week</option>
+            <option value="1">1 Day</option>
+          </select>
+        </div>
+        <canvas id="custom_alertbox"></canvas>
+    `
+}
+
+function update_temporal_data(){
+    var _days = $( "#duration" ).val();
+    var _rid = $('#rid_in_hidden').val()
+    var __y_name = $( "#data_keys" ).val();
+    __get_temporal_data(cat_conf['resoure_server_base_URL'] + "/search", _rid, _days)
+        .then(data => {
+            if(data.length == 0){
+                // toast_alert("Data is empty", 'warning', '#1abc9c')
+                alert("Data is empty")
+            }else{
+                var _x = []
+                var _y = []
+                var ctx = document.getElementById('custom_alertbox').getContext('2d');
+
+                // get list of key in data
+                var keys = Object.keys(data[0]);
+                
+                if(__y_name == undefined){
+                    __y_name = keys[0]
+                }
+                for (var i = data.length - 1; i >= 0; i--) {
+                    _x.push(formated_date(new Date(data[i]['LASTUPDATEDATETIME'])))
+                    _y.push(parseInt(data[i][__y_name]));
+                }
+
+                window._chart = new Chart(ctx, get_conf('time', __y_name));
+                window._chart.data.datasets=[]
+                window._chart.data.datasets.push({
+                        label: __y_name,
+                        borderColor: 'red',
+                        backgroundColor: 'rgba(0, 0, 0, 0)',
+                        fill: false,
+                        cubicInterpolationMode: 'monotone'
+                })
+                // console.log(_x,_y)
+                window._chart.data.labels=_x.reverse();
+                window._chart.data.datasets.forEach((dataset) => {
+                    // console.log(dataset);
+                    // console.log(_y)
+                    dataset.data=_y.reverse();
+                });
+                window._chart.update();
+            }
+        })
+        .catch(error => {
+            _alertify("Error!!!", '<pre id="custom_alertbox">: ' + error["statusText"] + '</pre>');
+            console.log(error)
+        })
+}
+
+function get_week_day(__day_num){
+    if(__day_num == 0){
+        return "Sun"
+    }else if(__day_num == 1){
+        return "Mon"
+    }else if(__day_num == 2){
+        return "Tue"
+    }else if(__day_num == 3){
+        return "Wed"
+    }else if(__day_num == 4){
+        return "Thu"
+    }else if(__day_num == 5){
+        return "Fri"
+    }else if(__day_num == 6){
+        return "Sat"
+    }
+}
+
+function formated_date(__date){
+    return get_week_day(__date.getDay()) + " | " + __date.getHours() + ":" + __date.getMinutes();
+}
+
+function display_temporal_data(e, ele, _rid, __y_name) {
+    e.preventDefault();   // use this to NOT go to href site
+    _alertify("Getting Data...", get_spinner_html())
+    __get_temporal_data(cat_conf['resoure_server_base_URL'] + "/search", _rid, 7)
+        .then(data => {
+            if(data.length == 0){
+                _alertify("Success!!!", '<pre id="custom_alertbox">Data is empty</pre>')
+            }else{
+                _alertify("Success!!!", get_temporal_data_alert_html())
+                $('#rid_in_hidden').val(_rid);
+                var _x = []
+                var _y = []
+                var ctx = document.getElementById('custom_alertbox').getContext('2d');
+
+
+                // get list of key in data
+                var keys = Object.keys(data[0]);
+                for (var i =  0; i < keys.length; i++) {
+                    $('#data_keys').append(`<option value="`+keys[i]+`">`+keys[i]+`</option>`);
+                }
+
+                if(__y_name == undefined){
+                    __y_name = keys[0]
+                }
+
+                for (var i = 0; i < data.length; i++) {
+                    _x.push(formated_date(new Date(data[i]['LASTUPDATEDATETIME'])))
+                    _y.push(parseInt(data[i][__y_name]));
+                }
+
+                window._chart = new Chart(ctx, get_conf('time', __y_name));
+                window._chart.data.datasets=[]
+                window._chart.data.datasets.push({
+                        label: __y_name,
+                        borderColor: 'red',
+                        backgroundColor: 'rgba(0, 0, 0, 0)',
+                        fill: false,
+                        cubicInterpolationMode: 'monotone'
+                })
+                // console.log(_x,_y)
+                window._chart.data.labels=_x.reverse();
+                window._chart.data.datasets.forEach((dataset) => {
+                    // console.log(dataset);
+                    // console.log(_y)
+                    dataset.data=_y.reverse();
+                });
+                window._chart.update();
+            }
         })
         .catch(error => {
             _alertify("Error!!!", '<pre id="custom_alertbox">: ' + error["statusText"] + '</pre>');
@@ -213,9 +403,7 @@ function round_off(__arr, __decimal_places) {
 }
 
 function toast_alert_for_response_data_length(__data) {
-    console.log(__data)
     var len = __data.length;
-    console.log(len)
     if (len == 0) {
         toast_alert('Zero items found for this query', 'warning', '#c0392b');
     } else {
@@ -489,10 +677,10 @@ function plotGeoJSONs(geoJSONObject, _id, _json_object, _resourceServerGroup, _r
                 });
                 layer.bindPopup(`<span class="float-left" style="padding-right:7.5px;"><img src='`+
                 ((is_public) ? "../assets/img/icons/green_unlock.svg" : "../assets/img/icons/red_lock.svg")
-                +`' class='img-fluid secure_icon'></span><a href='#' class='data-modal'  onclick="display_latest_data(event, this, '` + _id + `')">Get latest-data</a><br>`+
+                +`' class='img-fluid secure_icon'></span><a href='#' class='data-modal'  onclick="display_latest_data(event, this, '` + _id + `')">Get latest-data</a><br>`
+                +`<a href="#" class="data-modal" onclick="display_temporal_data(event, this, '`+_json_object.id+`')">Get Temporal Data</a><br>`+
                 ((is_secure) ? `<a href='#' class='data-modal'  onclick="request_access_token('` + _json_object.id + `', '`+ _json_object["resourceServerGroup"]["value"] + `', '`+ _json_object["resourceId"]["value"] + `')">Request Access Token</a>` : ``)
                 ).addTo(map);
-                
             }
 
         }).addTo(markersLayer);
@@ -510,7 +698,8 @@ function plotGeoJSONs(geoJSONObject, _id, _json_object, _resourceServerGroup, _r
                 // <a href='/catalogue/v1/items/"+plot_id+"'>Get Catalogue-item-details</a><br/>
                 var customPopup = `<span class="float-left" style="padding-right:7.5px;"><img src='`+
                 ((is_public) ? "../assets/img/icons/green_unlock.svg" : "../assets/img/icons/red_lock.svg")
-                +`' class='img-fluid secure_icon'></span><a href='#' class='data-modal'  onclick="display_latest_data(event, this, '` + _id + `')">Get latest-data</a>`;
+                +`' class='img-fluid secure_icon'></span><a href='#' class='data-modal'  onclick="display_latest_data(event, this, '` + _id + `')">Get latest-data</a>`
+                +`<br><a href="#"  class="data-modal" onclick="display_temporal_data(event, this, '`+_json_object.id+`')">Get Temporal Data</a><br>`;
                 var _marker = L.marker(latlng, { icon: getMarkerIcon(_resourceServerGroup) }).addTo(map);
                 _marker.itemUUID = _id;
                 // console.log(_id,this,event)
