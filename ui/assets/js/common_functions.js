@@ -209,9 +209,6 @@ function update_temporal_data(){
     var _days = $( "#duration" ).val();
     var _rid = $('#rid_in_hidden').val()
     var __y_name = $( "#data_keys" ).val();
-
-    console.log(_days, _rid, __y_name)
-
     __get_temporal_data(cat_conf['resoure_server_base_URL'] + "/search", _rid, _days)
         .then(data => {
             if(data.length == 0){
@@ -221,8 +218,6 @@ function update_temporal_data(){
                 var _x = []
                 var _y = []
                 var ctx = document.getElementById('custom_alertbox').getContext('2d');
-
-                console.log(data.length)
 
                 // get list of key in data
                 var keys = Object.keys(data[0]);
@@ -408,9 +403,7 @@ function round_off(__arr, __decimal_places) {
 }
 
 function toast_alert_for_response_data_length(__data) {
-    console.log(__data)
     var len = __data.length;
-    console.log(len)
     if (len == 0) {
         toast_alert('Zero items found for this query', 'warning', '#c0392b');
     } else {
@@ -684,10 +677,10 @@ function plotGeoJSONs(geoJSONObject, _id, _json_object, _resourceServerGroup, _r
                 });
                 layer.bindPopup(`<span class="float-left" style="padding-right:7.5px;"><img src='`+
                 ((is_public) ? "../assets/img/icons/green_unlock.svg" : "../assets/img/icons/red_lock.svg")
-                +`' class='img-fluid secure_icon'></span><a href='#' class='data-modal'  onclick="display_latest_data(event, this, '` + _id + `')">Get latest-data</a><br>`+
+                +`' class='img-fluid secure_icon'></span><a href='#' class='data-modal'  onclick="display_latest_data(event, this, '` + _id + `')">Get latest-data</a><br>`
+                +`<a href="#" class="data-modal" onclick="display_temporal_data(event, this, '`+_json_object.id+`')">Get Temporal Data</a><br>`+
                 ((is_secure) ? `<a href='#' class='data-modal'  onclick="request_access_token('` + _json_object.id + `', '`+ _json_object["resourceServerGroup"]["value"] + `', '`+ _json_object["resourceId"]["value"] + `')">Request Access Token</a>` : ``)
                 ).addTo(map);
-                
             }
 
         }).addTo(markersLayer);
@@ -705,7 +698,8 @@ function plotGeoJSONs(geoJSONObject, _id, _json_object, _resourceServerGroup, _r
                 // <a href='/catalogue/v1/items/"+plot_id+"'>Get Catalogue-item-details</a><br/>
                 var customPopup = `<span class="float-left" style="padding-right:7.5px;"><img src='`+
                 ((is_public) ? "../assets/img/icons/green_unlock.svg" : "../assets/img/icons/red_lock.svg")
-                +`' class='img-fluid secure_icon'></span><a href='#' class='data-modal'  onclick="display_latest_data(event, this, '` + _id + `')">Get latest-data</a>`;
+                +`' class='img-fluid secure_icon'></span><a href='#' class='data-modal'  onclick="display_latest_data(event, this, '` + _id + `')">Get latest-data</a>`
+                +`<br><a href="#"  class="data-modal" onclick="display_temporal_data(event, this, '`+_json_object.id+`')">Get Temporal Data</a><br>`;
                 var _marker = L.marker(latlng, { icon: getMarkerIcon(_resourceServerGroup) }).addTo(map);
                 _marker.itemUUID = _id;
                 // console.log(_id,this,event)
