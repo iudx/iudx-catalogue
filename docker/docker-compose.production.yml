@@ -11,7 +11,11 @@ volumes:
 services:
 
    mongodb:
-    image: vasanthrajaraman/catalogue-database-mongodb
+    image: mongo
+    environment:
+      # provide your credentials here
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=rootPassXXX
     container_name: catalogue-database-mongodb
     hostname: catalogue-database-mongodb
     restart: always
@@ -24,7 +28,6 @@ services:
       - mongodb:/var/lib/mongodb/
       - mongodb-data:/data/db/ 
       - ../setup/mongodb:/scripts/  
-
    apiserver:
     image: vasanthrajaraman/catalogue-apiserver
     container_name: catalogue-apiserver

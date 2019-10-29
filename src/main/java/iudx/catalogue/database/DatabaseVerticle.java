@@ -1,17 +1,28 @@
 package iudx.catalogue.database;
 
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.util.Properties;
 import java.util.logging.Logger;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.mongo.MongoClient;
 
 public class DatabaseVerticle extends AbstractVerticle {
 
-  private static final Logger logger = Logger.getLogger(DatabaseVerticle.class.getName());
-  private DatabaseInterface db;
-  private static final String database_name = "catalogue";
-
+	private static final Logger logger = Logger.getLogger(DatabaseVerticle.class.getName());
+	private DatabaseInterface db;
+	private MongoClient mongo;
+	private JsonObject mongoconfig;
+	private String database_host;
+	private int database_port;
+	private String database_user;
+	private String database_password;
+	private String database_name;
+	private String auth_database;
+  
   /**
    * Constructor for DatabaseVerticle
    *
@@ -38,14 +49,44 @@ public class DatabaseVerticle extends AbstractVerticle {
               validateRequest(message);
             });
 
-    database_uri =
-        "mongodb://"
-            + config().getString("mongo_host", "catalogue-database-mongodb")
-            + ":"
-            + config().getInteger("mongo_port", 27017).toString();
+	Properties prop = new Properties();
+    InputStream input = null;
 
-    mongoconfig =
-        new JsonObject().put("connection_string", database_uri).put("db_name", database_name);
+    try 
+    {
+        input = new FileInputStream("config.properties");
+        prop.load(input);
+        
+        database_user		=	prop.getProperty("database_user");
+        database_password	=	prop.getProperty("database_password");
+        database_host 		=	prop.getProperty("database_host");
+        database_port		=	Integer.parseInt(prop.getProperty("database_port"));
+        database_name		=	prop.getProperty("database_name");
+        auth_database		=	prop.getProperty("auth_database");
+        	        
+
+        logger.info("database_user 	: " + database_user);
+        logger.info("database_password	: " + database_password);
+        logger.info("database_host 	: " + database_host);
+        logger.info("database_port 	: " + database_port);
+        logger.info("database_name		: " + database_name);
+        logger.info("auth_database		: " + auth_database);
+        
+        input.close();
+        
+    } 
+    catch (Exception e) 
+    {
+        e.printStackTrace();
+    } 
+    
+	mongoconfig		= 	new JsonObject()
+					.put("username", database_user)
+					.put("password", database_password)
+					.put("authSource", auth_database)
+					.put("host", database_host)
+					.put("port", database_port)
+					.put("db_name", database_name);
 
     Future<Void> init_fut = db.initDB(vertx, mongoconfig);
     init_fut.setHandler(startFuture.completer());
