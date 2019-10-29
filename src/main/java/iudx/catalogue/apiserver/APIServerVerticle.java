@@ -73,7 +73,8 @@ public class APIServerVerticle extends AbstractVerticle {
     itemTypes.add("resourceItem");
     itemTypes.add("data-model");
     itemTypes.add("access-object");
-    itemTypes.add("resource-server");
+    itemTypes.add("resourceServer");
+    itemTypes.add("resourceServerGroup");
     itemTypes.add("provider");
     itemTypes.add("base-schema");
     itemTypes.add("catalogue-item");
@@ -333,8 +334,6 @@ public class APIServerVerticle extends AbstractVerticle {
     HttpServerRequest request = routingContext.request();
     String query_params = request.query();
     String itemType = query_params.split("=")[1];
- 
-		if (itemType.contains("resourceItem")) {
 
 			String skip_validation = "false";
 			if (request.headers().contains("skip_validation")) {
@@ -348,6 +347,7 @@ public class APIServerVerticle extends AbstractVerticle {
 						request_body.put("onboardedBy", onboarder);
 						request_body.put("role", onboardedBy);
 						request_body.put("item-type", itemType);
+						request_body.put("__createdBy",onboardedBy);
 						DeliveryOptions validator_action = new DeliveryOptions();
 						validator_action.addHeader("action", "validate-item");
 
@@ -359,7 +359,6 @@ public class APIServerVerticle extends AbstractVerticle {
 								validator_action.addHeader("skip_validation", skip_validation);
 							}
 						}
-
 						vertx.eventBus().send("validator", request_body, validator_action, validator_reply -> {
 							if (validator_reply.succeeded()) {
 								if (itemTypes.contains(itemType)) {
@@ -381,7 +380,7 @@ public class APIServerVerticle extends AbstractVerticle {
 			} else {
 				handle400(routingContext, "Certificate 'authenticaton' error");
 			}
-		}
+
 	 }
 
   private void bulkCreate(RoutingContext routingContext) {

@@ -12,13 +12,7 @@ import io.vertx.ext.mongo.FindOptions;
 import io.vertx.ext.mongo.MongoClient;
 import io.vertx.ext.mongo.UpdateOptions;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang3.StringUtils;
@@ -30,6 +24,10 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   private final String TAG_COLLECTION = "tags";
   private final String COLLECTION = "catalogue";
   private static final Logger logger = Logger.getLogger(MongoDB.class.getName());
+  private JsonArray  resourceServerGroupId = new JsonArray(),
+          resourceItemId = new JsonArray(), providerId = new JsonArray();
+  private static boolean isCacheEmpty = true;
+  private Map<String, JsonArray> resourceCache = new HashMap<>();
   
   /**
    * Constructor for MongoDB
@@ -37,6 +35,8 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
    * @param //item_database Name of the Item Collection
    * @param //schema_database Name of the Schema Collection
    */
+  //Future<Void> init_fut;
+
   public Future<Void> initDB(Vertx vertx, JsonObject mongoconfig) {
 
     Future<Void> init_fut = Future.future();
@@ -47,14 +47,91 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
         new JsonObject().put("geoJsonLocation", "2dsphere"),
         ar -> {
           if (ar.succeeded()) {
-            init_fut.complete();
+            //init_fut.complete();
+              System.out.println("index created");
+             Future<Void> populateFuture = populateHashMap();
+              populateFuture.setHandler(res->{
+                  if(res.succeeded()){
+                      logger.info("THIS HAS BEEN REACHED!");
+                      resourceCache.entrySet().forEach(entry ->{
+                          System.out.println("===="+entry.getKey()+": "+entry.getValue());
+                      });
+                      isCacheEmpty = false;
+                      init_fut.complete();
+                  }
+                  else{
+                      logger.info("Failed");
+                      init_fut.fail(res.cause());
+                  }
+              });
           } else {
-            init_fut.fail(ar.cause());
+              logger.info("Failed");
+              init_fut.fail(ar.cause());
           }
         });
     return init_fut;
   }
-  /**
+
+    private Future<Void> populateHashMap() {
+      Future<Void> hashFut = Future.future();
+      resourceCache.put("resourceServerIds",new JsonArray());
+      resourceCache.put("resourceGroupIds",new JsonArray());
+      resourceCache.put("resourceItemIds",new JsonArray());
+      resourceCache.put("providerIds",new JsonArray());
+
+      if(isCacheEmpty) {
+            //populate HashMap
+          JsonObject field = new JsonObject();
+          field.put("id",1);
+          FindOptions options = new FindOptions().setFields(field);
+          JsonObject query = new JsonObject();
+          query.put("itemType.value", "resourceServer");
+
+          mongo.findWithOptions(COLLECTION, query, options, res->{
+              if(res.succeeded()){
+                  for(JsonObject resSObj:res.result())
+                      resourceCache.get("resourceServerIds").add(resSObj.getString("id"));
+                  query.put("itemType.value", "resourceServerGroup");
+                  mongo.findWithOptions(COLLECTION, query, options, res1->{
+                      if(res1.succeeded()) {
+                          for (JsonObject resGObj : res1.result())
+                              resourceCache.get("resourceGroupIds").add(resGObj.getString("id"));
+                          query.put("itemType.value", "resourceItem");
+                          mongo.findWithOptions(COLLECTION, query, options,res2->{
+                              if(res2.succeeded()) {
+                                  for (JsonObject resObj : res2.result())
+                                      resourceCache.get("resourceItemIds").add(resObj.getString("id"));
+                                  mongo.distinct(COLLECTION,"provider.value",String.class.getName(),res3->{
+                                      if(res3.succeeded()){
+                                              resourceCache.put("providerIds",res3.result());
+                                          hashFut.complete();
+                                      }else {
+                                          if(!res3.succeeded())
+                                            hashFut.fail(res3.cause());
+                                      }
+                                  });
+                              } else {
+                                  if(!res2.succeeded())
+                                    hashFut.fail(res2.cause());
+                              }
+                          });
+                      }else{
+                          if(!res1.succeeded())
+                            hashFut.fail(res1.cause());
+                      }
+                  });
+              }else{
+                  if(!res.succeeded())
+                      hashFut.fail(res.cause());
+              }
+          });
+        }else{
+          hashFut.complete();
+      }
+    return hashFut;
+    }
+
+    /**
    * Searches the Mongo DB
    *
    * @param //collection Name of the collection
@@ -240,6 +317,27 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
             message.fail(0, "failure");
           }
         });
+  }
+
+  private Future<Void> mongoInsert(JsonObject insertDocument, Message<Object> message){
+
+      Future<Void> insert_fut = Future.future();
+      mongo.insert(COLLECTION, insertDocument, resp -> {
+          if (resp.succeeded()) {
+              if (insertDocument.containsKey("_tags")) {
+                  writeTags(insertDocument.getJsonArray("_tags"));
+              }
+              message.reply(insertDocument.getString("id"));
+              insert_fut.complete();
+              logger.info("Item Created " + insertDocument.getString("id"));
+          } else {
+              logger.info("INSERT FAILED!!!"+resp.cause());
+              message.fail(0, "failure");
+              insert_fut.fail(resp.cause());
+          }
+
+      });
+    return insert_fut;
   }
 
   @Override
@@ -650,46 +748,72 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
    */
   private JsonObject addNewAttributes(JsonObject doc, int version, boolean addId, String bulkId) {
 
-    JsonObject updated = doc.copy();
-    JsonObject geometry;
-    JsonArray geometry_array;
-    String id, sha1, sha, resourceServer, resourceServerGroup, provider, resourceId, geometry_type, longitude, latitude, domain, region = null, role;
-    String[] onboardedBy;
-    
-    sha1 = updated.getString("role");
-    onboardedBy = sha1.split("/");
-    sha = onboardedBy[1];
-    domain = onboardedBy[0];
-    resourceServer = updated.getJsonObject("resourceServer").getString("value"); 
-    resourceServerGroup = updated.getJsonObject("resourceServerGroup").getString("value"); 
-    provider = updated.getJsonObject("provider").getString("value"); 
-    resourceId = updated.getJsonObject("resourceId").getString("value");
+      JsonObject updated = doc.copy();
+      JsonObject geometry;
+      JsonArray geometry_array;
+      String id, sha1, sha, resourceServer = "", resourceServerGroup = "", provider, resourceId, geometry_type, longitude, latitude, domain, region = null, role;
+      String[] onboardedBy;
 
-		if (updated.containsKey("location")) {
-			region = "location";
-		} else if (updated.containsKey("coverageRegion")) {
-			region = "coverageRegion";
-		}
+      sha1 = updated.getString("role");
+      onboardedBy = sha1.split("/");
+      sha = onboardedBy[1];
+      domain = onboardedBy[0];
+      /**
+       * This is temporary code, needs better optimization
+       * Starts now......
+       * */
+      if (updated.getString("item-type").equalsIgnoreCase("resourceItem")) {
+          resourceServer = updated.getJsonObject("resourceServer").getString("value");
+          resourceServerGroup = updated.getJsonObject("resourceServerGroup").getString("value");
+          resourceId = updated.getJsonObject("resourceId").getString("value");
+          id = domain + "/" + sha + "/" + resourceServer + "/" + resourceServerGroup + "/" + resourceId;
+          updated.put("id", id);
+      }
 
-		geometry = updated.getJsonObject(region).getJsonObject("value").getJsonObject("geometry");
-		geometry_type = updated.getJsonObject(region).getJsonObject("value").getJsonObject("geometry")
-				.getString("type");
-		geometry_array = updated.getJsonObject(region).getJsonObject("value").getJsonObject("geometry")
-				.getJsonArray("coordinates");
-    
-    logger.info(geometry.toString());
-    logger.info(geometry_type.toString());
-    logger.info(geometry_array.toString());
-    
-		if (geometry_type == "Point") {
-			latitude = geometry_array.getString(0);
-			longitude = geometry_array.getString(1);
-		} else if (geometry_type == "Polygon") {
-			latitude = geometry_array.getString(0);
-			longitude = geometry_array.getString(1);
-		} 
-	
-	updated.put("geoJsonLocation", geometry);	
+      if (updated.getString("item-type").equalsIgnoreCase("resourceServer")) {
+          id = updated.getString("name");
+          updated.put("id", id);
+      }
+
+      if (updated.getString("item-type").equalsIgnoreCase("resourceServerGroup")) {
+          id = updated.getJsonObject("provider").getString("value").split(":")[2] + "/"
+                  + updated.getJsonObject("resourceServer").getString("value").split(":")[2] + "/"
+                  + updated.getString("name");
+          updated.put("id", id);
+      }
+      provider = updated.containsKey("provider") ? updated.getJsonObject("provider").getString("value") : "";
+
+    if(updated.getString("item-type").equalsIgnoreCase("resourceItem")
+        || updated.getString("item-type").equalsIgnoreCase("resourceServer")){
+          if (updated.containsKey("location")) {
+              region = "location";
+          } else if (updated.containsKey("coverageRegion")) {
+              region = "coverageRegion";
+          }
+
+          geometry = updated.getJsonObject(region).getJsonObject("value").getJsonObject("geometry");
+          geometry_type = updated.getJsonObject(region).getJsonObject("value").getJsonObject("geometry")
+                  .getString("type");
+          geometry_array = updated.getJsonObject(region).getJsonObject("value").getJsonObject("geometry")
+                  .getJsonArray("coordinates");
+
+          logger.info(geometry.toString());
+          logger.info(geometry_type.toString());
+          logger.info(geometry_array.toString());
+
+          if (geometry_type == "Point") {
+              latitude = geometry_array.getString(0);
+              longitude = geometry_array.getString(1);
+          } else if (geometry_type == "Polygon") {
+              latitude = geometry_array.getString(0);
+              longitude = geometry_array.getString(1);
+          }
+
+        updated.put("geoJsonLocation", geometry);
+    }
+      /**
+       * .....ends here
+       * */
     updated.remove("sha_1_id");
     updated.remove("role");
 	updated.put("createdAt", new JsonObject().put("type", "TimeProperty").put("value", new java.util.Date().toString()));
@@ -711,8 +835,8 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
       }
       updated.put("_tags", tagsInLowerCase);
     }
-    id = domain + "/" + sha + "/" + resourceServer + "/" + resourceServerGroup + "/" + resourceId;
-    updated.put("id", id);
+
+
     
     return updated;
   }
@@ -744,8 +868,11 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
               bulk.add(BulkOperation.createInsert(ins));
             }
             if (!bulk.isEmpty()) {
-              mongo.bulkWrite(TAG_COLLECTION, bulk, tagsUpdated -> {});
+                mongo.bulkWrite(TAG_COLLECTION, bulk, tagsUpdated -> {
+                });
             }
+          }
+          else{
           }
         });
   }
@@ -779,52 +906,132 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   @Override
   public void create(Message<Object> message) {
 
-		JsonObject request_body = (JsonObject) message.body();
-		JsonObject itemWithoutDol = removeDollar(request_body);
-		
-		JsonObject query = new JsonObject();
-		JsonObject q = new JsonObject();
-		JsonArray expressions = new JsonArray();
+      JsonObject request_body = (JsonObject) message.body();
+      JsonObject itemWithoutDol = removeDollar(request_body);
 
-		String item_type = request_body.getString("item-type");
-		String item_id = null;
+      String item_type = request_body.getString("item-type");
+      String item_id = null;
+      String resourceGroup, resourceServer = null;
+      Future<Void> insertHashFuture = Future.future();
+      if (item_type.equalsIgnoreCase("resourceItem")) {
+          request_body = addNewAttributes(itemWithoutDol, 1, true, null);
+          item_id = request_body.getString("id");
+          resourceGroup = request_body.getString("resourceServerGroup.value");
+          resourceServer = request_body.getString("resourceServer.value");
+          logger.info("Item ID : " + item_id);
 
-		if (item_type.contains("resourceItem")) {
-			request_body = addNewAttributes(itemWithoutDol, 1, true, null);
-			item_id = request_body.getString("id");
-			logger.info("Item ID : " +item_id);
-		} else if (item_type == "resourceServer"){
-			request_body = itemWithoutDol;
-			item_id = request_body.getString("name");
-		}
-		
-		q.put("id", item_id);
-		q.put("item-type", item_type);
-		expressions.add(q);
-		query.put("$and", expressions);
-		
-		JsonObject updated_item = request_body;
+          if (!resourceCache.get("resouceServerItemIds").contains(item_id))
+              if (resourceCache.get("resourceServerIds").contains(resourceServer) &&
+                      resourceCache.get("resourceGroupIds").contains(resourceGroup))
+                  insertHashFuture = mongoInsert(request_body, message);
+              else
+                  message.fail(0,"Resource Server and/or Resource Server Group not found!");
+          else
+              message.reply("conflict");
 
-		mongo.count(COLLECTION, query, res -> {
-			logger.info(res.result().toString());
-			
-			if (res.result().intValue() == 0) {		
-				mongo.insert(COLLECTION, updated_item, resp -> {
-					if (resp.succeeded()) {
-						if (updated_item.containsKey("_tags")) {
-							writeTags(updated_item.getJsonArray("_tags"));
-						}
-						message.reply(updated_item.getString("id"));
-						logger.info("Item Created " + updated_item.getString("id"));
-					} else {
-						message.fail(0, "failure");
-					}
-				});
-			} else {
-				message.reply("conflict");
-			}
-		});
+      } else if (item_type.equalsIgnoreCase("resourceServer")) {
+          request_body = addNewAttributes(itemWithoutDol, 1, true, null);
+          item_id = request_body.getString("id");
+
+          if (!resourceCache.get("resourceServerIds").contains(item_id)){
+              logger.info("CREATE RESOURCE SERVER");
+             insertHashFuture= mongoInsert(request_body, message);
+          }
+          else
+              message.reply("conflict");
+      } else if (item_type.equalsIgnoreCase("resourceServerGroup")) {
+          request_body = addNewAttributes(itemWithoutDol, 1, true, null);
+          item_id = request_body.getString("id");
+          resourceServer = request_body.getJsonObject("resourceServer").getString("value").split(":")[2];
+          logger.info("RES V: "+resourceServer);
+          if (!resourceCache.get("resourceGroupIds").contains(item_id)) {
+              if (resourceCache.get("resourceServerIds").contains(resourceServer)) {
+                  logger.info("CREATE RESOURCE GROUP");
+                  insertHashFuture = mongoInsert(request_body, message);
+              } else
+                  message.fail(0,"Resource Server is not Found!");
+          }else
+          message.reply("conflict");
+      }
+
+      String finalItem_id = item_id;
+      insertHashFuture.setHandler(res->{
+          if(res.succeeded()) {
+              if (item_type.equalsIgnoreCase("resourceItem"))
+                  resourceCache.get("resourceItemIds").add(finalItem_id);
+              else if (item_type.equalsIgnoreCase("resourceServer")) {
+                  resourceCache.get("resourceServerIds").add(finalItem_id);
+              }
+              else if (item_type.equalsIgnoreCase("resourceServerGroup")) {
+                  resourceCache.get("resourceGroupIds").add(finalItem_id);
+              }
+          }else{
+              logger.info("HashMap insert failed. "+res.cause());
+          }
+      });
   }
+//			JsonObject q1 = new JsonObject();
+//			JsonObject q2 = new JsonObject();
+//            q1.put("id", resourceServer);
+//            q2.put("id",resourceGroup);
+//            JsonObject fields = new JsonObject().put("id",1);
+//            FindOptions options = new FindOptions().setFields(fields).setLimit(1);
+//
+//            //check in the hash map if item-id is already present
+//            //add code here....
+//
+//            JsonObject finalRequest_body = request_body;
+//            mongo.findWithOptions(COLLECTION,q1,options, res->{
+//                if(res.succeeded() && !res.result().isEmpty()){
+//                    mongo.findWithOptions(COLLECTION,q2,options,res2->{
+//                       if(res2.succeeded() && !res2.result().isEmpty()){
+//                           //call the insert function
+//                            mongoInsert(finalRequest_body,message);
+//                       }else {
+//                           //throw an error
+//                       }
+//
+//                    });
+//                } else{
+//                        //throw an error
+//                }
+//            });
+
+//		    JsonObject q1 = new JsonObject();
+//		    q1.put("id",resourceServer);
+//		    JsonObject field = new JsonObject().put("id",1);
+//		    FindOptions options = new FindOptions().setFields(field).setLimit(1);
+//
+//		    //check if the item is already present in HashMap
+//            //add code here....
+//
+//            JsonObject finalRequest_body1 = request_body;
+//            mongo.findWithOptions(COLLECTION, q1,options, res -> {
+//                if(res.succeeded() && !res.result().isEmpty()){
+//                    //call the insert method
+//                    mongoInsert(finalRequest_body1,message);
+//                }else {
+//                    //throw an error
+//                }
+//            });
+//
+//        }
+//		q.put("id", item_id);
+//		q.put("item-type", item_type);
+//		expressions.add(q);
+//		query.put("$and", expressions);
+
+		// JsonObject updated_item = request_body;
+
+//		mongo.count(COLLECTION, query, res -> {
+//			logger.info(res.result().toString());
+//
+//			if (res.result().intValue() == 0) {
+//
+//			} else {
+//				message.reply("conflict");
+//			}
+//		});
  
 private void updateTags(JsonArray old_tags, JsonArray new_tags) {
     JsonArray toDelete = new JsonArray();
