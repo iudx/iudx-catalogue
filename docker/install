@@ -44,7 +44,6 @@ docker exec catalogue-database-mongodb ./scripts/mongodb_setup.sh
 echo "Catalogue Setup - Created Database (catalogue)"
 
 echo "Catalogue Setup - Created Collections (items and schemas)"
-
 echo "Catalogue Setup Completed"
 
 
