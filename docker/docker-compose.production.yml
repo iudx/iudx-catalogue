@@ -12,10 +12,8 @@ services:
 
    mongodb:
     image: mongo
-    environment:
-      # provide your credentials here
-      - MONGO_INITDB_ROOT_USERNAME=root
-      - MONGO_INITDB_ROOT_PASSWORD=rootPassXXX
+    env_file:
+      - .env
     container_name: catalogue-database-mongodb
     hostname: catalogue-database-mongodb
     restart: always

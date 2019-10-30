@@ -1,5 +1,8 @@
 #!bin/bash
 
+echo "Generating User ID and password"
+sh generate_credentials.sh
+
 cd ..
 
 cp docker_conf.production.json src/main/conf/docker_conf.json
