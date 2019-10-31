@@ -309,47 +309,52 @@ function display_swagger_ui(_openapi_url){
 }
 
 function json_to_htmlcard(json_obj){
-	var openapi_url = json_obj["accessInformation"]["value"][0]["accessObject"]["value"]
-	// var openapi_url = json_obj["accessInformation"]["value"][0]["accessObject"]["value"]
-	// //console.log(openapi_url)
-	var is_public = (json_obj['secure']||[]).length === 0;
-	var rat_btn_html=`<button class="btn btn-success" onclick="request_access_token('` + json_obj.id + `', '`+ json_obj["resourceServerGroup"]["value"] + `', '`+ json_obj["resourceId"]["value"] + `')" style="background-color:green">Request Access Token</button>`
-	var s = json_obj["id"].split("/")
-	return `
-		<div class="col-12 card-margin-top">
-		<div class="card">
-		  <h5 class="card-header card-header-color">
-		  <span class="float-left" style="padding-right:7.5px;"><img src='`+
-		  ((is_public) ? "../assets/img/icons/green_unlock.svg" : "../assets/img/icons/red_lock.svg")
-		  +`' class='img-fluid secure_icon'></span>` + get_horizontal_spaces(3) + s.splice(2).join("/") + " by " + s[0]  + `</h5>
-		  <div class="card-body">
-		    <h5 class="card-title">` + json_obj["itemDescription"] + `</h5>
-		    <strong>Item-ID</strong>: `+json_obj['id']+`<br>
-		    <strong>Onboarded-By</strong>: `+json_obj['onboardedBy']+`<br>
-		    <strong>Access</strong>: `+ (is_public ? "Public": "Requires Authentication") +`<br>
-		    <div id="btn_`+resource_id_to_html_id(json_obj.id)+`">
-		    <button class="btn btn-primary" onclick="show_details('`+ json_obj.id +`')">Details</button>
-		    <!-- button class="btn btn-success" onclick="display_swagger_ui('` + openapi_url + `')">APIs Details</button-->
-		    `+ ((is_public)?"":rat_btn_html) +`
-		    <a href="#" style="color:white"  class="data-modal" onclick="display_latest_data(event, this, '`+json_obj['id']+`')"><button class="btn btn-danger">Get Latest Data</button></a>
-		    <a href="#" style="color:white"  class="data-modal" onclick="display_temporal_data(event, this, '`+json_obj['id']+`')"><button class="btn btn-warning">Get Temporal Data</button></a>
-		    </div>
-		     <div id="token_section_`+resource_id_to_html_id(json_obj.id)+`" class="token_section"></div>
-		  </div>
-		  <div id="details_section_`+resource_id_to_html_id(json_obj.id)+`" class="details_section">
-		  	<table class="table table-borderless table-dark">
-			  <thead>
-			  	<tr></tr>
-			  </thead>
-			  <tbody id="_tbody_`+resource_id_to_html_id(json_obj.id)+`">
+	if(json_obj['id'].split("/").length < 5){
+		return ``
+	}
+	else{
+		var openapi_url = json_obj["accessInformation"]["value"][0]["accessObject"]["value"]
+		// var openapi_url = json_obj["accessInformation"]["value"][0]["accessObject"]["value"]
+		// //console.log(openapi_url)
+		var is_public = (json_obj['secure']||[]).length === 0;
+		var rat_btn_html=`<button class="btn btn-success" onclick="request_access_token('` + json_obj.id + `', '`+ json_obj["resourceServerGroup"]["value"] + `', '`+ json_obj["resourceId"]["value"] + `')" style="background-color:green">Request Access Token</button>`
+		var s = json_obj["id"].split("/")
+		return `
+			<div class="col-12 card-margin-top">
+			<div class="card">
+			  <h5 class="card-header card-header-color">
+			  <span class="float-left" style="padding-right:7.5px;"><img src='`+
+			  ((is_public) ? "../assets/img/icons/green_unlock.svg" : "../assets/img/icons/red_lock.svg")
+			  +`' class='img-fluid secure_icon'></span>` + get_horizontal_spaces(3) + s.splice(2).join("/") + " by " + s[0]  + `</h5>
+			  <div class="card-body">
+			    <h5 class="card-title">` + json_obj["itemDescription"] + `</h5>
+			    <strong>Item-ID</strong>: `+json_obj['id']+`<br>
+			    <strong>Onboarded-By</strong>: `+json_obj['onboardedBy']+`<br>
+			    <strong>Access</strong>: `+ (is_public ? "Public": "Requires Authentication") +`<br>
+			    <div id="btn_`+resource_id_to_html_id(json_obj.id)+`">
+			    <button class="btn btn-primary" onclick="show_details('`+ json_obj.id +`')">Details</button>
+			    <!--button class="btn btn-success" onclick="display_swagger_ui('` + openapi_url + `')">API Details</button-->
+			    `+ ((is_public)?"":rat_btn_html) +`
+			    <a href="#" style="color:white"  class="data-modal" onclick="display_latest_data(event, this, '`+json_obj['id']+`')"><button class="btn btn-danger">Get Latest Data</button></a>
+			    <a href="#" style="color:white"  class="data-modal" onclick="display_temporal_data(event, this, '`+json_obj['id']+`')"><button class="btn btn-warning">Get Temporal Data</button></a>
+			    </div>
+			     <div id="token_section_`+resource_id_to_html_id(json_obj.id)+`" class="token_section"></div>
+			  </div>
+			  <div id="details_section_`+resource_id_to_html_id(json_obj.id)+`" class="details_section">
+			  	<table class="table table-borderless table-dark">
+				  <thead>
+				  	<tr></tr>
+				  </thead>
+				  <tbody id="_tbody_`+resource_id_to_html_id(json_obj.id)+`">
 
-			  </tbody>
-			</table>
-			<p id="extra_links_`+resource_id_to_html_id(json_obj.id)+`"></p>
-		  </div>
-		</div>
-		</div>
-	`	
+				  </tbody>
+				</table>
+				<p id="extra_links_`+resource_id_to_html_id(json_obj.id)+`"></p>
+			  </div>
+			</div>
+			</div>
+		`	
+	}
 }
 
 /*************************************************FUNCTION DECLARATIONS START*********************************************/

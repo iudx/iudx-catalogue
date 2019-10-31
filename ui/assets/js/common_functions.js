@@ -643,75 +643,77 @@ function plotGeoJSONs(geoJSONObject, _id, _json_object, _resourceServerGroup, _r
     // _resourceId_data = _resourceId;
 
     ////console.log(geoJSONObject)
+    if(_json_object['id'].split("/").length == 5){
+
+        if (geoJSONObject["type"] == "Polygon") {
+
+            //console.log("Printing Polygon....")
+            // color_count=color_count+1
+            // var _color=getRandomColor()
+
+            var div = $('div.info.legend');
+
+            //console.log(_resourceServerGroup, div)
+            var is_public = (_json_object['secure']||[]).length === 0;
+            var is_secure = (_json_object['secure']||[]).length !== 0;;
 
 
-    if (geoJSONObject["type"] == "Polygon") {
+            L.geoJSON(geoJSONObject, {
+                style: {
+                    // fillColor: colors[color_count],
+                    // fillColor: _color,
+                    fillColor: getColorsForPolygon(_resourceServerGroup),
+                    weight: 2,
+                    opacity: 1,
+                    // color: 'white',
+                    // dashArray: '3',
+                    fillOpacity: 0.5
+                },
+                onEachFeature: function (feature, layer) {
+                    layer.on('click', function (e) {
 
-        //console.log("Printing Polygon....")
-        // color_count=color_count+1
-        // var _color=getRandomColor()
+                        show_details(_id)
 
-        var div = $('div.info.legend');
+                    });
+                    layer.bindPopup(`<span class="float-left" style="padding-right:7.5px;"><img src='`+
+                    ((is_public) ? "../assets/img/icons/green_unlock.svg" : "../assets/img/icons/red_lock.svg")
+                    +`' class='img-fluid secure_icon'></span><a href='#' class='data-modal'  onclick="display_latest_data(event, this, '` + _id + `')">Get latest-data</a><br>`
+                    +`<a href="#" class="data-modal" onclick="display_temporal_data(event, this, '`+_json_object.id+`')">Get Temporal Data</a><br>`+
+                    ((is_secure) ? `<a href='#' class='data-modal'  onclick="request_access_token('` + _json_object.id + `', '`+ _json_object["resourceServerGroup"]["value"] + `', '`+ _json_object["resourceId"]["value"] + `')">Request Access Token</a>` : ``)
+                    ).addTo(map);
+                }
 
-        //console.log(_resourceServerGroup, div)
-        var is_public = (_json_object['secure']||[]).length === 0;
-        var is_secure = (_json_object['secure']||[]).length !== 0;;
+            }).addTo(markersLayer);
 
+        }
+        else if (geoJSONObject["type"] == "Point") {
 
-        L.geoJSON(geoJSONObject, {
-            style: {
-                // fillColor: colors[color_count],
-                // fillColor: _color,
-                fillColor: getColorsForPolygon(_resourceServerGroup),
-                weight: 2,
-                opacity: 1,
-                // color: 'white',
-                // dashArray: '3',
-                fillOpacity: 0.5
-            },
-            onEachFeature: function (feature, layer) {
-                layer.on('click', function (e) {
+            var is_public = (_json_object['secure']||[]).length === 0;
+            // //console.log("Printing Point....")
+            L.geoJSON(geoJSONObject, {
+                pointToLayer: function (feature, latlng) {
+                    // console.log(_resourceServerGroup)
+                    // return L.marker(latlng, {icon: getOfficeIcon()});
 
-                    show_details(_id)
-
-                });
-                layer.bindPopup(`<span class="float-left" style="padding-right:7.5px;"><img src='`+
-                ((is_public) ? "../assets/img/icons/green_unlock.svg" : "../assets/img/icons/red_lock.svg")
-                +`' class='img-fluid secure_icon'></span><a href='#' class='data-modal'  onclick="display_latest_data(event, this, '` + _id + `')">Get latest-data</a><br>`
-                +`<a href="#" class="data-modal" onclick="display_temporal_data(event, this, '`+_json_object.id+`')">Get Temporal Data</a><br>`+
-                ((is_secure) ? `<a href='#' class='data-modal'  onclick="request_access_token('` + _json_object.id + `', '`+ _json_object["resourceServerGroup"]["value"] + `', '`+ _json_object["resourceId"]["value"] + `')">Request Access Token</a>` : ``)
-                ).addTo(map);
-            }
-
-        }).addTo(markersLayer);
-
-    }
-    else if (geoJSONObject["type"] == "Point") {
-
-        var is_public = (_json_object['secure']||[]).length === 0;
-        // //console.log("Printing Point....")
-        L.geoJSON(geoJSONObject, {
-            pointToLayer: function (feature, latlng) {
-                // console.log(_resourceServerGroup)
-                // return L.marker(latlng, {icon: getOfficeIcon()});
-
-                // <a href='/catalogue/v1/items/"+plot_id+"'>Get Catalogue-item-details</a><br/>
-                var customPopup = `<span class="float-left" style="padding-right:7.5px;"><img src='`+
-                ((is_public) ? "../assets/img/icons/green_unlock.svg" : "../assets/img/icons/red_lock.svg")
-                +`' class='img-fluid secure_icon'></span><a href='#' class='data-modal'  onclick="display_latest_data(event, this, '` + _id + `')">Get latest-data</a>`
-                +`<br><a href="#"  class="data-modal" onclick="display_temporal_data(event, this, '`+_json_object.id+`')">Get Temporal Data</a><br>`;
-                var _marker = L.marker(latlng, { icon: getMarkerIcon(_resourceServerGroup) }).addTo(map);
-                _marker.itemUUID = _id;
-                // console.log(_id,this,event)
-                //////console.log(_marker.itemUUID); _marker.bindPopup(customPopup) _marker.bindPopup(customPopup)
-                _marker.on('click', markerOnClick);
-                _marker.bindPopup(customPopup)
-                return _marker;
-            },
-            // filter: filter_byTags,
-            // onEachFeature: onEachFeature
-        }).addTo(markersLayer);
-        // //console.log("22222222222")
+                    // <a href='/catalogue/v1/items/"+plot_id+"'>Get Catalogue-item-details</a><br/>
+                    var customPopup = `<span class="float-left" style="padding-right:7.5px;"><img src='`+
+                    ((is_public) ? "../assets/img/icons/green_unlock.svg" : "../assets/img/icons/red_lock.svg")
+                    +`' class='img-fluid secure_icon'></span><a href='#' class='data-modal'  onclick="display_latest_data(event, this, '` + _id + `')">Get latest-data</a>`
+                    +`<br><a href="#"  class="data-modal" onclick="display_temporal_data(event, this, '`+_json_object.id+`')">Get Temporal Data</a><br>`;
+                    var _marker = L.marker(latlng, { icon: getMarkerIcon(_resourceServerGroup) }).addTo(map);
+                    _marker.itemUUID = _id;
+                    // console.log(_id,this,event)
+                    //////console.log(_marker.itemUUID); _marker.bindPopup(customPopup) _marker.bindPopup(customPopup)
+                    _marker.on('click', markerOnClick);
+                    _marker.bindPopup(customPopup)
+                    return _marker;
+                },
+                // filter: filter_byTags,
+                // onEachFeature: onEachFeature
+            }).addTo(markersLayer);
+            // //console.log("22222222222")
+        }
+        
     }
 }
 
