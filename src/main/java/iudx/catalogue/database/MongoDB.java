@@ -763,8 +763,8 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
        * Starts now......
        * */
       if (updated.getString("item-type").equalsIgnoreCase("resourceItem")) {
-          resourceServer = updated.getJsonObject("resourceServer").getString("value");
-          resourceServerGroup = updated.getJsonObject("resourceServerGroup").getString("value");
+          resourceServer = updated.getJsonObject("resourceServer").getString("value").split(":")[2];
+          resourceServerGroup = updated.getJsonObject("resourceServerGroup").getString("value").split(":")[2];
           resourceId = updated.getJsonObject("resourceId").getString("value");
           id = domain + "/" + sha + "/" + resourceServer + "/" + resourceServerGroup + "/" + resourceId;
           updated.put("id", id);
@@ -776,8 +776,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
       }
 
       if (updated.getString("item-type").equalsIgnoreCase("resourceServerGroup")) {
-          id = updated.getJsonObject("provider").getString("value").split(":")[2] + "/"
-                  + updated.getJsonObject("resourceServer").getString("value").split(":")[2] + "/"
+          id = updated.getJsonObject("resourceServer").getString("value").split(":")[2] + "/"
                   + updated.getString("name");
           updated.put("id", id);
       }
@@ -916,11 +915,11 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
       if (item_type.equalsIgnoreCase("resourceItem")) {
           request_body = addNewAttributes(itemWithoutDol, 1, true, null);
           item_id = request_body.getString("id");
-          resourceGroup = request_body.getString("resourceServerGroup.value");
-          resourceServer = request_body.getString("resourceServer.value");
+          resourceGroup = request_body.getJsonObject("resourceServerGroup").getString("value").split(":")[2];
+          resourceServer = request_body.getJsonObject("resourceServer").getString("value").split(":")[2];
           logger.info("Item ID : " + item_id);
 
-          if (!resourceCache.get("resouceServerItemIds").contains(item_id))
+          if (!resourceCache.get("resourceItemIds").contains(item_id))
               if (resourceCache.get("resourceServerIds").contains(resourceServer) &&
                       resourceCache.get("resourceGroupIds").contains(resourceGroup))
                   insertHashFuture = mongoInsert(request_body, message);
