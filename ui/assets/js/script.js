@@ -693,7 +693,7 @@ function show_details(_id) {
             </table>
         `);
         $("#resource_item_special_feature_links").html(`
-                    <button onclick="display_swagger_ui('` + data[0]["accessInformation"]["value"][0]["accessObject"]["value"] + `')">API Details</button>
+                    <!-- button onclick="display_swagger_ui('` + data[0]["accessInformation"]["value"][0]["accessObject"]["value"] + `')">API Details</button -->
                     <button><a href="`+ data[0]["refDataModel"]["value"] + `" target="_blank">Data Model </a></button>
             `);
     });
