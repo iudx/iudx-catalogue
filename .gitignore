@@ -50,7 +50,6 @@ local.properties
 .settings/
 .loadpath
 .recommenders
-.idea
 
 # External tool builders
 .externalToolBuilders/
