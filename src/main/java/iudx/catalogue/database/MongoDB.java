@@ -766,7 +766,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
           resourceServer = updated.getJsonObject("resourceServer").getString("value").split(":")[2];
           resourceServerGroup = updated.getJsonObject("resourceServerGroup").getString("value").split(":")[2];
           resourceId = updated.getJsonObject("resourceId").getString("value");
-          id = domain + "/" + sha + "/" + resourceServer + "/" + resourceServerGroup + "/" + resourceId;
+          id = domain + "/" + sha + "/" + resourceServerGroup + "/" + resourceId;
           updated.put("id", id);
       }
 
@@ -912,6 +912,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
       String item_id = null;
       String resourceGroup, resourceServer = null;
       Future<Void> insertHashFuture = Future.future();
+      System.out.println("In create : " + request_body);
       if (item_type.equalsIgnoreCase("resourceItem")) {
           request_body = addNewAttributes(itemWithoutDol, 1, true, null);
           item_id = request_body.getString("id");
