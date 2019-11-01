@@ -732,6 +732,31 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     JsonObject request_body = (JsonObject) message.body();
     JsonObject query = decodeQuery(request_body);
     JsonObject fields = decodeFields(request_body);
+    
+    String key = request_body.getString("item-type");
+    System.out.println("In count block : "+ key);
+    if(key.equalsIgnoreCase("resourceItem"))
+    { 
+    	System.out.println("Searching resourceItem");
+	    query.put("itemType", new JsonObject().put("type", "Property").put("value", "resourceItem"));
+	    query.put("itemStatus", new JsonObject().put("type", "Property").put("value", "active"));
+  	} 
+    
+    else if(key.equalsIgnoreCase("resourceServer"))
+    { 
+    	System.out.println("Searching resourceServer");
+	    query.put("itemType", new JsonObject().put("type", "Property").put("value", "resourceServer"));
+	    query.put("itemStatus", new JsonObject().put("type", "Property").put("value", "active"));
+  	} 
+    
+    else if(key.equalsIgnoreCase("resourceServerGroup"))
+    { 
+    	System.out.println("Searching resourceServerGroup");
+	    query.put("itemType", new JsonObject().put("type", "Property").put("value", "resourceServerGroup"));
+	    query.put("itemStatus", new JsonObject().put("type", "Property").put("value", "active"));
+  	}
+
+    
     if (query == null) {
       message.fail(0, "Bad query: Number of attributes is not equal to number of number of values");
     } else {
