@@ -289,7 +289,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     attributeFilter.put("_id", 0);
     // query.put("Status", "Live");
 
-    String[] hiddenFields = {"_tags","__uuid", "geoJsonLocation", "item-type"};
+    String[] hiddenFields = {"_tags","__uuid", "geoJsonLocation", "item-type", "__createdBy", ""};
 
     FindOptions options = new FindOptions();
     options.setFields(attributeFilter);
@@ -344,12 +344,36 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   public void list(Message<Object> message) {
       JsonObject request = (JsonObject) message.body();
       String key = request.getString("item-type");
+      System.out.println("In list block : "+ key);
       if(key.equalsIgnoreCase("resourceItem"))
-	    mongoFind(new JsonObject(), new JsonObject(), message);
+      { 
+    	System.out.println("Searching resourceItem");
+	    JsonObject query = new JsonObject();
+	    query.put("itemType", new JsonObject().put("type", "Property").put("value", "resourceItem"));
+	    query.put("itemStatus", new JsonObject().put("type", "Property").put("value", "active"));
+    	mongoFind(query, new JsonObject(), message);
+	    
+      } else if(key.equalsIgnoreCase("resourceServer"))
+      { 
+    	System.out.println("Searching resourceServer");
+	    JsonObject query = new JsonObject();
+	    query.put("itemType", new JsonObject().put("type", "Property").put("value", "resourceServer"));
+	    query.put("itemStatus", new JsonObject().put("type", "Property").put("value", "active"));
+    	mongoFind(query, new JsonObject(), message);
+	    
+      } else if(key.equalsIgnoreCase("resourceServerGroup"))
+      { 
+    	System.out.println("Searching resourceServerGroup");
+	    JsonObject query = new JsonObject();
+	    query.put("itemType", new JsonObject().put("type", "Property").put("value", "resourceServerGroup"));
+	    query.put("itemStatus", new JsonObject().put("type", "Property").put("value", "active"));
+    	mongoFind(query, new JsonObject(), message);
+	    
+      }
     else{
       mongo.distinct(COLLECTION,key+".value", String.class.getName(),res->{
          if(res.succeeded()){
-             //System.out.println("Response Distinct: "+res.result().getJsonArray(0).toString());
+             System.out.println("Response Distinct: "+res.result().getJsonArray(0).toString());
              message.reply(res.result());
          }else
          {
@@ -720,6 +744,29 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     JsonObject request_body = (JsonObject) message.body();
     JsonObject query = decodeQuery(request_body);
 
+    String key = request_body.getString("item-type");
+    System.out.println("In count block : "+ key);
+    if(key.equalsIgnoreCase("resourceItem"))
+    { 
+    	System.out.println("Searching resourceItem");
+	    query.put("itemType", new JsonObject().put("type", "Property").put("value", "resourceItem"));
+	    query.put("itemStatus", new JsonObject().put("type", "Property").put("value", "active"));
+  	} 
+    
+    else if(key.equalsIgnoreCase("resourceServer"))
+    { 
+    	System.out.println("Searching resourceServer");
+	    query.put("itemType", new JsonObject().put("type", "Property").put("value", "resourceServer"));
+	    query.put("itemStatus", new JsonObject().put("type", "Property").put("value", "active"));
+  	} 
+    
+    else if(key.equalsIgnoreCase("resourceServerGroup"))
+    { 
+    	System.out.println("Searching resourceServerGroup");
+	    query.put("itemType", new JsonObject().put("type", "Property").put("value", "resourceServerGroup"));
+	    query.put("itemStatus", new JsonObject().put("type", "Property").put("value", "active"));
+  	}
+    
     if (query == null) {
       message.fail(0, "Bad query: Number of attributes is not equal to number of number of values");
     } else {
