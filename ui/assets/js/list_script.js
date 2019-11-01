@@ -140,11 +140,19 @@ function get_items(_attr_name,_attr_value){
 		display_search_section();
 	}
 
+	var _temp_a_v = _attr_value
+
+	if(_attr_name=="resourceServerGroup"){
+		_attr_value=cat_conf['resource_server_group_head']+_attr_value
+	}else if(_attr_name=="provider"){
+		_attr_value=cat_conf['provider_head']+_attr_value
+	}
+
 	$.get("/catalogue/v1/search?attribute-name=("+_attr_name+")&attribute-value=("+_attr_value+")", function(data) {
             // $("#searched_items").text(data);
 			data=JSON.parse(data)
 			set_data_globally(data);
-			$("#retrieved_items_count").html("About " + get_item_count(data) + " results for " + _attr_value + " (Attribute: " + _attr_name + ")");
+			$("#retrieved_items_count").html("About " + get_item_count(data) + " results for " + _temp_a_v + " (Attribute: " + _attr_name + ")");
 			$("#searched_items").html("");
             for (var i = 0; i < data.length; i++) {
                 $("#searched_items").append(json_to_htmlcard(data[i]));
@@ -389,10 +397,16 @@ $(document).ready(function(){
     });
     $.get("/catalogue/internal_apis/list/resourceServerGroup", function(data) {
 			rsg_set=JSON.parse(data)
+    		for (var i = rsg_set.length - 1; i >= 0; i--) {
+    			rsg_set[i]=rsg_set[i].split(cat_conf['resource_server_group_head'])[1]
+    		}
     });
     $.get("/catalogue/internal_apis/list/provider", function(data) {
-			provider_set=JSON.parse(data)
 			$("#provider_count").html(provider_set.length);
+			provider_set=JSON.parse(data)
+			for (var i = rsg_set.length - 1; i >= 0; i--) {
+				provider_set[i]=provider_set[i].split(cat_conf['provider_head'])[1]
+			}
     });
 
 	$("#landing_footer, #normal_footer").html(getFooterContent());

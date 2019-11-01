@@ -122,15 +122,17 @@ var marker = L.marker(getMapDefaultViewLatLng(), { icon: getOfficeIcon() }).addT
 marker.itemUUID = cat_conf['map_default_lat_lng_name']
 //Create a marker layer 
 var markersLayer = L.featureGroup().addTo(map);
-marker.on("click", markerOnClick);
+// marker.on("click", markerOnClick);
+
+marker.bindPopup(cat_conf['map_default_lat_lng_name'])
+
 //Add markers to marker layer
 // marker.addTo(markersLayer);
 
-
-
-markersLayer.on("click", markerOnClick);
-
-
+markersLayer.on("click", function(){
+    $('#resource_item_details').html(``);
+    $('#resource_item_special_feature_links').html(``);
+});
 
 $("#menu-bar-icon").click(function (e) {
     sidebar.toggle();

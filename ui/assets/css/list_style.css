@@ -164,7 +164,8 @@ a{
             /*margin: 2px;*/
             /*width: 200px;*/
             width: auto;
-            color: #07cdae;
+            font-weight: bold;
+            color: black;
     }
     
     .ui-menu .ui-menu-item a {
