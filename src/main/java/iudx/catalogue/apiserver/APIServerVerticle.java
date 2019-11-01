@@ -485,7 +485,7 @@ public class APIServerVerticle extends AbstractVerticle {
 				request_body.put("item-type", item_type);
 			}
 			if (item_type.equalsIgnoreCase("resourceServer") || item_type.equalsIgnoreCase("resourceServerGroup") || item_type.equalsIgnoreCase("resourceItem")) {
-				databaseHandler("list", routingContext, request_body);
+				databaseHandler("search-attribute", routingContext, request_body);
 			}
 			else {
 				handle400(routingContext, "Bad Request. Should be one of [resourceServer, resourceServerGroup, resourceItem]");
