@@ -480,6 +480,9 @@ public class APIServerVerticle extends AbstractVerticle {
 			JsonObject request_body = prepareQuery(query);
 			String item_type = request_body.getString("item-type");
 			System.out.println(item_type);
+			if(item_type == null) {
+				item_type = "resourceItem";
+			}
 			if (item_type.equalsIgnoreCase("resourceServer") || item_type.equalsIgnoreCase("resourceServerGroup") || item_type.equalsIgnoreCase("resourceItem")) {
 				databaseHandler("list", routingContext, request_body);
 			}
