@@ -30,13 +30,22 @@ var tile_layer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voya
 tile_layer.addTo(map);
 
 //link position: bottomright, topright, topleft, bottomleft
-var link = L.control({ position: 'bottomright' });
+var link = L.control({ position: 'bottomleft' });
 link.onAdd = function (map) {
     var div = L.DomUtil.create('div', 'myclass');
-    div.innerHTML = `Also Checkout <a href='https://apidocs.iudx.org.in/' target="_blank">API Documentation here</a>`;
+    div.innerHTML = `<button class="btn btn-danger" style="background-color:red" onclick="location.href='/'">Go To Main Page</button>`;
     return div;
 }
 link.addTo(map);
+
+link = L.control({ position: 'bottomright' });
+link.onAdd = function (map) {
+    var div = L.DomUtil.create('div', 'myclass');
+    div.innerHTML = `<span>Checkout the API Documentation <a href='https://apidocs.iudx.org.in/' target="_blank">here</a></span>`;
+    return div;
+}
+link.addTo(map);
+
 L.Control.Watermark = L.Control.extend({
     onAdd: function (map) {
         var img = L.DomUtil.create('img');
@@ -692,8 +701,8 @@ function show_details(_id) {
             </tbod
             </table>
         `);
+        // <!-- button onclick="display_swagger_ui('` + data[0]["accessInformation"]["value"][0]["accessObject"]["value"] + `')">API Details</button -->
         $("#resource_item_special_feature_links").html(`
-                    <!-- button onclick="display_swagger_ui('` + data[0]["accessInformation"]["value"][0]["accessObject"]["value"] + `')">API Details</button -->
                     <button><a href="`+ data[0]["refDataModel"]["value"] + `" target="_blank">Data Model </a></button>
             `);
     });

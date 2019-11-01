@@ -120,6 +120,16 @@ function display_search_section(){
 	$("#search_section").fadeIn(1500);
 }
 
+function get_item_count(__data){
+	var _c=0;
+	for (var i = __data.length - 1; i >= 0; i--) {
+		if(__data[i]['itemType']['value']=="resourceItem"){
+			_c+=1;
+		}
+	}
+	return _c;
+}
+
 function get_items(_attr_name,_attr_value){
 	if(is_attr_empty(_attr_name,_attr_value)){
 		return;
@@ -134,7 +144,7 @@ function get_items(_attr_name,_attr_value){
             // $("#searched_items").text(data);
 			data=JSON.parse(data)
 			set_data_globally(data);
-			$("#retrieved_items_count").html("About " + data.length + " results for " + _attr_value + " (Attribute: " + _attr_name + ")");
+			$("#retrieved_items_count").html("About " + get_item_count(data) + " results for " + _attr_value + " (Attribute: " + _attr_name + ")");
 			$("#searched_items").html("");
             for (var i = 0; i < data.length; i++) {
                 $("#searched_items").append(json_to_htmlcard(data[i]));
@@ -224,7 +234,7 @@ function display_json_response_in_modal(json_obj){
 
 function show_details(_id){
 	var id = resource_id_to_html_id(_id)
-	console.log($("#details_section_"+id).is(':visible'))
+	// console.log($("#details_section_"+id).is(':visible'))
 	if(!($("#details_section_"+id).is(':visible'))) {
     	$.get("/catalogue/v1/items/" + _id , function(data) {
 			data=JSON.parse(data)
@@ -313,7 +323,8 @@ function json_to_htmlcard(json_obj){
 		return ``
 	}
 	else{
-		var openapi_url = json_obj["accessInformation"]["value"][0]["accessObject"]["value"]
+		var openapi_url = "blah_blah"
+		// var openapi_url = json_obj["accessInformation"]["value"][0]["accessObject"]["value"]
 		// var openapi_url = json_obj["accessInformation"]["value"][0]["accessObject"]["value"]
 		// //console.log(openapi_url)
 		var is_public = (json_obj['secure']||[]).length === 0;
@@ -385,8 +396,8 @@ $(document).ready(function(){
     });
 
 	$("#landing_footer, #normal_footer").html(getFooterContent());
-	$.get("/catalogue/v1/count", function(data) {
-		$("#resource_item_count").html(JSON.parse(data)["Count"]);
+	$.get("/catalogue/v1/search", function(data) {
+		$("#resource_item_count").html(get_item_count(JSON.parse(data)));
 	});
 
 });

@@ -184,7 +184,7 @@ function display_latest_data(e, ele, _rid) {
         })
         .catch(error => {
             _alertify("Error!!!", '<pre id="custom_alertbox">: ' + error["statusText"] + '</pre>');
-            console.log(error)
+            // console.log(error)
         })
 }
 
@@ -328,7 +328,7 @@ function display_temporal_data(e, ele, _rid, __y_name) {
         })
         .catch(error => {
             _alertify("Error!!!", '<pre id="custom_alertbox">: ' + error["statusText"] + '</pre>');
-            console.log(error)
+            // console.log(error)
         })
 }
 
