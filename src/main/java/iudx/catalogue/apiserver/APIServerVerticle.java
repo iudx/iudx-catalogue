@@ -101,11 +101,27 @@ public class APIServerVerticle extends AbstractVerticle {
     router.route().handler(BodyHandler.create());
 
     // IUDX v1 APIs
+    
+    // Create an item
     router.post("/catalogue/v1/items").handler(this::create);
+    
+    // Get item with ID
     router.get("/catalogue/v1/items/:domain/:provider/:resourceServer/:resourceCatogery/:resourceId").handler(this::getItem);
+    router.get("/catalogue/v1/items/:resourceServer/:resourceCatogery").handler(this::getItem);
+    router.get("/catalogue/v1/items/:resourceServer").handler(this::getItem);
+    
+    
     router.put("/catalogue/v1/items/:provider/:resourceServer/:resourceCatogery/:resourceId").handler(this::update);
+    
+    // Delete item with ID
     router.delete("/catalogue/v1/items/:domain/:provider/:resourceServer/:resourceCatogery/:resourceId").handler(this::delete);
+    router.delete("/catalogue/v1/items/:resourceServer/:resourceCatogery").handler(this::delete);
+    router.delete("/catalogue/v1/items/:resourceServer").handler(this::delete);
+    
+    // Search items in Catalogue
     router.get("/catalogue/v1/search").handler(this::searchAttribute);
+    
+    // Count items in Catalogue
     router.get("/catalogue/v1/count").handler(this::count);
     
     // NEW APIs
@@ -261,8 +277,8 @@ public class APIServerVerticle extends AbstractVerticle {
 			logger.info("onBoarder is " + onboarder);
 			logger.info("onBoardedBy is " + onboardedBy);
 
-			if (level.contains("class:3") || level.contains("class:4")
-					|| level.contains("class:5")) {
+			if ((level.contains("class:3") || level.contains("class:4")
+					|| level.contains("class:5")) && onboardedBy.equalsIgnoreCase("rbccps.org/aa9d66a000d94a78895de8d4c0b3a67f3450e531") ) {
 				status = true;
 				logger.info("Valid Certificate");
 			} else {
@@ -278,9 +294,23 @@ public class APIServerVerticle extends AbstractVerticle {
 	}
 
 	private void getItem(RoutingContext routingContext) { // "/catalogue/v1/items/:domain/:provider/:resourceServer/:resourceCatogery/:resourceId
-		String id = routingContext.pathParam("domain") + "/" + routingContext.pathParam("provider") + "/"
-				+ routingContext.pathParam("resourceServer") + "/" + routingContext.pathParam("resourceCatogery") + "/"
-				+ routingContext.pathParam("resourceId");
+
+		System.out.println("HIT : In Get Item");
+		String id = null;
+		int state = routingContext.pathParams().size();
+
+		if (state == 5) {
+			id = routingContext.pathParam("domain") + "/" + routingContext.pathParam("provider") + "/"
+					+ routingContext.pathParam("resourceServer") + "/" + routingContext.pathParam("resourceCatogery")
+					+ "/" + routingContext.pathParam("resourceId");
+			System.out.println(id);
+		} else if (state == 2) {
+			id = routingContext.pathParam("resourceServer") + "/" + routingContext.pathParam("resourceCatogery");
+		}
+
+		else if (state == 1) {
+			id = routingContext.pathParam("resourceServer");
+		}
 		System.out.println(id);
 		JsonObject request_body = new JsonObject();
 		request_body.put("id", id);
@@ -448,13 +478,20 @@ public class APIServerVerticle extends AbstractVerticle {
     logger.info(query);
 
 			JsonObject request_body = prepareQuery(query);
-			databaseHandler("search-attribute", routingContext, request_body);
-    } else {
-		JsonObject request_body = new JsonObject();
-		request_body.put("item-type", "resourceItem");
-	    databaseHandler("list", routingContext, request_body);
-    }
-  }
+			String item_type = request_body.getString("item-type");
+			System.out.println(item_type);
+			if (item_type.equalsIgnoreCase("resourceServer") || item_type.equalsIgnoreCase("resourceServerGroup") || item_type.equalsIgnoreCase("resourceItem")) {
+				databaseHandler("list", routingContext, request_body);
+			}
+			else {
+				handle400(routingContext, "Bad Request. Should be one of [resourceServer, resourceServerGroup, resourceItem]");
+			}
+		} else {
+			JsonObject request_body = new JsonObject();
+			request_body.put("item-type", "resourceItem");
+			databaseHandler("list", routingContext, request_body);
+		}
+	  }
 
   private void count(RoutingContext routingContext) {
 
@@ -475,7 +512,14 @@ public class APIServerVerticle extends AbstractVerticle {
 	    logger.info(query);
 
 				JsonObject request_body = prepareQuery(query);
-				databaseHandler("count", routingContext, request_body);
+				String item_type = request_body.getString("item-type");
+				System.out.println(item_type);
+				if (item_type.equalsIgnoreCase("resourceServer") || item_type.equalsIgnoreCase("resourceServerGroup") || item_type.equalsIgnoreCase("resourceItem")) {
+					databaseHandler("count", routingContext, request_body);
+				}
+				else {
+					handle400(routingContext, "Bad Request. Should be one of [resourceServer, resourceServerGroup, resourceItem]");
+				}
 	    } else {
 			JsonObject request_body = new JsonObject();
 			request_body.put("item-type", "resourceItem");
@@ -491,15 +535,34 @@ public class APIServerVerticle extends AbstractVerticle {
   private void delete(RoutingContext routingContext) {
 		HttpServerRequest request = routingContext.request();
 
+		System.out.println("HIT : In Delete");
+		
 		if (decodeCertificate(routingContext)) {
 			if (authenticateRequest(routingContext, "user.list")) {
-
-				String id = routingContext.pathParam("domain") + "/" + routingContext.pathParam("provider") + "/"
+				String id = null;
+				int state = routingContext.pathParams().size();
+				
+				if (state == 5)
+				{
+				id = routingContext.pathParam("domain") + "/" + routingContext.pathParam("provider") + "/"
 						+ routingContext.pathParam("resourceServer") + "/"
 						+ routingContext.pathParam("resourceCatogery") + "/" + routingContext.pathParam("resourceId");
 				System.out.println(id);
+				}
+				else if(state == 2)
+				{
+					id = routingContext.pathParam("resourceServer") + "/"
+							+ routingContext.pathParam("resourceCatogery");
+				}
+				
+				else if(state == 1)
+				{
+					id = routingContext.pathParam("resourceServer");
+				}
 
-				if (id.contains(onboardedBy)) {
+				
+				//if (id.contains(onboardedBy)) {
+				if (true) {
 
 					JsonObject request_body = new JsonObject();
 					request_body.put("id", id);
