@@ -130,6 +130,7 @@ function get_item_count(__data){
 	return _c;
 }
 
+/*
 function _get_item_count(__url){
     return new Promise((resolve, reject) => {
         $.ajax({
@@ -149,6 +150,7 @@ function _get_item_count(__url){
         })
     })
 }
+*/
 
 function get_items(_attr_name,_attr_value){
 	if(is_attr_empty(_attr_name,_attr_value)){
@@ -434,15 +436,9 @@ $(document).ready(function(){
 	});
 
 	$("#landing_footer, #normal_footer").html(getFooterContent());
-	$(".se-pre-con").fadeIn("slow");
-	_get_item_count("/catalogue/v1/search").then(data => {
-		$("#resource_item_count").html(data);
-		$(".se-pre-con").fadeOut("slow");
-        })
-        .catch(error => {
-            _alertify("Error!!!", '<pre id="custom_alertbox">: ' + error["statusText"] + '</pre>');
-            // console.log(error)
-        })
+	$.get("/catalogue/v1/search", function(data) {
+		$("#resource_item_count").html(get_item_count(JSON.parse(data)));
+	});
 
 });
 
