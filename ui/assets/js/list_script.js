@@ -152,17 +152,17 @@ function get_items(_attr_name,_attr_value){
 	
 	$.get("/catalogue/v1/search?attribute-name=("+_attr_name+")&attribute-value=("+_attr_value+")", function(data) {
             // $("#searched_items").text(data);
-			data=JSON.parse(data)
-			set_data_globally(data);
-			$("#retrieved_items_count").html("About " + get_item_count(data) + " results for " + _temp_a_v + " (Attribute: " + _attr_name + ") | <a href='/map'>Go to Map View</a>");
-			$("#searched_items").html("");
-            for (var i = 0; i < data.length; i++) {
-                $("#searched_items").append(json_to_htmlcard(data[i]));
-            }
-            populate_pagination_section();
+		data=JSON.parse(data)
+		set_data_globally(data);
+		$("#retrieved_items_count").html("About " + get_item_count(data) + " results for " + _temp_a_v + " (Attribute: " + _attr_name + ") | <a href='/map'>Go to Map View</a>");
+		$("#searched_items").html("");
+		for (var i = 0; i < data.length; i++) {
+			$("#searched_items").append(json_to_htmlcard(data[i]));
+		}
+		populate_pagination_section();
+			
+		$(".se-pre-con").fadeOut("slow");
         });
-
-	$(".se-pre-con").fadeOut("slow");
 
 	// $( "#_value" ).autocomplete({
 	//       source: seen_tags_set
@@ -393,29 +393,31 @@ function json_to_htmlcard(json_obj){
 
 // Set up Footer, filter seen_tags_set
 $(document).ready(function(){
+	$(".se-pre-con").fadeIn("slow");
 	$("body").fadeIn(1000);
 	$("#landing_section").fadeIn();
 	$.get("/catalogue/internal_apis/list/tags", function(data) {
 			tags_set=JSON.parse(data)
-    });
-    $.get("/catalogue/internal_apis/list/resourceServerGroup", function(data) {
+	});
+	$.get("/catalogue/internal_apis/list/resourceServerGroup", function(data) {
 			rsg_set=JSON.parse(data)
-    		for (var i = rsg_set.length - 1; i >= 0; i--) {
-    			rsg_set[i]=rsg_set[i].split(cat_conf['resource_server_group_head'])[1]
-    		}
-    });
-    $.get("/catalogue/internal_apis/list/provider", function(data) {
+		for (var i = rsg_set.length - 1; i >= 0; i--) {
+			rsg_set[i]=rsg_set[i].split(cat_conf['resource_server_group_head'])[1]
+		}
+	});
+	$.get("/catalogue/internal_apis/list/provider", function(data) {
 			provider_set=JSON.parse(data)
-	    		$("#provider_count").html(provider_set.length);
+			$("#provider_count").html(provider_set.length);
 			for (var i = provider_set.length - 1; i >= 0; i--) {
 				provider_set[i]=provider_set[i].split(cat_conf['provider_head'])[1]
 			}
-    });
+	});
 
 	$("#landing_footer, #normal_footer").html(getFooterContent());
 	$.get("/catalogue/v1/search", function(data) {
 		$("#resource_item_count").html(get_item_count(JSON.parse(data)));
 	});
+	$(".se-pre-con").fadeOut("slow");
 
 });
 
