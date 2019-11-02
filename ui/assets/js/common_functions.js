@@ -795,7 +795,7 @@ function getOfficeIcon() {
 
 
 function getMarkerIcon(__rsg) {
-    return L.icon(getMarkerIconOptions(__rsg));
+    return L.icon(getMarkerIconOptions(__rsg.split(cat_conf['resource_server_group_head'])[1]));
 }
 
 
