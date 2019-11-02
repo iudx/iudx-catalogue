@@ -234,24 +234,26 @@
     $("#ckbCheckAll").click(function () {
         $(".checkBoxClass").prop('checked', $(this).prop('checked'));
         var __filter_url =  "/catalogue/v1/search?" + get_selected_values_framed_url();
+        $(".se-pre-con").fadeIn("slow");
         $.get(__filter_url, function (data, status) {
-      markersLayer.clearLayers();
-      data = JSON.parse(data)
-      //console.log(data)
-      for (var i = data.length - 1; i >= 0; i--) {
-        // console.log(data[i])
-        if (data[i].hasOwnProperty('location')) {
-          
-          
-          plotGeoJSONs(data[i]["location"]["value"]["geometry"], data[i]["id"], data[i], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
-        } else if (data[i].hasOwnProperty('coverageRegion')) {
-         
-          
-          plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], data[i]["id"], data[i], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
-          // console.log("2")
+        markersLayer.clearLayers();
+        data = JSON.parse(data)
+        //console.log(data)
+        for (var i = data.length - 1; i >= 0; i--) {
+          // console.log(data[i])
+          if (data[i].hasOwnProperty('location')) {
+
+
+            plotGeoJSONs(data[i]["location"]["value"]["geometry"], data[i]["id"], data[i], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
+          } else if (data[i].hasOwnProperty('coverageRegion')) {
+
+
+            plotGeoJSONs(data[i]["coverageRegion"]["value"]["geometry"], data[i]["id"], data[i], data[i]["resourceServerGroup"]["value"], data[i]["resourceId"]["value"]);
+            // console.log("2")
+          }
         }
-      }
       });
+      $(".se-pre-con").fadeOut("slow");
         
     });
     
