@@ -130,6 +130,26 @@ function get_item_count(__data){
 	return _c;
 }
 
+function _get_item_count(__url){
+    return new Promise((resolve, reject) => {
+        $.ajax({
+            "url": __url,
+            "async": true,
+            "crossDomain": true,
+            "processData": false,
+            "method": 'GET',
+            // dataType: 'json',
+            success: function (data) {
+                resolve(get_item_count(data))
+            },
+            error: function (error) {
+                reject(error)
+            },
+            timeout: 30000 // sets timeout to 30 seconds
+        })
+    })
+}
+
 function get_items(_attr_name,_attr_value){
 	if(is_attr_empty(_attr_name,_attr_value)){
 		return;
@@ -397,29 +417,32 @@ $(document).ready(function(){
 	$("body").fadeIn(1000);
 	$("#landing_section").fadeIn();
 	$.get("/catalogue/internal_apis/list/tags", function(data) {
-			tags_set=JSON.parse(data)
+		tags_set=JSON.parse(data)
 	});
 	$.get("/catalogue/internal_apis/list/resourceServerGroup", function(data) {
-			rsg_set=JSON.parse(data)
+		rsg_set=JSON.parse(data)
 		for (var i = rsg_set.length - 1; i >= 0; i--) {
 			rsg_set[i]=rsg_set[i].split(cat_conf['resource_server_group_head'])[1]
 		}
 	});
 	$.get("/catalogue/internal_apis/list/provider", function(data) {
-			provider_set=JSON.parse(data)
-			$("#provider_count").html(provider_set.length);
-			for (var i = provider_set.length - 1; i >= 0; i--) {
-				provider_set[i]=provider_set[i].split(cat_conf['provider_head'])[1]
-			}
+		provider_set=JSON.parse(data)
+		$("#provider_count").html(provider_set.length);
+		for (var i = provider_set.length - 1; i >= 0; i--) {
+			provider_set[i]=provider_set[i].split(cat_conf['provider_head'])[1]
+		}
 	});
 
 	$("#landing_footer, #normal_footer").html(getFooterContent());
 	$(".se-pre-con").fadeIn("slow");
-	$.get("/catalogue/v1/search", function(data) {
-		$("#resource_item_count").html(get_item_count(JSON.parse(data)));
+	_get_item_count("/catalogue/v1/search").then(data => {
+		$("#resource_item_count").html(_get_item_count(data));
 		$(".se-pre-con").fadeOut("slow");
-	});
-	
+        })
+        .catch(error => {
+            _alertify("Error!!!", '<pre id="custom_alertbox">: ' + error["statusText"] + '</pre>');
+            // console.log(error)
+        })
 
 });
 
