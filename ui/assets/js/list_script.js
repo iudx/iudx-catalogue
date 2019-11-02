@@ -140,7 +140,7 @@ function _get_item_count(__url){
             "method": 'GET',
             // dataType: 'json',
             success: function (data) {
-                resolve(data)
+                resolve(get_item_count(JSON.parse(data)))
             },
             error: function (error) {
                 reject(error)
@@ -436,9 +436,7 @@ $(document).ready(function(){
 	$("#landing_footer, #normal_footer").html(getFooterContent());
 	$(".se-pre-con").fadeIn("slow");
 	_get_item_count("/catalogue/v1/search").then(data => {
-		var x = get_item_count(data)
-		console.log(x, data)
-		$("#resource_item_count").html(x);
+		$("#resource_item_count").html(data);
 		$(".se-pre-con").fadeOut("slow");
         })
         .catch(error => {
@@ -489,4 +487,3 @@ $(".ui-menu").on('click',function(){
 
 
 /********************************************************************************************/
-
