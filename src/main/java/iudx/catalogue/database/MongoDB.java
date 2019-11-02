@@ -1,21 +1,26 @@
 package iudx.catalogue.database;
 
-import io.vertx.core.Vertx;
-import io.vertx.core.eventbus.Message;
-import io.vertx.core.json.Json;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.logging.Logger;
+
+import org.json.JSONArray;
+
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
+import io.vertx.core.Vertx;
+import io.vertx.core.eventbus.Message;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.BulkOperation;
 import io.vertx.ext.mongo.FindOptions;
 import io.vertx.ext.mongo.MongoClient;
 import io.vertx.ext.mongo.UpdateOptions;
-
-import java.util.*;
-import java.util.logging.Logger;
-
-import org.apache.commons.lang3.StringUtils;
 
 public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 
@@ -27,7 +32,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   private JsonArray  resourceServerGroupId = new JsonArray(),
           resourceItemId = new JsonArray(), providerId = new JsonArray();
   private static boolean isCacheEmpty = true;
-  private Map<String, JsonArray> resourceCache = new HashMap<>();
+  private static Map<String, JsonArray> resourceCache = new HashMap<>();
   
   /**
    * Constructor for MongoDB
@@ -1011,7 +1016,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
           resourceGroup = request_body.getJsonObject("resourceServerGroup").getString("value").split(":")[2];
           resourceServer = request_body.getJsonObject("resourceServer").getString("value").split(":")[2];
           logger.info("Item ID : " + item_id);
-
+          // resourceCache.remove("resourceItemIds", item_id);
           if (!resourceCache.get("resourceItemIds").contains(item_id))
               if (resourceCache.get("resourceServerIds").contains(resourceServer) &&
                       resourceCache.get("resourceGroupIds").contains(resourceGroup))
@@ -1258,7 +1263,8 @@ private void updateTags(JsonArray old_tags, JsonArray new_tags) {
   public void delete(Message<Object> message) {
     // TODO Auto-generated method stub
     JsonObject request_body = (JsonObject) message.body();
-
+    String item_id = request_body.getString("id");
+    String item_type = request_body.getString("item_type");
     // Populate query
     JsonObject query = new JsonObject();
     query.put("id", request_body.getString("id"));
@@ -1268,9 +1274,20 @@ private void updateTags(JsonArray old_tags, JsonArray new_tags) {
         query,
         res -> {
           if (res.succeeded() && !(res.result() == null)) {
+        	  JsonArray resourceItem_dataArray = resourceCache.get("resourceItemIds"); 
+        	  JsonArray resourceServer_dataArray = resourceCache.get("resourceServerIds");
+        	  JsonArray resourceServerGroup_dataArray = resourceCache.get("resourceServerGroupIds");
+              if (item_type.equalsIgnoreCase("resourceItem"))
+                  resourceCache.remove("resourceItemIds", resourceItem_dataArray.remove(item_id)); 
+              else if (item_type.equalsIgnoreCase("resourceServer")) {
+                  resourceCache.remove("resourceItemIds", resourceServer_dataArray.remove(item_id));              }
+              else if (item_type.equalsIgnoreCase("resourceServerGroup")) {
+                  resourceCache.remove("resourceServerGroupIds", resourceServerGroup_dataArray.remove(item_id));              }
+              System.out.println(resourceCache.toString());
             if (res.result().containsKey("_tags")) {
               deleteTags(res.result().getJsonArray("_tags"));
             }
+            System.out.println(resourceCache.toString());
             message.reply("Success");
           } else if (res.result() == null) {
             message.fail(0, "Item not found");
