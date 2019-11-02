@@ -662,7 +662,7 @@ function plotGeoJSONs(geoJSONObject, _id, _json_object, _resourceServerGroup, _r
                 style: {
                     // fillColor: colors[color_count],
                     // fillColor: _color,
-                    fillColor: getColorsForPolygon(_resourceServerGroup),
+                    fillColor: getColorsForPolygon(_resourceServerGroup.split(cat_conf['resource_server_group_head'])[1]),
                     weight: 2,
                     opacity: 1,
                     // color: 'white',
