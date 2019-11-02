@@ -418,15 +418,22 @@ $(document).ready(function(){
 	
 	$("body").fadeIn(1000);
 	$("#landing_section").fadeIn();
+	
+	$.get("/catalogue/v1/search", function(data) {
+		$("#resource_item_count").html(get_item_count(JSON.parse(data)));
+	});
+	
 	$.get("/catalogue/internal_apis/list/tags", function(data) {
 		tags_set=JSON.parse(data)
 	});
+	
 	$.get("/catalogue/internal_apis/list/resourceServerGroup", function(data) {
 		rsg_set=JSON.parse(data)
 		for (var i = rsg_set.length - 1; i >= 0; i--) {
 			rsg_set[i]=rsg_set[i].split(cat_conf['resource_server_group_head'])[1]
 		}
 	});
+	
 	$.get("/catalogue/internal_apis/list/provider", function(data) {
 		provider_set=JSON.parse(data)
 		$("#provider_count").html(provider_set.length);
@@ -436,9 +443,6 @@ $(document).ready(function(){
 	});
 
 	$("#landing_footer, #normal_footer").html(getFooterContent());
-	$.get("/catalogue/v1/search", function(data) {
-		$("#resource_item_count").html(get_item_count(JSON.parse(data)));
-	});
 
 });
 
