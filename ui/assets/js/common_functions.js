@@ -369,7 +369,7 @@ function reset_filter(__input_name) {
     }
     console.log(get_selected_values_framed_url())
     var __filter_url = "/catalogue/v1/search?" + get_selected_values_framed_url()
-//     $(".se-pre-con").fadeIn("slow");
+    $(".se-pre-con").fadeIn("slow");
     $.get(__filter_url, function (data, status) {
         markersLayer.clearLayers();
         data = JSON.parse(data)
@@ -387,7 +387,7 @@ function reset_filter(__input_name) {
                 //console.log("2")
             }
         }
-        //     $(".se-pre-con").fadeOut("slow");
+            $(".se-pre-con").fadeOut("slow");
     });
   
 
