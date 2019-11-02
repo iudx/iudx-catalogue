@@ -393,7 +393,7 @@ function json_to_htmlcard(json_obj){
 
 // Set up Footer, filter seen_tags_set
 $(document).ready(function(){
-	$(".se-pre-con").fadeIn("slow");
+	
 	$("body").fadeIn(1000);
 	$("#landing_section").fadeIn();
 	$.get("/catalogue/internal_apis/list/tags", function(data) {
@@ -414,10 +414,12 @@ $(document).ready(function(){
 	});
 
 	$("#landing_footer, #normal_footer").html(getFooterContent());
+	$(".se-pre-con").fadeIn("slow");
 	$.get("/catalogue/v1/search", function(data) {
 		$("#resource_item_count").html(get_item_count(JSON.parse(data)));
+		$(".se-pre-con").fadeOut("slow");
 	});
-	$(".se-pre-con").fadeOut("slow");
+	
 
 });
 
