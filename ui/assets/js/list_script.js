@@ -436,7 +436,9 @@ $(document).ready(function(){
 	$("#landing_footer, #normal_footer").html(getFooterContent());
 	$(".se-pre-con").fadeIn("slow");
 	_get_item_count("/catalogue/v1/search").then(data => {
-		$("#resource_item_count").html(get_item_count(data));
+		var x = get_item_count(data)
+		console.log(x)
+		$("#resource_item_count").html(x);
 		$(".se-pre-con").fadeOut("slow");
         })
         .catch(error => {
