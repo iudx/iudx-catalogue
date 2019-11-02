@@ -326,13 +326,13 @@ public class APIServerVerticle extends AbstractVerticle {
      **/
     JsonObject requestBody = new JsonObject();
     if(currentType.equalsIgnoreCase("tags")){
-        requestBody.put("item-type","tags");
+        requestBody.put("item-type-ui","tags");
         databaseHandler("list",routingContext,requestBody);
     } else if (currentType.equalsIgnoreCase("provider")){
-        requestBody.put("item-type","provider");
+        requestBody.put("item-type-ui","provider");
         databaseHandler("list",routingContext,requestBody);
     }else if (currentType.equalsIgnoreCase("resourceservergroup")){
-          requestBody.put("item-type","resourceServerGroup");
+          requestBody.put("item-type-ui","resourceServerGroup");
           databaseHandler("list",routingContext,requestBody);
     }
     /**-----------------------------ends here-----------------------------------**/

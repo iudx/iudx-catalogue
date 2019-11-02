@@ -343,8 +343,18 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   @Override
   public void list(Message<Object> message) {
       JsonObject request = (JsonObject) message.body();
-      String key = request.getString("item-type");
-      System.out.println("In list block : "+ key);
+      System.out.println(request.containsKey("item-type"));
+      System.out.println(request.containsKey("item-type-ui"));
+
+		String key;
+
+		if (request.containsKey("item-type")) {
+			key = request.getString("item-type");
+		} else {
+			key = "undefined";
+		}
+		System.out.println("In list block : " + key);
+      
       if(key.equalsIgnoreCase("resourceItem"))
       { 
     	System.out.println("Searching resourceItem");
@@ -369,19 +379,29 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 	    query.put("itemStatus", new JsonObject().put("type", "Property").put("value", "active"));
     	mongoFind(query, new JsonObject(), message);
 	    
-      }
-    else{
-      mongo.distinct(COLLECTION,key+".value", String.class.getName(),res->{
-         if(res.succeeded()){
-             System.out.println("Response Distinct: "+res.result().getJsonArray(0).toString());
-             message.reply(res.result());
-         }else
-         {
-             message.fail(0, "Failure");
-         }
-      });
+      } else if(request.containsKey("item-type-ui")){
+        key = request.getString("item-type-ui");
+        
+        if(key.equalsIgnoreCase("tags") || key.equalsIgnoreCase("provider") || key.equalsIgnoreCase("resourceservergroup"))
+        {
+            System.out.println("In list for UI block : "+ key);
+        	
+            mongo.distinct(COLLECTION,key+".value", String.class.getName(),res->{
+               if(res.succeeded()){
+                   System.out.println("Response Distinct: "+res.result().toString());
+                   message.reply(res.result());
+               }else
+               {
+                   message.fail(0, "Failure");
+               }
+            });        	
+        } else {
+            message.fail(0, "Failure");
+        }
 
-	  }
+	  } else {
+        message.fail(0, "Failure");
+    }
   }
 
   
