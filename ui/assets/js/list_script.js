@@ -404,7 +404,7 @@ $(document).ready(function(){
     $.get("/catalogue/internal_apis/list/provider", function(data) {
 			$("#provider_count").html(provider_set.length);
 			provider_set=JSON.parse(data)
-			for (var i = rsg_set.length - 1; i >= 0; i--) {
+			for (var i = provider_set.length - 1; i >= 0; i--) {
 				provider_set[i]=provider_set[i].split(cat_conf['provider_head'])[1]
 			}
     });
