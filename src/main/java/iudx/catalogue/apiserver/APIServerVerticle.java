@@ -548,6 +548,7 @@ public class APIServerVerticle extends AbstractVerticle {
 		if (decodeCertificate(routingContext)) {
 			if (authenticateRequest(routingContext, "user.list")) {
 				String id = null;
+				String item_type = null;
 				int state = routingContext.pathParams().size();
 				
 				if (state == 5)
@@ -556,16 +557,24 @@ public class APIServerVerticle extends AbstractVerticle {
 						+ routingContext.pathParam("resourceServer") + "/"
 						+ routingContext.pathParam("resourceCatogery") + "/" + routingContext.pathParam("resourceId");
 				System.out.println(id);
+				item_type = "resourceItem"; //   resourceGroupIds   resourceServerIds
+				System.out.println(item_type);
 				}
 				else if(state == 2)
 				{
 					id = routingContext.pathParam("resourceServer") + "/"
 							+ routingContext.pathParam("resourceCatogery");
+					System.out.println(id);
+					item_type = "resourceGroup"; //   resourceGroupIds   resourceServerIds
+					System.out.println(item_type);
 				}
 				
 				else if(state == 1)
 				{
 					id = routingContext.pathParam("resourceServer");
+					System.out.println(id);
+					item_type = "resourceServer"; //   resourceGroupIds   resourceServerIds
+					System.out.println(item_type);
 				}
 
 				
@@ -574,6 +583,7 @@ public class APIServerVerticle extends AbstractVerticle {
 
 					JsonObject request_body = new JsonObject();
 					request_body.put("id", id);
+					request_body.put("item_type", item_type);
 					databaseHandler("delete", routingContext, request_body);
 				} else {
 					handle401(routingContext, "Unauthorised");
