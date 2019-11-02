@@ -369,7 +369,7 @@ function reset_filter(__input_name) {
     }
     console.log(get_selected_values_framed_url())
     var __filter_url = "/catalogue/v1/search?" + get_selected_values_framed_url()
-
+    $(".se-pre-con").fadeIn("slow");
     $.get(__filter_url, function (data, status) {
         markersLayer.clearLayers();
         data = JSON.parse(data)
@@ -388,6 +388,8 @@ function reset_filter(__input_name) {
             }
         }
     });
+    
+    $(".se-pre-con").fadeOut("slow");
 
     toast_alert(category + ' filter has been cleared', 'success', '#1abc9c')
 }
@@ -646,8 +648,6 @@ function plotGeoJSONs(geoJSONObject, _id, _json_object, _resourceServerGroup, _r
     
     if(_json_object['id'].split("/").length == 5){
         
-        $(".se-pre-con").fadeIn("slow");
-        
         if (geoJSONObject["type"] == "Polygon") {
 
             //console.log("Printing Polygon....")
@@ -716,7 +716,6 @@ function plotGeoJSONs(geoJSONObject, _id, _json_object, _resourceServerGroup, _r
             }).addTo(markersLayer);
             // //console.log("22222222222")
         }
-        $(".se-pre-con").fadeOut("slow");
     }
 }
 
