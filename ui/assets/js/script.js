@@ -235,7 +235,7 @@ map.on('draw:edited', function (e) {
             // activate_batch_mode();
 
           console.log("/catalogue/v1/search?lat=" + center_point["lat"] + "&lon=" + center_point["lng"] + "&radius=" + radius)
-
+           $(".se-pre-con").fadeIn("slow");
             $.get("/catalogue/v1/search?lat=" + center_point["lat"] + "&lon=" + center_point["lng"] + "&radius=" + radius + __filter_url, function (data) {
                 //$.get("/catalogue/v1/search?lat=12.273737&lon=78.37475&radius=200000", function(data) {
                 //$.get("/search/catalogue/attribute?bounding-type=circle&lat="+ center_point["lat"] +"&long="+ center_point["lng"] +"&radius="+radius, function(data) {
@@ -258,7 +258,7 @@ map.on('draw:edited', function (e) {
                     }
 
                 }
-
+                $(".se-pre-con").fadeOut("slow");
 
             });
         }
@@ -283,6 +283,7 @@ map.on('draw:edited', function (e) {
             __filter_url = get_filtered_url(get_selected_values_framed_url());
             //console.log("/catalogue/v1/search?geometry=polygon(("+ polyPoints + ","+polyPoints[0]+"))&relation=within")
             markersLayer.clearLayers();
+            $(".se-pre-con").fadeIn("slow");
             $.get("/catalogue/v1/search?geometry=polygon((" + polyPoints + "," + polyPoints[0] + "))&relation=within" + __filter_url, function (data) {
 
 
@@ -301,7 +302,7 @@ map.on('draw:edited', function (e) {
 
                     }
                 }
-
+                $(".se-pre-con").fadeOut("slow");
             });
         }
 
@@ -328,7 +329,7 @@ map.on('draw:edited', function (e) {
 
             //console.log("/catalogue/v1/search?bbox=" + boundingPoints + "&relation=within")
 
-
+            $(".se-pre-con").fadeIn("slow");
             $.get("/catalogue/v1/search?bbox=" + boundingPoints + "&relation=within" + __filter_url, function (data) {
 
 
@@ -347,14 +348,14 @@ map.on('draw:edited', function (e) {
 
                     }
                 }
-
+            $(".se-pre-con").fadeOut("slow");
             });
         }
         else if ((layer instanceof L.Polyline) && !(layer instanceof L.Polygon)) {
             console.log("plot polyline")
             //Do marker specific actions here
         }
-
+        $(".se-pre-con").fadeOut("slow");
     });
 
 });
@@ -382,7 +383,7 @@ map.on('draw:created', async function (e) {
         // activate_batch_mode();
 
         ////console.log("/catalogue/v1/search?lat=" + center_point["lat"] + "&lon=" + center_point["lng"] + "&radius=" + radius)
-
+        $(".se-pre-con").fadeIn("slow");
         $.get("/catalogue/v1/search?lat=" + center_point["lat"] + "&lon=" + center_point["lng"] + "&radius=" + radius + __filter_url, function (data) {
             //$.get("/catalogue/v1/search?lat=12.273737&lon=78.37475&radius=200000", function(data) {
             //$.get("/search/catalogue/attribute?bounding-type=circle&lat="+ center_point["lat"] +"&long="+ center_point["lng"] +"&radius="+radius, function(data) {
@@ -406,7 +407,7 @@ map.on('draw:created', async function (e) {
                 }
 
             }
-
+            $(".se-pre-con").fadeOut("slow");
 
         });
 
@@ -426,7 +427,7 @@ map.on('draw:created', async function (e) {
         //console.log(layer.getLatLng());
         // //console.log(radius);
         markersLayer.clearLayers();
-
+        $(".se-pre-con").fadeIn("slow");
         $.get("/catalogue/v1/search?lat=" + center_point["lat"] + "&lon=" + center_point["lng"] + __filter_url, function (data) {
 
             data = JSON.parse(data);
@@ -447,6 +448,7 @@ map.on('draw:created', async function (e) {
                     ////console.log("2")
                 }
             }
+            $(".se-pre-con").fadeOut("slow");
         });
 
     }
@@ -472,7 +474,7 @@ map.on('draw:created', async function (e) {
         geo_shape = { "type": "polygon", "value": { "points": polyPoints } }
         __filter_url = get_filtered_url(get_selected_values_framed_url());
         //console.log("/catalogue/v1/search?geometry=polygon(("+ polyPoints + ","+polyPoints[0]+"))&relation=within")
-
+        $(".se-pre-con").fadeIn("slow");
         $.get("/catalogue/v1/search?geometry=polygon((" + polyPoints + "," + polyPoints[0] + "))&relation=within" + __filter_url, function (data) {
 
 
@@ -491,7 +493,7 @@ map.on('draw:created', async function (e) {
 
                 }
             }
-
+        $(".se-pre-con").fadeOut("slow");
         });
     }
 
@@ -515,7 +517,7 @@ map.on('draw:created', async function (e) {
 
         //console.log("/catalogue/v1/search?bbox=" + boundingPoints + "&relation=within")
 
-
+        $(".se-pre-con").fadeIn("slow");
         $.get("/catalogue/v1/search?bbox=" + boundingPoints + "&relation=within" + __filter_url, function (data) {
 
 
@@ -534,7 +536,7 @@ map.on('draw:created', async function (e) {
 
                 }
             }
-
+               $(".se-pre-con").fadeOut("slow");
         });
     }
 
@@ -569,7 +571,7 @@ map.on('draw:created', async function (e) {
         }
         geo_shape = { "type": "polyline", "value": { "bbox_points": polylinePoints } }
         __filter_url = get_filtered_url(get_selected_values_framed_url());
-
+        $(".se-pre-con").fadeIn("slow");
         $.get("/catalogue/v1/search?geometry=linestring((" + polylinePoints + "))&relation=intersects" + __filter_url, function (data) {
 
 
@@ -588,7 +590,7 @@ map.on('draw:created', async function (e) {
 
                 }
             }
-
+            $(".se-pre-con").fadeOut("slow");
         });
     }
 
@@ -712,6 +714,7 @@ function show_details(_id) {
 
 
 $(document).ready(function () {
+    $(".se-pre-con").fadeIn("slow");
     $.get("/catalogue/v1/search", function (data, status) {
         // $.get("/list/catalogue/resource-item", function(data, status){
         ////console.log("Data: " + data + "\nStatus: " + status);
@@ -734,6 +737,7 @@ $(document).ready(function () {
                 // //console.log("2")
             }
         }
+        $(".se-pre-con").fadeOut("slow");
     });
 });
 
