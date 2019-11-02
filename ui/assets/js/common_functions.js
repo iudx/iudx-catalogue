@@ -387,9 +387,9 @@ function reset_filter(__input_name) {
                 //console.log("2")
             }
         }
+        //     $(".se-pre-con").fadeOut("slow");
     });
-    
-//     $(".se-pre-con").fadeOut("slow");
+  
 
     toast_alert(category + ' filter has been cleared', 'success', '#1abc9c')
 }
