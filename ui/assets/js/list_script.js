@@ -140,7 +140,7 @@ function _get_item_count(__url){
             "method": 'GET',
             // dataType: 'json',
             success: function (data) {
-                resolve(get_item_count(data))
+                resolve(data)
             },
             error: function (error) {
                 reject(error)
