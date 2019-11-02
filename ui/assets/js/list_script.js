@@ -147,7 +147,9 @@ function get_items(_attr_name,_attr_value){
 	}else if(_attr_name=="provider"){
 		_attr_value=cat_conf['provider_head']+_attr_value
 	}
-
+	
+	$(".se-pre-con").fadeIn("slow");
+	
 	$.get("/catalogue/v1/search?attribute-name=("+_attr_name+")&attribute-value=("+_attr_value+")", function(data) {
             // $("#searched_items").text(data);
 			data=JSON.parse(data)
@@ -160,6 +162,7 @@ function get_items(_attr_name,_attr_value){
             populate_pagination_section();
         });
 
+	$(".se-pre-con").fadeOut("slow");
 
 	// $( "#_value" ).autocomplete({
 	//       source: seen_tags_set
