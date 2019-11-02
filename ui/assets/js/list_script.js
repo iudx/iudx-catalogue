@@ -437,7 +437,7 @@ $(document).ready(function(){
 	$(".se-pre-con").fadeIn("slow");
 	_get_item_count("/catalogue/v1/search").then(data => {
 		var x = get_item_count(data)
-		console.log(x)
+		console.log(x, data)
 		$("#resource_item_count").html(x);
 		$(".se-pre-con").fadeOut("slow");
         })
