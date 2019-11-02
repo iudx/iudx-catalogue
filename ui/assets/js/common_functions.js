@@ -643,8 +643,11 @@ function plotGeoJSONs(geoJSONObject, _id, _json_object, _resourceServerGroup, _r
     // _resourceId_data = _resourceId;
 
     ////console.log(geoJSONObject)
+    
     if(_json_object['id'].split("/").length == 5){
-
+        
+        $(".se-pre-con").fadeIn("slow");
+        
         if (geoJSONObject["type"] == "Polygon") {
 
             //console.log("Printing Polygon....")
@@ -713,7 +716,7 @@ function plotGeoJSONs(geoJSONObject, _id, _json_object, _resourceServerGroup, _r
             }).addTo(markersLayer);
             // //console.log("22222222222")
         }
-        
+        $(".se-pre-con").fadeOut("slow");
     }
 }
 
