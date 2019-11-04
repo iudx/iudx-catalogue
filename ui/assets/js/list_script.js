@@ -240,20 +240,6 @@ function get_horizontal_spaces(space_count){
 	return horizontal_space_str;
 }
 
-function copyToClipboard(element_id) {
-	var $temp = $("<input>");
-	$("body").append($temp);
-	$temp.val($("#token_value_"+element_id).text()).select();
-	// $("#copied_"+element_id).html("Token copied!")
-	document.execCommand("copy");
-	$temp.remove();
-	_alertify("Success!!!", "Token copied!")
-	// $.sweetModal({
-	//   title: 'Token copied!',
-	//   theme: $.sweetModal.THEME_DARK
-	// });
-}
-
 function display_json_response_in_modal(json_obj){
 		$.sweetAlert({
 		  content: jsonPrettyHighlightToId(json_obj),
