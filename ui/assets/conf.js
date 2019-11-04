@@ -30,7 +30,7 @@ const legends = {
 	"tomtom": "https://image.flaticon.com/icons/svg/401/401434.svg",
 	"itms-mobility": "https://image.flaticon.com/icons/svg/32/32425.svg",
 	"pune-iitm-aqi": "https://image.flaticon.com/icons/svg/1684/1684375.svg",
-	"pune-itms": "https://image.flaticon.com/icons/svg/1168/1168001.svg"
+	"pune-itms": "https://image.flaticon.com/icons/svg/32/32425.svg"
 }
 
 //set attribution for used icons -> prefer flaticon as it has a wide range of options and icons are appealling

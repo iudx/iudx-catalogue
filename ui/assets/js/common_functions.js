@@ -595,7 +595,7 @@ function onEachFeature(feature, layer) {
 function getColorsForPolygon(_resourceServerGroup) {
 
     // var colors=["#1abc9c", '#f1c40f']//, '#9b59b6']//, '#e67e22', '#f39c12']
-    var colors = ['#1abc9c', '#f1c40f', '#FF0000', '#ffffff00'];
+    var colors = ['#1abc9c', '#f1c40f', '#FF0000', '#ffffff00', '#ffffff00'];
 
     if (_resourceServerGroup == "crowd-sourced-changebhai" || _resourceServerGroup == "changebhai") {
         // loop through our density intervals and generate a label with a colored square for each interval
@@ -618,7 +618,7 @@ function getColorsForPolygon(_resourceServerGroup) {
         //   'TomTom' + '<br>';
         // console.log("tomtom")
         return colors[2]
-    } else if (_resourceServerGroup == "itms-mobility") {
+    } else if (_resourceServerGroup == "itms-mobility" | _resourceServerGroup == "pune-itms") {
         //   console.log("itms-mobility")
         return colors[3]
     }
