@@ -509,7 +509,7 @@ function request_access_token(resource_id, resourceServerGroup, rid) {
                 $('#sidebar_token_space').html(
                     `<br><b style="font-size: 24px">Token:</b> <span style="font-size: 24px;word-break: break-all;" id="token_value_` + resource_id_to_html_id(resource_id) + `">` + data.token + `</span>`
                     + `&nbsp;&nbsp;&nbsp;<button class="btn copy-btn" onclick="copyToClipboard('` + resource_id_to_html_id(resource_id) + `')"> Copy Token <img class="secure_icon svg-white" src="../assets/img/icons/copy_white.svg"></button> <br> ` )
-                if(!($(`#get_full_latest_data_`+ resource_id_to_html_id(_resource_id)).is(':visible'))){
+                if(!($(`#get_full_latest_data_`+ resource_id_to_html_id(resource_id)).is(':visible'))){
                     $(`#pop_up_`+ resource_id_to_html_id(resource_id)).append(`<br>` 
                     + _get_security_based_latest_data_link_for_map_view(resource_id, resourceServerGroup, rid, data.token))
                 }
