@@ -179,6 +179,7 @@ function _get_latest_data(_resource_id, _token) {
             // display_json_response_in_modal(data)
             _alertify("Success!!!", '<pre id="custom_alertbox">' + jsonPrettyHighlightToId(data) + '</pre>');
         },
+
         error: _alertify("Error!!!", '<pre id="custom_alertbox">: Please try some time later. Server is facing some problems at this moment.</pre>'),
         timeout: 30000 // sets timeout to 30 seconds
     })
@@ -485,7 +486,7 @@ function _get_security_based_latest_data_link(_resource_id, _resourceServerGroup
 
 function _get_security_based_latest_data_link_for_map_view(_resource_id, _resourceServerGroup, _rid, token) {
     // if(_resource_id=="rbccps.org/aa9d66a000d94a78895de8d4c0b3a67f3450e531/safetipin/safetipin/safetyIndex"){
-    return `<a onclick="_get_latest_data('` + _resource_id + `','` + token + `')">Get Full Latest Data</a>`
+    return `<a id="get_full_latest_data_`+ resource_id_to_html_id(_resource_id) +`" onclick="_get_latest_data('` + _resource_id + `','` + token + `')">Get Full Latest Data</a>`
     // }else{
     //     return `<a href="#" class="data-modal"  onclick="display_latest_data(event, this, '`+_resource_id+`')">Get Latest Data</a>`
     // }
@@ -508,8 +509,11 @@ function request_access_token(resource_id, resourceServerGroup, rid) {
                 $('#sidebar_token_space').html(
                     `<br><b style="font-size: 24px">Token:</b> <span style="font-size: 24px;word-break: break-all;" id="token_value_` + resource_id_to_html_id(resource_id) + `">` + data.token + `</span>`
                     + `&nbsp;&nbsp;&nbsp;<button class="btn copy-btn" onclick="copyToClipboard('` + resource_id_to_html_id(resource_id) + `')"> Copy Token <img class="secure_icon svg-white" src="../assets/img/icons/copy_white.svg"></button> <br> ` )
-                $(`#pop_up_`+ resource_id_to_html_id(resource_id)).append(`<br>` 
+                if(!($(`#get_full_latest_data_`+ resource_id_to_html_id(_resource_id)).is(':visible'))){
+                    $(`#pop_up_`+ resource_id_to_html_id(resource_id)).append(`<br>` 
                     + _get_security_based_latest_data_link_for_map_view(resource_id, resourceServerGroup, rid, data.token))
+                }
+                
 
                 if (!($('#sidebar_token_space').is(':visible'))) {
                     $('#sidebar_token_space').toggle();
