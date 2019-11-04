@@ -31,6 +31,20 @@ function getImageRsg(_resourceServerGroup) {
     return legends[_resourceServerGroup]
 }
 
+function copyToClipboard(element_id) {
+	var $temp = $("<input>");
+	$("body").append($temp);
+	$temp.val($("#token_value_"+element_id).text()).select();
+	// $("#copied_"+element_id).html("Token copied!")
+	document.execCommand("copy");
+	$temp.remove();
+	_alertify("Success!!!", "Token copied!")
+	// $.sweetModal({
+	//   title: 'Token copied!',
+	//   theme: $.sweetModal.THEME_DARK
+	// });
+}
+
 // Spinner by https://tobiasahlin.com/spinkit/
 function get_spinner_html() {
     return `
@@ -468,6 +482,16 @@ function _get_security_based_latest_data_link(_resource_id, _resourceServerGroup
     // }
 }
 
+
+function _get_security_based_latest_data_link_for_map_view(_resource_id, _resourceServerGroup, _rid, token) {
+    // if(_resource_id=="rbccps.org/aa9d66a000d94a78895de8d4c0b3a67f3450e531/safetipin/safetipin/safetyIndex"){
+    return `<a onclick="_get_latest_data('` + _resource_id + `','` + token + `')">Get Full Latest Data</a>`
+    // }else{
+    //     return `<a href="#" class="data-modal"  onclick="display_latest_data(event, this, '`+_resource_id+`')">Get Latest Data</a>`
+    // }
+}
+
+
 function request_access_token(resource_id, resourceServerGroup, rid) {
     //console.log(resource_id)
     $.ajax({
@@ -477,26 +501,44 @@ function request_access_token(resource_id, resourceServerGroup, rid) {
         contentType: 'application/json',
         data: JSON.stringify({ "request": { "resource-id": resource_id } }),
         success: function (data) {
-            // //console.log(data.token)
+            console.log(data.token)
 
-            // $('#token_section_'+resource_id_to_html_id(resource_id)).html($('#token_section_'+resource_id_to_html_id(resource_id)).html());
-            $('#token_section_' + resource_id_to_html_id(resource_id)).html(
-                `<b>Token</b>: <span id="token_value_` + resource_id_to_html_id(resource_id) + `">` + data.token + `</span>`
-                + `&nbsp;&nbsp;&nbsp;<button class="btn copy-btn" onclick="copyToClipboard('` + resource_id_to_html_id(resource_id) + `')"> Copy Token <img class="secure_icon svg-white" src="../assets/img/icons/copy_white.svg"></button> <br> `
-                + _get_security_based_latest_data_link(resource_id, resourceServerGroup, rid, data.token))
+            // For map view
+            if(window.location.href.includes(`map`)){
+                $('#sidebar_token_space').html(
+                    `<br><b style="font-size: 24px">Token:</b> <span style="font-size: 24px;word-break: break-all;" id="token_value_` + resource_id_to_html_id(resource_id) + `">` + data.token + `</span>`
+                    + `&nbsp;&nbsp;&nbsp;<button class="btn copy-btn" onclick="copyToClipboard('` + resource_id_to_html_id(resource_id) + `')"> Copy Token <img class="secure_icon svg-white" src="../assets/img/icons/copy_white.svg"></button> <br> ` )
+                $(`#pop_up_`+ resource_id_to_html_id(resource_id)).append(`<br>` 
+                    + _get_security_based_latest_data_link_for_map_view(resource_id, resourceServerGroup, rid, data.token))
 
-            _alertify("Success!!!", "Token received.<br>You are now authenticated to access the non-public data.")
-            // _alertify("Success!!!", "Token received: " + data.token)
-            if (!($('#token_section_' + resource_id_to_html_id(resource_id)).is(':visible'))) {
-                $('#token_section_' + resource_id_to_html_id(resource_id)).toggle();
+                if (!($('#sidebar_token_space').is(':visible'))) {
+                    $('#sidebar_token_space').toggle();
+                }
             }
+            // For list view
+            else{
+                // $('#token_section_'+resource_id_to_html_id(resource_id)).html($('#token_section_'+resource_id_to_html_id(resource_id)).html());
+                $('#token_section_' + resource_id_to_html_id(resource_id)).html(
+                    `<b>Token</b>: <span id="token_value_` + resource_id_to_html_id(resource_id) + `">` + data.token + `</span>`
+                    + `&nbsp;&nbsp;&nbsp;<button class="btn copy-btn" onclick="copyToClipboard('` + resource_id_to_html_id(resource_id) + `')"> Copy Token <img class="secure_icon svg-white" src="../assets/img/icons/copy_white.svg"></button> <br> `
+                    + _get_security_based_latest_data_link(resource_id, resourceServerGroup, rid, data.token))
+
+                _alertify("Success!!!", "Token received.<br>You are now authenticated to access the non-public data.")
+                // _alertify("Success!!!", "Token received: " + data.token)
+                if (!($('#token_section_' + resource_id_to_html_id(resource_id)).is(':visible'))) {
+                    $('#token_section_' + resource_id_to_html_id(resource_id)).toggle();
+                }
+            }
+
+
 
         },
         error: function (jqXHR, exception) {
-            _alertify("Error", "Unauthorized access! Please contact the provider.")
+            _alertify("Error", "Unauthorized access! Please get a token.")
         }
     });
 }
+
 
 function urlify(text) {
     var urlRegex = /(https?:\/\/[^"]+)/g;
@@ -678,11 +720,11 @@ function plotGeoJSONs(geoJSONObject, _id, _json_object, _resourceServerGroup, _r
                         show_details(_id)
 
                     });
-                    layer.bindPopup(`<span class="float-left" style="padding-right:7.5px;"><img src='`+
+                    layer.bindPopup(`<div id="pop_up_`+ resource_id_to_html_id(_id) +`"><span class="float-left" style="padding-right:7.5px;"><img src='`+
                     ((is_public) ? "../assets/img/icons/green_unlock.svg" : "../assets/img/icons/red_lock.svg")
-                    +`' class='img-fluid secure_icon'></span><a href='#' class='data-modal'  onclick="display_latest_data(event, this, '` + _id + `')">Get latest-data</a><br>`
-                    +`<a href="#" class="data-modal" onclick="display_temporal_data(event, this, '`+_json_object.id+`')">Get Temporal Data</a><br>`+
-                    ((is_secure) ? `<a href='#' class='data-modal'  onclick="request_access_token('` + _json_object.id + `', '`+ _json_object["resourceServerGroup"]["value"] + `', '`+ _json_object["resourceId"]["value"] + `')">Request Access Token</a>` : ``)
+                    +`' class='img-fluid secure_icon'></span><a href='#' class='data-modal'  onclick="display_latest_data(event, this, '` + _id + `')">Get latest-data</a><br>`+
+                    ((is_secure) ? `<a href='#' class='data-modal'  onclick="request_access_token('` + _json_object.id + `', '`+ _json_object["resourceServerGroup"]["value"] + `', '`+ _json_object["resourceId"]["value"] + `')">Request Access Token</a>` : ``
+                    + `</div>`)
                     ).addTo(map);
                 }
 
@@ -699,10 +741,9 @@ function plotGeoJSONs(geoJSONObject, _id, _json_object, _resourceServerGroup, _r
                     // return L.marker(latlng, {icon: getOfficeIcon()});
 
                     // <a href='/catalogue/v1/items/"+plot_id+"'>Get Catalogue-item-details</a><br/>
-                    var customPopup = `<span class="float-left" style="padding-right:7.5px;"><img src='`+
-                    ((is_public) ? "../assets/img/icons/green_unlock.svg" : "../assets/img/icons/red_lock.svg")
-                    +`' class='img-fluid secure_icon'></span><a href='#' class='data-modal'  onclick="display_latest_data(event, this, '` + _id + `')">Get latest-data</a>`
-                    +`<br><a href="#"  class="data-modal" onclick="display_temporal_data(event, this, '`+_json_object.id+`')">Get Temporal Data</a><br>`;
+                    var customPopup = `<div id="pop_up_`+ resource_id_to_html_id(_id) +`"><span class="float-left" style="padding-right:7.5px;"><img src='`+
+                ((is_public) ? "../assets/img/icons/green_unlock.svg" : "../assets/img/icons/red_lock.svg")
+                +`' class='img-fluid secure_icon'></span><a href='#' class='data-modal'  onclick="display_latest_data(event, this, '` + _id + `')">Get latest-data</a></div>`;
                     var _marker = L.marker(latlng, { icon: getMarkerIcon(_resourceServerGroup) }).addTo(map);
                     _marker.itemUUID = _id;
                     // console.log(_id,this,event)
