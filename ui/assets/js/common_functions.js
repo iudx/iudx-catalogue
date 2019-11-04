@@ -486,7 +486,7 @@ function _get_security_based_latest_data_link(_resource_id, _resourceServerGroup
 
 function _get_security_based_latest_data_link_for_map_view(_resource_id, _resourceServerGroup, _rid, token) {
     // if(_resource_id=="rbccps.org/aa9d66a000d94a78895de8d4c0b3a67f3450e531/safetipin/safetipin/safetyIndex"){
-    return `<a id="get_full_latest_data_`+ resource_id_to_html_id(_resource_id) +`" onclick="_get_latest_data('` + _resource_id + `','` + token + `')">Get Full Latest Data</a>`
+    return ``+get_bullets()+` <a id="get_full_latest_data_`+ resource_id_to_html_id(_resource_id) +`" onclick="_get_latest_data('` + _resource_id + `','` + token + `')">Get Full Latest Data</a>`
     // }else{
     //     return `<a href="#" class="data-modal"  onclick="display_latest_data(event, this, '`+_resource_id+`')">Get Latest Data</a>`
     // }
@@ -682,6 +682,11 @@ function getColorsForPolygon(_resourceServerGroup) {
 //  return color;
 // }data[i]["id"]
 // function getColorForPolygon()
+
+function get_bullets(){
+    return `&#9679;`
+}
+
 function plotGeoJSONs(geoJSONObject, _id, _json_object, _resourceServerGroup, _resourceId, _tags, _provider) {
     ////console.log(_resourceServerGroup)
     // ////console.log("plotting "+ geoJSONObject, _id, _id["id"])
@@ -726,11 +731,11 @@ function plotGeoJSONs(geoJSONObject, _id, _json_object, _resourceServerGroup, _r
                         activate_point_mode(_id)
 
                     });
-                    layer.bindPopup(`<div id="pop_up_`+ resource_id_to_html_id(_id) +`"><span class="float-left" style="padding-right:7.5px;"><img src='`+
+                    layer.bindPopup(`<div id="pop_up_`+ resource_id_to_html_id(_id) +`"><p class="text-center" style="padding-right:7.5px;"><img src='`+
                     ((is_public) ? "../assets/img/icons/green_unlock.svg" : "../assets/img/icons/red_lock.svg")
-                    +`' class='img-fluid secure_icon'></span><a href='#' class='data-modal'  onclick="display_latest_data(event, this, '` + _id + `')">Get latest-data</a><br>
-			         <a href="#"  class="data-modal" onclick="display_temporal_data(event, this, '`+_json_object.id+`')">Get Temporal Data</a><br>` +
-                    ((is_secure) ? `<a href='#' class='data-modal'  onclick="request_access_token('` + _json_object.id + `', '`+ _json_object["resourceServerGroup"]["value"] + `', '`+ _json_object["resourceId"]["value"] + `')">Request Access Token</a>` : ``
+                    +`' class='img-fluid secure_icon'></p>`+get_bullets()+` <a href='#' class='data-modal'  onclick="display_latest_data(event, this, '` + _id + `')"> Get latest-data</a><br>
+			          `+get_bullets()+` <a href="#"  class="data-modal" onclick="display_temporal_data(event, this, '`+_json_object.id+`')">Get Temporal Data</a><br>` +
+                    ((is_secure) ? ` `+get_bullets()+` <a href='#' class='data-modal'  onclick="request_access_token('` + _json_object.id + `', '`+ _json_object["resourceServerGroup"]["value"] + `', '`+ _json_object["resourceId"]["value"] + `')">Request Access Token</a>` : ``
                     + `</div>`)
                     ).addTo(map);
                 }
@@ -748,10 +753,10 @@ function plotGeoJSONs(geoJSONObject, _id, _json_object, _resourceServerGroup, _r
                     // return L.marker(latlng, {icon: getOfficeIcon()});
 
                     // <a href='/catalogue/v1/items/"+plot_id+"'>Get Catalogue-item-details</a><br/>
-                    var customPopup = `<div id="pop_up_`+ resource_id_to_html_id(_id) +`"><span class="float-left" style="padding-right:7.5px;"><img src='`+
+                    var customPopup = `<div id="pop_up_`+ resource_id_to_html_id(_id) +`"><p class="text-center" style="padding-right:7.5px;"><img src='`+
                 ((is_public) ? "../assets/img/icons/green_unlock.svg" : "../assets/img/icons/red_lock.svg")
-                +`' class='img-fluid secure_icon'></span><a href='#' class='data-modal'  onclick="display_latest_data(event, this, '` + _id + `')">Get latest-data</a>
-		<br><a href="#"  class="data-modal" onclick="display_temporal_data(event, this, '`+_json_object.id+`')">Get Temporal Data</a><br>` +
+                +`' class='img-fluid secure_icon'></p>`+get_bullets()+` <a href='#' class='data-modal'  onclick="display_latest_data(event, this, '` + _id + `')">Get latest-data</a>
+		<br> `+get_bullets()+` <a href="#"  class="data-modal" onclick="display_temporal_data(event, this, '`+_json_object.id+`')">Get Temporal Data</a><br>` +
 		`</div>`;
                     var _marker = L.marker(latlng, { icon: getMarkerIcon(_resourceServerGroup) }).addTo(map);
                     _marker.itemUUID = _id;
