@@ -29,8 +29,6 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   private final String TAG_COLLECTION = "tags";
   private final String COLLECTION = "catalogue";
   private static final Logger logger = Logger.getLogger(MongoDB.class.getName());
-  private JsonArray  resourceServerGroupId = new JsonArray(),
-          resourceItemId = new JsonArray(), providerId = new JsonArray();
   private static boolean isCacheEmpty = true;
   private static Map<String, JsonArray> resourceCache = new HashMap<>();
   
@@ -57,7 +55,6 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
              Future<Void> populateFuture = populateHashMap();
               populateFuture.setHandler(res->{
                   if(res.succeeded()){
-                      logger.info("THIS HAS BEEN REACHED!");
                       resourceCache.entrySet().forEach(entry ->{
                           System.out.println("===="+entry.getKey()+": "+entry.getValue());
                       });
@@ -108,7 +105,9 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
                                       resourceCache.get("resourceItemIds").add(resObj.getString("id"));
                                   mongo.distinct(COLLECTION,"provider.value",String.class.getName(),res3->{
                                       if(res3.succeeded()){
-                                              resourceCache.put("providerIds",res3.result());
+                                            for (Object pIds : res3.result()){
+                                                resourceCache.get("providerIds").add(pIds.toString().split(":")[2]);
+                                            }
                                           hashFut.complete();
                                       }else {
                                           if(!res3.succeeded())
@@ -759,7 +758,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     JsonObject fields = decodeFields(request_body);
     
     String key = request_body.getString("item-type");
-    System.out.println("In count block : "+ key);
+    System.out.println("In search block : "+ key);
     if(key.equalsIgnoreCase("resourceItem"))
     { 
     	System.out.println("Searching resourceItem");
@@ -860,7 +859,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
        * Starts now......
        * */
       if (updated.getString("item-type").equalsIgnoreCase("resourceItem")) {
-          resourceServer = updated.getJsonObject("resourceServer").getString("value").split(":")[2];
+          //resourceServer = updated.getJsonObject("resourceServer").getString("value").split(":")[2];
           resourceServerGroup = updated.getJsonObject("resourceServerGroup").getString("value").split(":")[2];
           resourceId = updated.getJsonObject("resourceId").getString("value");
           id = domain + "/" + sha + "/" + resourceServerGroup + "/" + resourceId;
@@ -877,7 +876,9 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
                   + updated.getString("name");
           updated.put("id", id);
       }
-      provider = updated.containsKey("provider") ? updated.getJsonObject("provider").getString("value") : "";
+      provider = updated.containsKey("provider") ? updated.getJsonObject("provider").getString("value").split(":")[2] : null;
+      if(provider!=null)
+          updated.put("providerId",provider);
 
     if(updated.getString("item-type").equalsIgnoreCase("resourceItem")
         || updated.getString("item-type").equalsIgnoreCase("resourceServer")){
@@ -1007,7 +1008,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 
       String item_type = request_body.getString("item-type");
       String item_id = null;
-      String resourceGroup, resourceServer = null;
+      String resourceGroup= null, resourceServer = null, provider=null;
       Future<Void> insertHashFuture = Future.future();
       System.out.println("In create : " + request_body);
       if (item_type.equalsIgnoreCase("resourceItem")) {
@@ -1040,7 +1041,6 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
           request_body = addNewAttributes(itemWithoutDol, 1, true, null);
           item_id = request_body.getString("id");
           resourceServer = request_body.getJsonObject("resourceServer").getString("value").split(":")[2];
-          logger.info("RES V: "+resourceServer);
           if (!resourceCache.get("resourceGroupIds").contains(item_id)) {
               if (resourceCache.get("resourceServerIds").contains(resourceServer)) {
                   logger.info("CREATE RESOURCE GROUP");
@@ -1052,6 +1052,8 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
       }
 
       String finalItem_id = item_id;
+
+      JsonObject finalRequest_body = request_body;
       insertHashFuture.setHandler(res->{
           if(res.succeeded()) {
               if (item_type.equalsIgnoreCase("resourceItem"))
@@ -1062,6 +1064,13 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
               else if (item_type.equalsIgnoreCase("resourceServerGroup")) {
                   resourceCache.get("resourceGroupIds").add(finalItem_id);
               }
+              if(finalRequest_body.containsKey("providerId")
+                      && !resourceCache.get("providerIds").contains(finalRequest_body.getString("providerId"))){
+                  resourceCache.get("providerIds").add(finalRequest_body.getString("providerId"));
+              }
+              resourceCache.entrySet().forEach(entry ->{
+                  System.out.println("Added to HaspMap after insert\n===="+entry.getKey()+": "+entry.getValue());
+              });
           }else{
               logger.info("HashMap insert failed. "+res.cause());
           }

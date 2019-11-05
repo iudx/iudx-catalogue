@@ -464,7 +464,7 @@ public class APIServerVerticle extends AbstractVerticle {
     HttpServerRequest request = routingContext.request();
     String query = null;
 
-    System.out.println(routingContext.request().absoluteURI().contains("?"));
+    //System.out.println("APIVERTICLE searchAttribute(): "+routingContext.request().absoluteURI().contains("?"));
     
     if(routingContext.request().absoluteURI().contains("?")) 
     {
@@ -475,11 +475,11 @@ public class APIServerVerticle extends AbstractVerticle {
       handle400(routingContext, "Bad Query");
       return;
     }
-    logger.info(query);
+    logger.info("APIVERTICLE searchAttribute(): "+ query);
 
 			JsonObject request_body = prepareQuery(query);
 			String item_type = request_body.getString("item-type");
-			System.out.println(item_type);
+			//System.out.println(item_type);
 			if(item_type == null) {
 				item_type = "resourceItem";
 				request_body.put("item-type", item_type);
@@ -697,9 +697,10 @@ public class APIServerVerticle extends AbstractVerticle {
             database_reply -> {
               if (database_reply.succeeded()) {
                 switch (action) {
-                  case "getItem":
+                  case "getItem": break;
                   case "list":
                     handle200(routingContext, (JsonArray) database_reply.result().body());
+                    break;
                   case "get-tags":
                   case "search-attribute":
                     handle200(routingContext, (JsonArray) database_reply.result().body());
