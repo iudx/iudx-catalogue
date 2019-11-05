@@ -521,6 +521,8 @@ function request_access_token(resource_id, resourceServerGroup, rid) {
                     + _get_security_based_latest_data_link_for_map_view(resource_id, resourceServerGroup, rid, data.token))
                 }
 
+                _alertify("Success!!!", "Token received.<br>You are now authenticated to access the non-public data.")
+
                 if (!($('#sidebar_token_space').is(':visible'))) {
                     $('#sidebar_token_space').toggle();
                 }
