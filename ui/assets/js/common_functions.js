@@ -501,9 +501,13 @@ function request_access_token(resource_id, resourceServerGroup, rid) {
     $.ajax({
         url: cat_conf['auth_base_URL'] + "/token",
         type: 'post',
-        dataType: 'json',
-        contentType: 'application/json',
-        data: JSON.stringify({ "request": { "resource-id": resource_id } }),
+        // dataType: 'json',
+        contentType: 'application/x-www-form-urlencoded',
+        xhrFields: {
+           withCredentials: true
+        },
+        // crossDomain: true,
+        data: "request=" + JSON.stringify({ "resource-id": resource_id }),
         success: function (data) {
 
             // For map view
