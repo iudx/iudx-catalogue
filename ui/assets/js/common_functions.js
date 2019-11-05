@@ -507,7 +507,7 @@ function request_access_token(resource_id, resourceServerGroup, rid) {
            withCredentials: true
         },
         // crossDomain: true,
-        data: "request=" + JSON.stringify({ "resource-id": resource_id }),
+        data: "request=" + JSON.stringify({ "resource-id": resource_id } ),
         success: function (data) {
 
             // For map view
@@ -544,7 +544,7 @@ function request_access_token(resource_id, resourceServerGroup, rid) {
 
         },
         error: function (jqXHR, exception) {
-            _alertify("Error", "Unauthorized access! Please get a token.")
+            _alertify("Error", "Unauthorized access! Please contact the provider.")
         }
     });
 }
