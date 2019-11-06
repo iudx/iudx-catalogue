@@ -502,12 +502,12 @@ function request_access_token(resource_id, resourceServerGroup, rid) {
         url: cat_conf['auth_base_URL'] + "/token",
         type: 'post',
         // dataType: 'json',
-        contentType: 'application/x-www-form-urlencoded',
+        contentType: 'text/plain',
         xhrFields: {
            withCredentials: true
         },
         // crossDomain: true,
-        data: "request=" + JSON.stringify({ "resource-id": resource_id } ),
+        data: JSON.stringify({"request": { "resource-id": resource_id }}),
         success: function (data) {
 
             // For map view
