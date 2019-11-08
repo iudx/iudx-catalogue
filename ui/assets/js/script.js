@@ -709,6 +709,13 @@ function show_details(_id) {
         $("#resource_item_special_feature_links").html(`
                     <button><a href="`+ data[0]["refDataModel"]["value"] + `" target="_blank">Data Model </a></button>
             `);
+        var _x = $('#sidebar_token_space').html()
+        // console.log(_x)
+        if(!($(_x).attr("id") == "map_token_"+resource_id_to_html_id(_id))){
+            $(`#sidebar_token_space`).hide();
+        }else{
+            perform_scroll('#sidebar', `#sidebar_token_space`)
+        }
     });
 }
 
