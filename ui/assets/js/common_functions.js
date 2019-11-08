@@ -162,6 +162,7 @@ function __get_temporal_data(__url, __rid, __days) {
 
 function _get_latest_data(_resource_id, _token) {
     //console.log(_token)
+    _alertify("Getting Data...", get_spinner_html())
     $.ajax({
         "url": cat_conf['resoure_server_base_URL'] + "/search",
         "async": true,
@@ -179,9 +180,10 @@ function _get_latest_data(_resource_id, _token) {
             // display_json_response_in_modal(data)
             _alertify("Success!!!", '<pre id="custom_alertbox">' + jsonPrettyHighlightToId(data) + '</pre>');
         },
-
-        error: _alertify("Error!!!", '<pre id="custom_alertbox">: Please try some time later. Server is facing some problems at this moment.</pre>'),
-        timeout: 30000 // sets timeout to 30 seconds
+        error: function (jqXHR, exception) {
+            _alertify("Error!!!", '<pre id="custom_alertbox">: Please try some time later. Server is facing some problems at this moment.</pre>')
+        },
+        "timeout"   : 30000 // sets timeout to 30 seconds
     })
 }
 
@@ -501,9 +503,13 @@ function request_access_token(resource_id, resourceServerGroup, rid) {
     $.ajax({
         url: cat_conf['auth_base_URL'] + "/token",
         type: 'post',
-        dataType: 'json',
-        contentType: 'application/json',
-        data: JSON.stringify({ "request": { "resource-id": resource_id } }),
+        // dataType: 'json',
+        contentType: 'text/plain',
+        xhrFields: {
+           withCredentials: true
+        },
+        // crossDomain: true,
+        data: JSON.stringify({"request": { "resource-id": resource_id }}),
         success: function (data) {
 
             // For map view
@@ -516,6 +522,8 @@ function request_access_token(resource_id, resourceServerGroup, rid) {
                     $(`#pop_up_`+ resource_id_to_html_id(resource_id)).append(`<br>` 
                     + _get_security_based_latest_data_link_for_map_view(resource_id, resourceServerGroup, rid, data.token))
                 }
+
+                _alertify("Success!!!", "Token received.<br>You are now authenticated to access the non-public data.")
 
                 if (!($('#sidebar_token_space').is(':visible'))) {
                     $('#sidebar_token_space').toggle();
@@ -540,7 +548,7 @@ function request_access_token(resource_id, resourceServerGroup, rid) {
 
         },
         error: function (jqXHR, exception) {
-            _alertify("Error", "Unauthorized access! Please get a token.")
+            _alertify("Error", "Unauthorized access! Please contact the provider.")
         }
     });
 }
