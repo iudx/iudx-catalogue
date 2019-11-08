@@ -162,6 +162,7 @@ function __get_temporal_data(__url, __rid, __days) {
 
 function _get_latest_data(_resource_id, _token) {
     //console.log(_token)
+    _alertify("Getting Data...", get_spinner_html())
     $.ajax({
         "url": cat_conf['resoure_server_base_URL'] + "/search",
         "async": true,
@@ -179,9 +180,10 @@ function _get_latest_data(_resource_id, _token) {
             // display_json_response_in_modal(data)
             _alertify("Success!!!", '<pre id="custom_alertbox">' + jsonPrettyHighlightToId(data) + '</pre>');
         },
-
-        error: _alertify("Error!!!", '<pre id="custom_alertbox">: Please try some time later. Server is facing some problems at this moment.</pre>'),
-        timeout: 30000 // sets timeout to 30 seconds
+        function (jqXHR, exception) {
+            _alertify("Error!!!", '<pre id="custom_alertbox">: Please try some time later. Server is facing some problems at this moment.</pre>')
+        },
+        "timeout"   : 30000 // sets timeout to 30 seconds
     })
 }
 
