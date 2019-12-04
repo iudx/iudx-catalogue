@@ -18,19 +18,19 @@ const cat_conf = {
 */
 
 const legends = {
-	"streetlight-feeder-sree" : "https://image.flaticon.com/icons/svg/1245/1245929.svg",
-	"aqm-bosch-climo": "https://image.flaticon.com/icons/svg/1808/1808701.svg",
-	"flood-sensor": "https://image.flaticon.com/icons/svg/1890/1890123.svg",
-	"wifi-hotspot": "https://image.flaticon.com/icons/svg/660/660488.svg",
-	"ptz-video camera": "https://image.flaticon.com/icons/svg/1111/1111407.svg",
-	"crowd-sourced-changebhai": "https://image.flaticon.com/icons/svg/1200/1200848.svg",
-	"changebhai": "https://image.flaticon.com/icons/svg/1200/1200848.svg",
-	"safetipin": "https://image.flaticon.com/icons/svg/541/541384.svg",
-	"traffic-incidents": "https://image.flaticon.com/icons/svg/401/401434.svg",
-	"tomtom": "https://image.flaticon.com/icons/svg/401/401434.svg",
-	"itms-mobility": "https://image.flaticon.com/icons/svg/32/32425.svg",
-	"pune-iitm-aqi": "https://image.flaticon.com/icons/svg/1684/1684375.svg",
-	"pune-itms": "https://image.flaticon.com/icons/svg/32/32425.svg"
+	"pudx-resource-server/streetlight-feeder-sree" : "https://image.flaticon.com/icons/svg/1245/1245929.svg",
+	"pudx-resource-server/aqm-bosch-climo": "https://image.flaticon.com/icons/svg/1808/1808701.svg",
+	"pudx-resource-server/flood-sensor": "https://image.flaticon.com/icons/svg/1890/1890123.svg",
+	"pudx-resource-server/wifi-hotspot": "https://image.flaticon.com/icons/svg/660/660488.svg",
+	"pudx-resource-server/ptz-video camera": "https://image.flaticon.com/icons/svg/1111/1111407.svg",
+	"pudx-resource-server/crowd-sourced-changebhai": "https://image.flaticon.com/icons/svg/1200/1200848.svg",
+	"pudx-resource-server/changebhai": "https://image.flaticon.com/icons/svg/1200/1200848.svg",
+	"pudx-resource-server/safetipin": "https://image.flaticon.com/icons/svg/541/541384.svg",
+	"pudx-resource-server/traffic-incidents": "https://image.flaticon.com/icons/svg/401/401434.svg",
+	"pudx-resource-server/tomtom": "https://image.flaticon.com/icons/svg/401/401434.svg",
+	"pudx-resource-server/itms-mobility": "https://image.flaticon.com/icons/svg/32/32425.svg",
+	"pudx-resource-server/pune-iitm-aqi": "https://image.flaticon.com/icons/svg/1684/1684375.svg",
+	"pudx.resourceserver.iudx.org.in/pune-itms": "https://image.flaticon.com/icons/svg/32/32425.svg"
 }
 
 //set attribution for used icons -> prefer flaticon as it has a wide range of options and icons are appealling
