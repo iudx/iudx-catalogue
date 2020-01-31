@@ -1,60 +1,45 @@
 #!/bin/bash
 
-echo "$@"
+JAR_PATH="../target"
+JAR_NAME="catalogue-apiserver-0.0.1-fat.jar"
+OWNER="iudx"
+REPO="iudx-catalogue"
 
-if [ "$@" = "apiserver" ]; then
+if [ "$1" = "apiserver" ]; then
 	echo "Re-installing API Server"
+	echo "Downloading jar files from the latest release..." >&2
+        
+	curl -s https://api.github.com/repos/$OWNER/$REPO/releases/latest \
+        | grep browser_download_url | cut -d '"' -f 4 | xargs curl -LJ# > jars.tar.gz
 
-	echo "Stopping API Server Container"
-	docker stop catalogue-apiserver
+        tar -zxf jars.tar.gz
+        mkdir -p $JAR_PATH
+        mv $JAR_NAME $JAR_PATH/
+        rm -rf jars
+        rm jars.tar.gz
 
-	echo "Deleting API Server Container"
-	docker rm -f catalogue-apiserver
+	docker restart apiserver
+	
+	echo "Re-installed API Server"
 
-	cd ..
-
-	cp docker_conf.production.json src/main/conf/docker_conf.json
-
-	mvn clean package -DskipTests
-
-	cp target/catalogue-apiserver-0.0.1-fat.jar .
-
-	cd docker
-
-	echo "Starting Containers"
-	docker-compose -f docker-compose.production.yml up -d apiserver
-	echo "Started Catalogue API Server"
-
-elif [ "$@" = "mongodb" ]; then
+elif [ "$1" = "mongo" ]; then
 	echo "Re-installing MongoDB Server"
 
-	echo "Stopping MongoDB Server Container"
-	docker stop catalogue-database-mongodb
-
 	echo "Deleting MongoDB Server Container"
-	docker rm -f catalogue-database-mongodb
+	docker rm -f mongo
 	
 	echo "Starting MongoDB Containers"
 	docker-compose up -d mongodb
 
-	until nc -z localhost 27017
-	
 	echo "Checking MondoDB status"
 
+	until nc -z localhost 27017
 	do
 	    sleep 1
 	    echo "Waiting to boot..."
 	done
 
 	echo "MongoDB is up at PORT 27017"
-
-	sleep 5
-
-	until nc -z localhost 27017
-	do
-	    sleep 1
-	    echo "Waiting to boot..."
-	done
 
 else
 	echo "Invalid argument passed."
