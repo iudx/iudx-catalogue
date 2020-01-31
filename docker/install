@@ -51,8 +51,17 @@ echo "MONGO_INITDB_ROOT_PASSWORD=$PASSWORD" >> .env
 
 file1=config.properties
 
-sed -i '' -e 's/database_user=.*/database_user='$USER'/' ../$file1
-sed -i '' -e 's/database_password=.*/database_password='$PASSWORD'/' ../$file1
+os=`uname`
+if [ $os == "Linux" ]; then 
+	sed -i 's/database_user=.*/database_user='$USER'/' ../$file1
+	sed -i 's/database_password=.*/database_password='$PASSWORD'/' ../$file1
+elif [ $os == "Darwin"]; then
+	sed -i '' -e 's/database_user=.*/database_user='$USER'/' ../$file1
+	sed -i '' -e 's/database_password=.*/database_password='$PASSWORD'/' ../$file1
+else 
+	echo "Used Sed functionality not supported on your OS."
+	exit 1
+fi
 
 echo "Stopping Containers"
 docker-compose down -v
