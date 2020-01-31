@@ -51,8 +51,8 @@ echo "MONGO_INITDB_ROOT_PASSWORD=$PASSWORD" >> .env
 
 file1=config.properties
 
-sed -i -e 's/database_user=.*/database_user='$USER'/' ../$file1
-sed -i -e 's/database_password=.*/database_password='$PASSWORD'/' ../$file1
+sed -i '' -e 's/database_user=.*/database_user='$USER'/' ../$file1
+sed -i '' -e 's/database_password=.*/database_password='$PASSWORD'/' ../$file1
 
 echo "Stopping Containers"
 docker-compose down -v
