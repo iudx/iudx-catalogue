@@ -5,6 +5,9 @@ JAR_NAME="catalogue-apiserver-0.0.1-fat.jar"
 OWNER="iudx"
 REPO="iudx-catalogue"
 
+if [ -f .env ]; then
+    rm .env
+
 while [ -n "$1" ]; do 
 
     case "$1" in
