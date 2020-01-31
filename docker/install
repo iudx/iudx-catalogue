@@ -55,7 +55,7 @@ os=`uname`
 if [ $os == "Linux" ]; then 
 	sed -i 's/database_user=.*/database_user='$USER'/' ../$file1
 	sed -i 's/database_password=.*/database_password='$PASSWORD'/' ../$file1
-elif [ $os == "Darwin"]; then
+elif [ $os == "Darwin" ]; then
 	sed -i '' -e 's/database_user=.*/database_user='$USER'/' ../$file1
 	sed -i '' -e 's/database_password=.*/database_password='$PASSWORD'/' ../$file1
 else 
