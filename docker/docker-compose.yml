@@ -1,0 +1,47 @@
+version: "3"
+
+networks:
+  iudx-net:
+    driver: bridge
+
+volumes:
+    mongodb:
+    mongodb-data:
+
+services:
+
+   mongodb:
+    image: mongo
+    env_file:
+      - .env
+    container_name: mongo
+    hostname: mongo
+    restart: on-failure
+    ports:
+      - "27017:27017"
+    networks:
+      - iudx-net
+    volumes:
+      - mongodb:/var/lib/mongodb/
+      - mongodb-data:/data/db/ 
+
+   apiserver:
+    image: iudx/java 
+    container_name: apiserver
+    hostname: apiserver
+    restart: on-failure
+    ports:
+      - "8443:8443"
+    networks:
+      - iudx-net
+    volumes:
+      - ../../iudx-catalogue:/iudx-catalogue/
+    environment:
+      - WAIT_HOSTS=mongo:27017
+      - WAIT_HOSTS_TIMEOUT=120
+      - PROJECT_DIR=iudx-catalogue
+      - JAR_NAME=catalogue-apiserver-0.0.1-fat.jar
+      - MVN_OPTS=-DskipTests
+      - JAVA_OPTS=-conf src/main/conf/docker_conf.json
+    env_file:
+      - .env
