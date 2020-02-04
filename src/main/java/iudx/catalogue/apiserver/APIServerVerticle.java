@@ -1,10 +1,17 @@
 package iudx.catalogue.apiserver;
 
+import static org.apache.commons.codec.digest.MessageDigestAlgorithms.SHA_1;
+
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.HashSet;
+import java.util.Properties;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.net.ssl.SSLPeerUnverifiedException;
@@ -12,10 +19,12 @@ import javax.net.ssl.SSLPeerUnverifiedException;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.http.ClientAuth;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.http.HttpServerRequest;
@@ -26,12 +35,8 @@ import io.vertx.core.net.JksOptions;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
+import io.vertx.ext.web.handler.CorsHandler;
 import io.vertx.ext.web.handler.StaticHandler;
-
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Properties;
-import static org.apache.commons.codec.digest.MessageDigestAlgorithms.SHA_1;
 
 public class APIServerVerticle extends AbstractVerticle {
 
@@ -100,6 +105,26 @@ public class APIServerVerticle extends AbstractVerticle {
     Router router = Router.router(vertx);
     router.route().handler(BodyHandler.create());
 
+    Set<String> allowedHeaders = new HashSet<>();
+	allowedHeaders.add("Accept");
+	allowedHeaders.add("token");
+	allowedHeaders.add("Content-Length");
+	allowedHeaders.add("Content-Type");
+	allowedHeaders.add("Host");
+	allowedHeaders.add("Origin");
+	allowedHeaders.add("Referer");
+    allowedHeaders.add("Access-Control-Allow-Origin");
+    
+    Set<HttpMethod> allowedMethods = new HashSet<>();
+    allowedMethods.add(HttpMethod.GET);
+    allowedMethods.add(HttpMethod.POST);
+    allowedMethods.add(HttpMethod.OPTIONS);
+    allowedMethods.add(HttpMethod.DELETE);
+    allowedMethods.add(HttpMethod.PATCH);
+    allowedMethods.add(HttpMethod.PUT);
+    
+	router.route().handler(CorsHandler.create("*").allowedHeaders(allowedHeaders).allowedMethods(allowedMethods));
+    
     // IUDX v1 APIs
     
     // Create an item
@@ -134,7 +159,7 @@ public class APIServerVerticle extends AbstractVerticle {
     router.post("/create/catalogue/resource-item/bulk/:bulkId").handler(this::bulkCreate);
     router.patch("/update/catalogue/resource-item/bulk/:bulkId").handler(this::bulkUpdate);
     router.delete("/remove/catalogue/resource-item/bulk/:bulkId").handler(this::bulkDelete);
-
+    
     router
     .route("/")
     .handler(
