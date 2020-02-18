@@ -52,6 +52,7 @@ public class APIServerVerticle extends AbstractVerticle {
   static final int HTTP_STATUS_CONFLICT = 409;
   static String emailID_SHA_1, onboardedBy, onboarder;
   private ArrayList<String> itemTypes;
+  String host;
 
   @Override
   public void start(Future<Void> startFuture) {
@@ -128,30 +129,74 @@ public class APIServerVerticle extends AbstractVerticle {
     // IUDX v1 APIs
     
     // Create an item
-    router.post("/catalogue/v1/items").handler(this::create);
-    
+    router.post("/catalogue/v1/items").handler(routingContext -> {
+    	HttpServerRequest request = routingContext.request();
+        host = request.getHeader("Host");
+        searchAttribute(routingContext);
+    	});
+
     // Get item with ID
-    router.get("/catalogue/v1/items/:domain/:provider/:resourceServer/:resourceCatogery/:resourceId").handler(this::getItem);
-    router.get("/catalogue/v1/items/:resourceServer/:resourceCatogery").handler(this::getItem);
-    router.get("/catalogue/v1/items/:resourceServer").handler(this::getItem);
+    router.get("/catalogue/v1/items/:domain/:provider/:resourceServer/:resourceCatogery/:resourceId").handler(routingContext -> {
+    	HttpServerRequest request = routingContext.request();
+        host = request.getHeader("Host");
+        getItem(routingContext);
+    	});
+
+    router.get("/catalogue/v1/items/:domain/:provider/:resourceServer/:resourceCatogery").handler(routingContext -> {
+    	HttpServerRequest request = routingContext.request();
+        host = request.getHeader("Host");
+        getItem(routingContext);
+    	});
+
+    router.get("/catalogue/v1/items/:domain/:provider/:resourceServer").handler(routingContext -> {
+    	HttpServerRequest request = routingContext.request();
+        host = request.getHeader("Host");
+        getItem(routingContext);
+    	});
     
-    
-    router.put("/catalogue/v1/items/:provider/:resourceServer/:resourceCatogery/:resourceId").handler(this::update);
+    router.put("/catalogue/v1/items/:provider/:resourceServer/:resourceCatogery/:resourceId").handler(routingContext -> {
+    	HttpServerRequest request = routingContext.request();
+        host = request.getHeader("Host");
+        update(routingContext);
+    	});
     
     // Delete item with ID
-    router.delete("/catalogue/v1/items/:domain/:provider/:resourceServer/:resourceCatogery/:resourceId").handler(this::delete);
-    router.delete("/catalogue/v1/items/:resourceServer/:resourceCatogery").handler(this::delete);
-    router.delete("/catalogue/v1/items/:resourceServer").handler(this::delete);
-    
+    router.delete("/catalogue/v1/items/:domain/:provider/:resourceServer/:resourceCatogery/:resourceId").handler(routingContext -> {
+    	HttpServerRequest request = routingContext.request();
+        host = request.getHeader("Host");
+        delete(routingContext);
+    	});
+
+    router.delete("/catalogue/v1/items/:domain/:provider/:resourceServer/:resourceCatogery").handler(routingContext -> {
+    	HttpServerRequest request = routingContext.request();
+        host = request.getHeader("Host");
+        delete(routingContext);
+    	});
+
+    router.delete("/catalogue/v1/items/:domain/:provider/:resourceServer").handler(routingContext -> {
+    	HttpServerRequest request = routingContext.request();
+        host = request.getHeader("Host");
+        delete(routingContext);
+    	});
+   
     // Search items in Catalogue
-    router.get("/catalogue/v1/search").handler(this::searchAttribute);
+    router.get("/catalogue/v1/search").handler(routingContext -> {
+    	HttpServerRequest request = routingContext.request();
+        host = request.getHeader("Host");
+        searchAttribute(routingContext);
+    	});
     
     // Count items in Catalogue
-    router.get("/catalogue/v1/count").handler(this::count);
+    router.get("/catalogue/v1/count").handler(routingContext -> {
+    	HttpServerRequest request = routingContext.request();
+        host = request.getHeader("Host");
+        count(routingContext);
+    	});
+
     
     // NEW APIs
     router.get("/catalogue/internal_apis/list/:itemtype").handler(this::list);
-    router.get("/search/catalogue/attribute").handler(this::searchAttribute);
+    // router.get("/search/catalogue/attribute").handler(this::searchAttribute);
     router.post("/create/catalogue/:itemtype").handler(this::create);
     router.put("/update/catalogue/:itemtype/:id").handler(this::update);
     router.delete("/remove/catalogue/:itemtype/:id").handler(this::delete);
@@ -318,7 +363,7 @@ public class APIServerVerticle extends AbstractVerticle {
 		return status;
 	}
 
-	private void getItem(RoutingContext routingContext) { // "/catalogue/v1/items/:domain/:provider/:resourceServer/:resourceCatogery/:resourceId
+	private void getItem(RoutingContext routingContext) { 
 
 		System.out.println("HIT : In Get Item");
 		String id = null;
@@ -403,6 +448,7 @@ public class APIServerVerticle extends AbstractVerticle {
 						request_body.put("role", onboardedBy);
 						request_body.put("item-type", itemType);
 						request_body.put("__createdBy",onboardedBy);
+						request_body.put("__instance-id",host);
 						DeliveryOptions validator_action = new DeliveryOptions();
 						validator_action.addHeader("action", "validate-item");
 
@@ -475,6 +521,7 @@ public class APIServerVerticle extends AbstractVerticle {
         request_body.put(key, val);
       }
     }
+    request_body.put("__instance-id", host);
     return request_body;
   }
 
@@ -488,7 +535,6 @@ public class APIServerVerticle extends AbstractVerticle {
 
     HttpServerRequest request = routingContext.request();
     String query = null;
-
     System.out.println(routingContext.request().absoluteURI().contains("?"));
     
     if(routingContext.request().absoluteURI().contains("?")) 
@@ -518,6 +564,7 @@ public class APIServerVerticle extends AbstractVerticle {
 		} else {
 			JsonObject request_body = new JsonObject();
 			request_body.put("item-type", "resourceItem");
+			request_body.put("__instance-id", host);
 			databaseHandler("list", routingContext, request_body);
 		}
 	  }
@@ -556,6 +603,7 @@ public class APIServerVerticle extends AbstractVerticle {
 	    } else {
 			JsonObject request_body = new JsonObject();
 			request_body.put("item-type", "resourceItem");
+			request_body.put("__instance-id", host);
 		    databaseHandler("count", routingContext, request_body);
 	    }
   }
