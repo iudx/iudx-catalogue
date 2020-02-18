@@ -294,7 +294,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     attributeFilter.put("_id", 0);
     // query.put("Status", "Live");
 
-    String[] hiddenFields = {"_tags","__uuid", "geoJsonLocation", "item-type", "__createdBy", ""};
+    String[] hiddenFields = {"_tags","__uuid", "geoJsonLocation", "item-type", "__createdBy", "__instance-id"};
 
     FindOptions options = new FindOptions();
     options.setFields(attributeFilter);
@@ -350,6 +350,8 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
       JsonObject request = (JsonObject) message.body();
       System.out.println(request.containsKey("item-type"));
       System.out.println(request.containsKey("item-type-ui"));
+      String host = request.getString("__instance-id");
+      System.out.println(host);
 
 		String key;
 
@@ -366,6 +368,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 	    JsonObject query = new JsonObject();
 	    query.put("itemType", new JsonObject().put("type", "Property").put("value", "resourceItem"));
 	    query.put("itemStatus", new JsonObject().put("type", "Property").put("value", "active"));
+	    query.put("__instance-id", host);
     	mongoFind(query, new JsonObject(), message);
 	    
       } else if(key.equalsIgnoreCase("resourceServer"))
@@ -541,7 +544,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
               otherThanTagQuery.put(key+".value",new JsonObject().put("$in",values));
           }
       }
-
+      
       expressions.add(tagQuery).add(otherThanTagQuery);
       query.put("$and",expressions);
       return query;
@@ -781,6 +784,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 	    query.put("itemStatus", new JsonObject().put("type", "Property").put("value", "active"));
   	}
 
+    query.put("__instance-id", request_body.getString("__instance-id"));
     
     if (query == null) {
       message.fail(0, "Bad query: Number of attributes is not equal to number of number of values");
@@ -816,6 +820,8 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 	    query.put("itemType", new JsonObject().put("type", "Property").put("value", "resourceServerGroup"));
 	    query.put("itemStatus", new JsonObject().put("type", "Property").put("value", "active"));
   	}
+
+    query.put("__instance-id", request_body.getString("__instance-id"));
     
     if (query == null) {
       message.fail(0, "Bad query: Number of attributes is not equal to number of number of values");
