@@ -4,6 +4,7 @@ import java.util.logging.Logger;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
+import io.vertx.core.Launcher;
 import iudx.catalogue.apiserver.APIServerVerticle;
 import iudx.catalogue.database.DatabaseVerticle;
 import iudx.catalogue.validator.Validator;
@@ -13,6 +14,10 @@ import iudx.catalogue.validator.ValidatorVerticle;
 public class CatalogueServer extends AbstractVerticle {
 
   private static final Logger logger = Logger.getLogger(CatalogueServer.class.getName());
+  
+	public static void main(String[] args) {
+		Launcher.executeCommand("run", CatalogueServer.class.getName());
+	}
 
   @Override
   public void start(Future<Void> startFuture) throws Exception {
