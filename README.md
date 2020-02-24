@@ -54,3 +54,34 @@ This will create the client keystore file client.jks with which REST API testing
 Catalogue will be up in development mode at <https://localhost:18443/>. 
 
 REST Assured testing will be performed. 
+
+6. Decoding IUDX certificates for creating, updating and deleting items
+  * Obtain a server side certificate for Catalogue Server from a well-known CA (eg. letsencrypt).
+  * Create .p12 file from the .pem files obtained from letsencrypt
+      - Follow the steps below for creating a .p12 file
+  ```
+  cp /etc/letsencrypt/live/pudx.catalogue.iudx.org.in/fullchain.pem .
+  ```
+  ```
+  cp /etc/letsencrypt/live/pudx.catalogue.iudx.org.in/privkey.pem .
+  ```   
+  ```
+  cat cert.pem privkey.pem >combined.pem
+  ``` 
+  ```
+  cat fullchain.pem privkey.pem >combined.pem
+  ``` 
+  ```
+  openssl pkcs12 -export -in combined.pem -out my-keystore.p12
+  ``` 
+    
+  * Convert the .p12 file to JKS file
+  ``` 
+  keytool -importkeystore -srckeystore my-keystore.p12 -srcstoretype pkcs12 -destkeystore my-keystore.jks
+  ``` 
+  * Import <https://ca.iudx.org.in/>  certificate as a trusted CA for decoding IUDX certificates
+  ```
+  keytool -import -trustcacerts -alias iudx-ca -file ca.iudx.org.in.crt -keystore my-keystore.jks
+  ```
+  * Start the Catalogue Server with my-keystore.jks file to serve all the APIs.
+
