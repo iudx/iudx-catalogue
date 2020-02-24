@@ -1,10 +1,17 @@
 package iudx.catalogue.apiserver;
 
+import static org.apache.commons.codec.digest.MessageDigestAlgorithms.SHA_1;
+
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.HashSet;
+import java.util.Properties;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.net.ssl.SSLPeerUnverifiedException;
@@ -12,10 +19,12 @@ import javax.net.ssl.SSLPeerUnverifiedException;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.http.ClientAuth;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.http.HttpServerRequest;
@@ -26,12 +35,8 @@ import io.vertx.core.net.JksOptions;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
+import io.vertx.ext.web.handler.CorsHandler;
 import io.vertx.ext.web.handler.StaticHandler;
-
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Properties;
-import static org.apache.commons.codec.digest.MessageDigestAlgorithms.SHA_1;
 
 public class APIServerVerticle extends AbstractVerticle {
 
@@ -47,6 +52,7 @@ public class APIServerVerticle extends AbstractVerticle {
   static final int HTTP_STATUS_CONFLICT = 409;
   static String emailID_SHA_1, onboardedBy, onboarder;
   private ArrayList<String> itemTypes;
+  String host;
 
   @Override
   public void start(Future<Void> startFuture) {
@@ -100,33 +106,97 @@ public class APIServerVerticle extends AbstractVerticle {
     Router router = Router.router(vertx);
     router.route().handler(BodyHandler.create());
 
+    Set<String> allowedHeaders = new HashSet<>();
+	allowedHeaders.add("Accept");
+	allowedHeaders.add("token");
+	allowedHeaders.add("Content-Length");
+	allowedHeaders.add("Content-Type");
+	allowedHeaders.add("Host");
+	allowedHeaders.add("Origin");
+	allowedHeaders.add("Referer");
+    allowedHeaders.add("Access-Control-Allow-Origin");
+    
+    Set<HttpMethod> allowedMethods = new HashSet<>();
+    allowedMethods.add(HttpMethod.GET);
+    allowedMethods.add(HttpMethod.POST);
+    allowedMethods.add(HttpMethod.OPTIONS);
+    allowedMethods.add(HttpMethod.DELETE);
+    allowedMethods.add(HttpMethod.PATCH);
+    allowedMethods.add(HttpMethod.PUT);
+    
+	router.route().handler(CorsHandler.create("*").allowedHeaders(allowedHeaders).allowedMethods(allowedMethods));
+    
     // IUDX v1 APIs
     
     // Create an item
-    router.post("/catalogue/v1/items").handler(this::create);
-    
+    router.post("/catalogue/v1/items").handler(routingContext -> {
+    	HttpServerRequest request = routingContext.request();
+        host = request.getHeader("Host");
+        searchAttribute(routingContext);
+    	});
+
     // Get item with ID
-    router.get("/catalogue/v1/items/:domain/:provider/:resourceServer/:resourceCatogery/:resourceId").handler(this::getItem);
-    router.get("/catalogue/v1/items/:resourceServer/:resourceCatogery").handler(this::getItem);
-    router.get("/catalogue/v1/items/:resourceServer").handler(this::getItem);
+    router.get("/catalogue/v1/items/:domain/:provider/:resourceServer/:resourceCatogery/:resourceId").handler(routingContext -> {
+    	HttpServerRequest request = routingContext.request();
+        host = request.getHeader("Host");
+        getItem(routingContext);
+    	});
+
+    router.get("/catalogue/v1/items/:domain/:provider/:resourceServer/:resourceCatogery").handler(routingContext -> {
+    	HttpServerRequest request = routingContext.request();
+        host = request.getHeader("Host");
+        getItem(routingContext);
+    	});
+
+    router.get("/catalogue/v1/items/:domain/:provider/:resourceServer").handler(routingContext -> {
+    	HttpServerRequest request = routingContext.request();
+        host = request.getHeader("Host");
+        getItem(routingContext);
+    	});
     
-    
-    router.put("/catalogue/v1/items/:provider/:resourceServer/:resourceCatogery/:resourceId").handler(this::update);
+    router.put("/catalogue/v1/items/:provider/:resourceServer/:resourceCatogery/:resourceId").handler(routingContext -> {
+    	HttpServerRequest request = routingContext.request();
+        host = request.getHeader("Host");
+        update(routingContext);
+    	});
     
     // Delete item with ID
-    router.delete("/catalogue/v1/items/:domain/:provider/:resourceServer/:resourceCatogery/:resourceId").handler(this::delete);
-    router.delete("/catalogue/v1/items/:resourceServer/:resourceCatogery").handler(this::delete);
-    router.delete("/catalogue/v1/items/:resourceServer").handler(this::delete);
-    
+    router.delete("/catalogue/v1/items/:domain/:provider/:resourceServer/:resourceCatogery/:resourceId").handler(routingContext -> {
+    	HttpServerRequest request = routingContext.request();
+        host = request.getHeader("Host");
+        delete(routingContext);
+    	});
+
+    router.delete("/catalogue/v1/items/:domain/:provider/:resourceServer/:resourceCatogery").handler(routingContext -> {
+    	HttpServerRequest request = routingContext.request();
+        host = request.getHeader("Host");
+        delete(routingContext);
+    	});
+
+    router.delete("/catalogue/v1/items/:domain/:provider/:resourceServer").handler(routingContext -> {
+    	HttpServerRequest request = routingContext.request();
+        host = request.getHeader("Host");
+        delete(routingContext);
+    	});
+   
     // Search items in Catalogue
-    router.get("/catalogue/v1/search").handler(this::searchAttribute);
+    router.get("/catalogue/v1/search").handler(routingContext -> {
+    	HttpServerRequest request = routingContext.request();
+        host = request.getHeader("Host");
+        searchAttribute(routingContext);
+    	});
     
     // Count items in Catalogue
-    router.get("/catalogue/v1/count").handler(this::count);
+    router.get("/catalogue/v1/count").handler(routingContext -> {
+    	HttpServerRequest request = routingContext.request();
+        host = request.getHeader("Host");
+        count(routingContext);
+    	});
+
     
     // NEW APIs
     router.get("/catalogue/internal_apis/list/:itemtype").handler(this::list);
-    router.get("/search/catalogue/attribute").handler(this::searchAttribute);
+    // router.get("/search/catalogue/attribute").handler(this::searchAttribute);
     router.post("/create/catalogue/:itemtype").handler(this::create);
     router.put("/update/catalogue/:itemtype/:id").handler(this::update);
     router.delete("/remove/catalogue/:itemtype/:id").handler(this::delete);
@@ -134,7 +204,7 @@ public class APIServerVerticle extends AbstractVerticle {
     router.post("/create/catalogue/resource-item/bulk/:bulkId").handler(this::bulkCreate);
     router.patch("/update/catalogue/resource-item/bulk/:bulkId").handler(this::bulkUpdate);
     router.delete("/remove/catalogue/resource-item/bulk/:bulkId").handler(this::bulkDelete);
-
+    
     router
     .route("/")
     .handler(
@@ -293,7 +363,7 @@ public class APIServerVerticle extends AbstractVerticle {
 		return status;
 	}
 
-	private void getItem(RoutingContext routingContext) { // "/catalogue/v1/items/:domain/:provider/:resourceServer/:resourceCatogery/:resourceId
+	private void getItem(RoutingContext routingContext) { 
 
 		System.out.println("HIT : In Get Item");
 		String id = null;
@@ -378,6 +448,7 @@ public class APIServerVerticle extends AbstractVerticle {
 						request_body.put("role", onboardedBy);
 						request_body.put("item-type", itemType);
 						request_body.put("__createdBy",onboardedBy);
+						request_body.put("__instance-id",host);
 						DeliveryOptions validator_action = new DeliveryOptions();
 						validator_action.addHeader("action", "validate-item");
 
@@ -450,6 +521,7 @@ public class APIServerVerticle extends AbstractVerticle {
         request_body.put(key, val);
       }
     }
+    request_body.put("__instance-id", host);
     return request_body;
   }
 
@@ -464,7 +536,7 @@ public class APIServerVerticle extends AbstractVerticle {
     HttpServerRequest request = routingContext.request();
     String query = null;
 
-    //System.out.println("APIVERTICLE searchAttribute(): "+routingContext.request().absoluteURI().contains("?"));
+    System.out.println(routingContext.request().absoluteURI().contains("?"));
     
     if(routingContext.request().absoluteURI().contains("?")) 
     {
@@ -493,6 +565,7 @@ public class APIServerVerticle extends AbstractVerticle {
 		} else {
 			JsonObject request_body = new JsonObject();
 			request_body.put("item-type", "resourceItem");
+			request_body.put("__instance-id", host);
 			databaseHandler("list", routingContext, request_body);
 		}
 	  }
@@ -531,6 +604,7 @@ public class APIServerVerticle extends AbstractVerticle {
 	    } else {
 			JsonObject request_body = new JsonObject();
 			request_body.put("item-type", "resourceItem");
+			request_body.put("__instance-id", host);
 		    databaseHandler("count", routingContext, request_body);
 	    }
   }

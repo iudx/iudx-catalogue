@@ -1,54 +1,77 @@
-#!bin/bash
+#!/bin/bash
+
+JAR_PATH="../target"
+JAR_NAME="catalogue-apiserver-0.0.1-fat.jar"
+OWNER="iudx"
+REPO="iudx-catalogue"
+
+if [ -f .env ]; then
+    rm .env
+fi
+
+while [ -n "$1" ]; do 
+
+    case "$1" in
+
+    -q|--quick)
+        if [ ! -f $JAR_PATH/$JAR_NAME ]; then
+            echo "Downloading jar files from the latest release..." >&2
+            curl -s https://api.github.com/repos/$OWNER/$REPO/releases/latest \
+            | grep browser_download_url | cut -d '"' -f 4 | xargs curl -LJ# > jars.tar.gz
+
+            tar -zxf jars.tar.gz
+            mkdir -p $JAR_PATH
+            mv $JAR_NAME $JAR_PATH/
+            rm -rf jars
+            rm jars.tar.gz
+        else
+            echo "RUN_ONLY=true" > .env
+        fi
+        ;; 
+    *) 
+        echo "unrecognized '$1' command. Please run ./install without options for regular installation or with -q/--quick for quick install."
+        exit 1
+        ;;
+    esac
+
+    shift
+
+done
 
 echo "Generating User ID and password"
-sh generate_credentials.sh
 
-cd ..
+USER=root
 
-cp docker_conf.production.json src/main/conf/docker_conf.json
+# bash generate random 32 character alphanumeric string (upper and lowercase) and 
+PASSWORD=$(env LC_ALL=C tr -dc a-zA-Z0-9 < /dev/urandom | head -c 32 ; echo)
+echo 'Password is : '$PASSWORD
 
-mvn clean package -DskipTests
+echo "MONGO_INITDB_ROOT_USERNAME=$USER" >> .env
+echo "MONGO_INITDB_ROOT_PASSWORD=$PASSWORD" >> .env
 
-cp target/catalogue-apiserver-0.0.1-fat.jar .
+file1=config.properties
 
-cd docker
+os=`uname`
+if [ $os == "Linux" ]; then 
+	sed -i 's/database_user=.*/database_user='$USER'/' ../$file1
+	sed -i 's/database_password=.*/database_password='$PASSWORD'/' ../$file1
+elif [ $os == "Darwin" ]; then
+	sed -i '' -e 's/database_user=.*/database_user='$USER'/' ../$file1
+	sed -i '' -e 's/database_password=.*/database_password='$PASSWORD'/' ../$file1
+else 
+	echo "Used Sed functionality not supported on your OS."
+	exit 1
+fi
 
 echo "Stopping Containers"
-docker-compose -f docker-compose.production.yml down -v
+docker-compose down -v
 
 echo "Starting Containers"
-docker-compose -f docker-compose.production.yml up -d
+docker-compose up -d
 
 echo "Configuring Catalogue API Server"
 
 echo "Catalogue API Server is UP!"
 
-until nc -z localhost 27017
-echo "Checking MondoDB status"
-
-do
-    sleep 1
-    echo "Waiting to boot..."
-done
-
-echo "MongoDB is up at PORT 27017"
-
-echo "Configuring Catalogue"
-sleep 5
-
-until nc -z localhost 27017
-do
-    sleep 1
-    echo "Waiting to boot..."
-done
-
-docker exec catalogue-database-mongodb ./scripts/mongodb_setup.sh
-
-echo "Catalogue Setup - Created Database (catalogue)"
-
-echo "Catalogue Setup - Created Collections (items and schemas)"
 echo "Catalogue Setup Completed"
-
-
-
 

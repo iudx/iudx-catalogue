@@ -14,12 +14,6 @@ echo "Done"
 echo "Installing Docker Compose"
 sudo apt-get install docker-compose
 echo "Done"
-echo "Installing Java"
-sudo apt install openjdk-11-jre-headless
-echo "Done"
-echo "Installing Maven"
-sudo apt install maven
-echo "Done"
 echo "Adding Docker to auto-start on boot"
 sudo systemctl enable docker
 echo "Done"
