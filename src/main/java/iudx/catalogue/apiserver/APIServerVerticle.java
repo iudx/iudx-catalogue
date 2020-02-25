@@ -3,6 +3,8 @@ package iudx.catalogue.apiserver;
 import static org.apache.commons.codec.digest.MessageDigestAlgorithms.SHA_1;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -87,16 +89,40 @@ public class APIServerVerticle extends AbstractVerticle {
   }
 
   private HttpServer createServer() {
-    ClientAuth clientAuth = ClientAuth.REQUEST;
-    String keystore = config().getString("keystore");
-    String keystorePassword = config().getString("keystorePassword");
+		ClientAuth clientAuth = ClientAuth.REQUEST;
+
+		Properties prop = new Properties();
+		InputStream input = null;
+		String keystore = null;
+		String keystorePassword = null;
+
+		String truststore = null;
+		String truststorePassword = null;
+		
+		try {
+			input = new FileInputStream("config.properties");
+			prop.load(input);
+
+			keystore = prop.getProperty("keystore");
+			keystorePassword = prop.getProperty("keystorePassword");
+
+			truststore = prop.getProperty("truststore");
+			truststorePassword = prop.getProperty("truststorePassword");
+			
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
     HttpServer server =
         vertx.createHttpServer(
             new HttpServerOptions()
                 .setSsl(true)
                 .setClientAuth(clientAuth)
-                .setTrustStoreOptions(new JksOptions().setPath(keystore).setPassword(keystorePassword))
+                .setTrustStoreOptions(new JksOptions().setPath(truststore).setPassword(truststorePassword))
                 .setKeyStoreOptions(
                     new JksOptions().setPath(keystore).setPassword(keystorePassword)));
     return server;
@@ -132,7 +158,7 @@ public class APIServerVerticle extends AbstractVerticle {
     router.post("/catalogue/v1/items").handler(routingContext -> {
     	HttpServerRequest request = routingContext.request();
         host = request.getHeader("Host");
-        searchAttribute(routingContext);
+        create(routingContext);
     	});
 
     // Get item with ID
@@ -233,13 +259,32 @@ public class APIServerVerticle extends AbstractVerticle {
   }
 
   private void setSystemProps() {
-    String keystore = config().getString("keystore");
-    String keystorePassword = config().getString("keystorePassword");
-
-    String truststore = config().getString("truststore");
-    String truststorePassword = config().getString("truststorePassword");
-
     Properties systemProps = System.getProperties();
+	Properties prop = new Properties();
+	InputStream input = null;
+	String keystore = null;
+	String keystorePassword = null;
+
+	String truststore = null;
+	String truststorePassword = null;
+	
+	try {
+		input = new FileInputStream("config.properties");
+		prop.load(input);
+
+		keystore = prop.getProperty("keystore");
+		keystorePassword = prop.getProperty("keystorePassword");
+
+		truststore = prop.getProperty("truststore");
+		truststorePassword = prop.getProperty("truststorePassword");
+		
+	} catch (FileNotFoundException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	} catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
 
     systemProps.put("javax.net.ssl.keyStore", keystore);
     systemProps.put("javax.net.ssl.keyStorePassword", keystorePassword);
