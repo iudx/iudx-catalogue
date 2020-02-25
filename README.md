@@ -60,16 +60,7 @@ REST Assured testing will be performed.
   * Create .p12 file from the .pem files obtained from letsencrypt
       - Follow the steps below for creating a .p12 file
   ```
-  cp /etc/letsencrypt/live/pudx.catalogue.iudx.org.in/fullchain.pem .
-  ```
-  ```
-  cp /etc/letsencrypt/live/pudx.catalogue.iudx.org.in/privkey.pem .
-  ```   
-  ```
-  cat cert.pem privkey.pem >combined.pem
-  ``` 
-  ```
-  cat fullchain.pem privkey.pem >combined.pem
+  cat /etc/letsencrypt/live/pudx.catalogue.iudx.org.in/fullchain.pem /etc/letsencrypt/live/pudx.catalogue.iudx.org.in/privkey.pem >combined.pem
   ``` 
   ```
   openssl pkcs12 -export -in combined.pem -out my-keystore.p12
@@ -79,7 +70,7 @@ REST Assured testing will be performed.
   ``` 
   keytool -importkeystore -srckeystore my-keystore.p12 -srcstoretype pkcs12 -destkeystore my-keystore.jks
   ``` 
-  * Import <https://ca.iudx.org.in/>  certificate as a trusted CA for decoding IUDX certificates
+  * Import <https://ca.iudx.org.in/>  certificate  as a trusted CA into the JKS file for decoding clients with IUDX certificates
   ```
   keytool -import -trustcacerts -alias iudx-ca -file ca.iudx.org.in.crt -keystore my-keystore.jks
   ```
