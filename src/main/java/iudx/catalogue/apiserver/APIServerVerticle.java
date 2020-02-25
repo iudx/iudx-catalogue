@@ -193,6 +193,12 @@ public class APIServerVerticle extends AbstractVerticle {
         count(routingContext);
     	});
 
+    router.get("/catalogue/v1/getconfig").handler(routingContext -> {
+        HttpServerRequest request=routingContext.request();
+        host = request.getHeader("Host");
+        getConfig(routingContext);
+    
+    });
     
     // NEW APIs
     router.get("/catalogue/internal_apis/list/:itemtype").handler(this::list);
@@ -204,7 +210,7 @@ public class APIServerVerticle extends AbstractVerticle {
     router.post("/create/catalogue/resource-item/bulk/:bulkId").handler(this::bulkCreate);
     router.patch("/update/catalogue/resource-item/bulk/:bulkId").handler(this::bulkUpdate);
     router.delete("/remove/catalogue/resource-item/bulk/:bulkId").handler(this::bulkDelete);
-    
+   
     router
     .route("/")
     .handler(
@@ -386,6 +392,11 @@ public class APIServerVerticle extends AbstractVerticle {
 		request_body.put("id", id);
 		databaseHandler("getItem", routingContext, request_body);
 	}
+
+    private void getConfig(RoutingContext routingContext){
+        JsonObject requestBody=new JsonObject().put("__instance-id",host);
+        databaseHandler("getConfig", routingContext, requestBody);
+    }
 
   private void list(RoutingContext routingContext) {
     String currentType = routingContext.request().getParam("itemtype");
@@ -771,7 +782,7 @@ public class APIServerVerticle extends AbstractVerticle {
             database_reply -> {
               if (database_reply.succeeded()) {
                 switch (action) {
-                  case "getItem": break;
+                  case "getItem":
                   case "list":
                     handle200(routingContext, (JsonArray) database_reply.result().body());
                     break;
@@ -808,6 +819,9 @@ public class APIServerVerticle extends AbstractVerticle {
                   case "bulkupdate":
                     JsonObject rep = (JsonObject) database_reply.result().body();
                     handle200(routingContext, rep);
+                    break;
+                  case "getConfig":
+                    handle200(routingContext, (JsonArray) database_reply.result().body());
                     break;
                 }
               } else {

@@ -27,7 +27,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   private MongoClient mongo;
 
   private final String TAG_COLLECTION = "tags";
-  private final String COLLECTION = "catalogue";
+  private String COLLECTION="";
   private static final Logger logger = Logger.getLogger(MongoDB.class.getName());
   private static boolean isCacheEmpty = true;
   private static Map<String, JsonArray> resourceCache = new HashMap<>();
@@ -46,7 +46,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     mongo = MongoClient.createShared(vertx, mongoconfig);
 
     mongo.createIndex(
-        COLLECTION,
+        "catalogue",
         new JsonObject().put("geoJsonLocation", "2dsphere"),
         ar -> {
           if (ar.succeeded()) {
@@ -89,25 +89,23 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
           JsonObject query = new JsonObject();
           query.put("itemType.value", "resourceServer");
 
-          mongo.findWithOptions(COLLECTION, query, options, res->{
+          mongo.findWithOptions("catalogue", query, options, res->{
               if(res.succeeded()){
                   for(JsonObject resSObj:res.result())
                       resourceCache.get("resourceServerIds").add(resSObj.getString("id"));
                   query.put("itemType.value", "resourceServerGroup");
-                  mongo.findWithOptions(COLLECTION, query, options, res1->{
+                  mongo.findWithOptions("catalogue", query, options, res1->{
                       if(res1.succeeded()) {
                           for (JsonObject resGObj : res1.result())
                               resourceCache.get("resourceGroupIds").add(resGObj.getString("id"));
                           query.put("itemType.value", "resourceItem");
-                          mongo.findWithOptions(COLLECTION, query, options,res2->{
+                          mongo.findWithOptions("catalogue", query, options,res2->{
                               if(res2.succeeded()) {
                                   for (JsonObject resObj : res2.result())
                                       resourceCache.get("resourceItemIds").add(resObj.getString("id"));
-                                  mongo.distinct(COLLECTION,"provider.value",String.class.getName(),res3->{
+                                  mongo.distinct("catalogue","provider.value",String.class.getName(),res3->{
                                       if(res3.succeeded()){
-                                            for (Object pIds : res3.result()){
-                                                resourceCache.get("providerIds").add(pIds.toString().split(":")[2]);
-                                            }
+                                        resourceCache.put("providerIds",res3.result());      
                                           hashFut.complete();
                                       }else {
                                           if(!res3.succeeded())
@@ -288,7 +286,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     return query;
   }
 
-  private void mongoFind(JsonObject query, JsonObject attributeFilter, Message<Object> message) {
+  private void mongoFind(String collection, JsonObject query, JsonObject attributeFilter, Message<Object> message) {
 
     attributeFilter.put("_id", 0);
     // query.put("Status", "Live");
@@ -299,7 +297,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     options.setFields(attributeFilter);
     System.out.println(query); 
     mongo.findWithOptions(
-        COLLECTION,
+        collection,
         query,
         options,
         res -> {
@@ -323,10 +321,10 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
         });
   }
 
-  private Future<Void> mongoInsert(JsonObject insertDocument, Message<Object> message){
+  private Future<Void> mongoInsert(String collection, JsonObject insertDocument, Message<Object> message){
 
       Future<Void> insert_fut = Future.future();
-      mongo.insert(COLLECTION, insertDocument, resp -> {
+      mongo.insert(collection, insertDocument, resp -> {
           if (resp.succeeded()) {
               if (insertDocument.containsKey("_tags")) {
                   writeTags(insertDocument.getJsonArray("_tags"));
@@ -368,7 +366,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 	    query.put("itemType", new JsonObject().put("type", "Property").put("value", "resourceItem"));
 	    query.put("itemStatus", new JsonObject().put("type", "Property").put("value", "active"));
 	    query.put("__instance-id", host);
-    	mongoFind(query, new JsonObject(), message);
+    	mongoFind("catalogue",query, new JsonObject(), message);
 	    
       } else if(key.equalsIgnoreCase("resourceServer"))
       { 
@@ -376,7 +374,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 	    JsonObject query = new JsonObject();
 	    query.put("itemType", new JsonObject().put("type", "Property").put("value", "resourceServer"));
 	    query.put("itemStatus", new JsonObject().put("type", "Property").put("value", "active"));
-    	mongoFind(query, new JsonObject(), message);
+    	mongoFind("catalogue",query, new JsonObject(), message);
 	    
       } else if(key.equalsIgnoreCase("resourceServerGroup"))
       { 
@@ -384,7 +382,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 	    JsonObject query = new JsonObject();
 	    query.put("itemType", new JsonObject().put("type", "Property").put("value", "resourceServerGroup"));
 	    query.put("itemStatus", new JsonObject().put("type", "Property").put("value", "active"));
-    	mongoFind(query, new JsonObject(), message);
+    	mongoFind("catalogue",query, new JsonObject(), message);
 	    
       } else if(request.containsKey("item-type-ui")){
         key = request.getString("item-type-ui");
@@ -393,7 +391,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
         {
             System.out.println("In list for UI block : "+ key);
         	
-            mongo.distinct(COLLECTION,key+".value", String.class.getName(),res->{
+            mongo.distinct("catalogue",key+".value", String.class.getName(),res->{
                if(res.succeeded()){
                    System.out.println("Response Distinct: "+res.result().toString());
                    message.reply(res.result());
@@ -414,7 +412,12 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   
   public void getItem(Message<Object> message) {
     JsonObject request_body = (JsonObject) message.body();
-    mongoFind(request_body, new JsonObject(), message);
+    mongoFind("catalogue",request_body, new JsonObject(), message);
+  }
+
+  public void getConfig(Message<Object> message) {
+    JsonObject request_body = (JsonObject) message.body();
+    mongoFind("city_config",request_body, new JsonObject(), message);
   }
 
   public void listTags(Message<Object> message) {
@@ -799,7 +802,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
     if (query == null) {
       message.fail(0, "Bad query: Number of attributes is not equal to number of number of values");
     } else {
-      mongoFind(query, fields, message);
+      mongoFind("catalogue",query, fields, message);
     }
   }
 
@@ -837,7 +840,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
       message.fail(0, "Bad query: Number of attributes is not equal to number of number of values");
     } else {
       mongo.count(
-          COLLECTION,
+          "catalogue",
           query,
           result -> {
             if (result.succeeded()) {
@@ -876,7 +879,6 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
        * Starts now......
        * */
       if (updated.getString("item-type").equalsIgnoreCase("resourceItem")) {
-          //resourceServer = updated.getJsonObject("resourceServer").getString("value").split(":")[2];
           resourceServerGroup = updated.getJsonObject("resourceServerGroup").getString("value").split(":")[2];
           resourceId = updated.getJsonObject("resourceId").getString("value");
           id = domain + "/" + sha + "/" + resourceServerGroup + "/" + resourceId;
@@ -893,7 +895,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
                   + updated.getString("name");
           updated.put("id", id);
       }
-      provider = updated.containsKey("provider") ? updated.getJsonObject("provider").getString("value").split(":")[2] : null;
+      provider = updated.containsKey("provider") ? updated.getJsonObject("provider").getString("value"): null;
       if(provider!=null)
           updated.put("providerId",provider);
 
@@ -1038,7 +1040,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
           if (!resourceCache.get("resourceItemIds").contains(item_id))
               if (resourceCache.get("resourceServerIds").contains(resourceServer) &&
                       resourceCache.get("resourceGroupIds").contains(resourceGroup))
-                  insertHashFuture = mongoInsert(request_body, message);
+                  insertHashFuture = mongoInsert("catalogue",request_body, message);
               else
                   message.fail(0,"Resource Server and/or Resource Server Group not found!");
           else
@@ -1050,7 +1052,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 
           if (!resourceCache.get("resourceServerIds").contains(item_id)){
               logger.info("CREATE RESOURCE SERVER");
-             insertHashFuture= mongoInsert(request_body, message);
+             insertHashFuture= mongoInsert("catalogue", request_body, message);
           }
           else
               message.reply("conflict");
@@ -1061,7 +1063,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
           if (!resourceCache.get("resourceGroupIds").contains(item_id)) {
               if (resourceCache.get("resourceServerIds").contains(resourceServer)) {
                   logger.info("CREATE RESOURCE GROUP");
-                  insertHashFuture = mongoInsert(request_body, message);
+                  insertHashFuture = mongoInsert("catalogue",request_body, message);
               } else
                   message.fail(0,"Resource Server is not Found!");
           }else
@@ -1193,7 +1195,7 @@ private void updateTags(JsonArray old_tags, JsonArray new_tags) {
     FindOptions options = new FindOptions().setFields(fields);
     
     mongo.findWithOptions(
-        COLLECTION,
+        "catalogue",
         query,
         options,
         res -> {
@@ -1216,7 +1218,7 @@ private void updateTags(JsonArray old_tags, JsonArray new_tags) {
               update.put("$set", to_update);
 
               mongo.updateCollection(
-                  COLLECTION,
+                  "catalogue",
                   query,
                   update,
                   res2 -> {
@@ -1240,7 +1242,7 @@ private void updateTags(JsonArray old_tags, JsonArray new_tags) {
                       }
 
                       mongo.insert(
-                          COLLECTION,
+                          "catalogue",
                           updated_item,
                           res3 -> {
                             if (res3.succeeded()) {
@@ -1296,7 +1298,7 @@ private void updateTags(JsonArray old_tags, JsonArray new_tags) {
     query.put("id", request_body.getString("id"));
     
     mongo.findOneAndDelete(
-        COLLECTION,
+        "catalogue",
         query,
         res -> {
           if (res.succeeded() && !(res.result() == null)) {
@@ -1343,7 +1345,7 @@ private void updateTags(JsonArray old_tags, JsonArray new_tags) {
     }
     if (!bulk_create.isEmpty()) {
       mongo.bulkWrite(
-          COLLECTION,
+          "catalogue",
           bulk_create,
           bulkWrite -> {
             if (bulkWrite.succeeded()) {
@@ -1367,7 +1369,7 @@ private void updateTags(JsonArray old_tags, JsonArray new_tags) {
     query.put("bulk-id", bulkId);
     query.put("item-type", "resource-item");
     mongo.find(
-        COLLECTION,
+        "catalogue",
         query,
         documents -> {
           if (documents.succeeded()) {
@@ -1382,7 +1384,7 @@ private void updateTags(JsonArray old_tags, JsonArray new_tags) {
                 }
               }
               mongo.removeDocuments(
-                  COLLECTION,
+                  "catalogue",
                   query,
                   deleteItems -> {
                     if (deleteItems.succeeded()) {
@@ -1410,7 +1412,7 @@ private void updateTags(JsonArray old_tags, JsonArray new_tags) {
     query.put("item-type", "resource-item");
     query.put("bulk-id", bulkId);
     mongo.find(
-        COLLECTION,
+        "catalogue",
         query,
         itemsToUpdate -> {
           if (itemsToUpdate.succeeded()) {
@@ -1443,7 +1445,7 @@ private void updateTags(JsonArray old_tags, JsonArray new_tags) {
               UpdateOptions options = new UpdateOptions();
               options.setMulti(true);
               mongo.updateCollectionWithOptions(
-                  COLLECTION,
+                  "catalogue",
                   query,
                   update,
                   options,

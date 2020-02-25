@@ -60,4 +60,6 @@ public interface DatabaseInterface {
   public void bulkDelete(Message<Object> message);
 
   public void bulkCreate(Message<Object> message);
+
+  public void getConfig(Message<Object> message);
 }

@@ -165,6 +165,11 @@ public class DatabaseVerticle extends AbstractVerticle {
     	  db.bulkDelete(message);
     	  break;
       }
+      case "getConfig":
+      {
+          db.getConfig(message);
+          break;
+      }
       default:
         {
           break;
