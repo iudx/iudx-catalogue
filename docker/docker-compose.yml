@@ -26,12 +26,17 @@ services:
       - mongodb-data:/data/db/ 
 
    apiserver:
-    image: iudx/java 
+    image: iudx/java
+    logging:
+     driver: "json-file"
+     options:
+         max-file: "5"
+         max-size: "100m"
     container_name: apiserver
     hostname: apiserver
     restart: on-failure
     ports:
-      - "8443:8443"
+      - "0.0.0.0:443:8443"
     networks:
       - iudx-net
     volumes:
