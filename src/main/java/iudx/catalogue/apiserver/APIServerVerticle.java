@@ -219,6 +219,12 @@ public class APIServerVerticle extends AbstractVerticle {
         count(routingContext);
     	});
 
+    router.get("/catalogue/v1/getconfig").handler(routingContext -> {
+        HttpServerRequest request=routingContext.request();
+        host = request.getHeader("Host");
+        getConfig(routingContext);
+    
+    });
     
     // NEW APIs
     router.get("/catalogue/internal_apis/list/:itemtype").handler(this::list);
@@ -230,7 +236,7 @@ public class APIServerVerticle extends AbstractVerticle {
     router.post("/create/catalogue/resource-item/bulk/:bulkId").handler(this::bulkCreate);
     router.patch("/update/catalogue/resource-item/bulk/:bulkId").handler(this::bulkUpdate);
     router.delete("/remove/catalogue/resource-item/bulk/:bulkId").handler(this::bulkDelete);
-    
+   
     router
     .route("/")
     .handler(
@@ -432,6 +438,11 @@ public class APIServerVerticle extends AbstractVerticle {
 		databaseHandler("getItem", routingContext, request_body);
 	}
 
+    private void getConfig(RoutingContext routingContext){
+        JsonObject requestBody=new JsonObject().put("__instance-id",host);
+        databaseHandler("getConfig", routingContext, requestBody);
+    }
+
   private void list(RoutingContext routingContext) {
     String currentType = routingContext.request().getParam("itemtype");
 
@@ -580,6 +591,7 @@ public class APIServerVerticle extends AbstractVerticle {
 
     HttpServerRequest request = routingContext.request();
     String query = null;
+
     System.out.println(routingContext.request().absoluteURI().contains("?"));
     
     if(routingContext.request().absoluteURI().contains("?")) 
@@ -591,11 +603,11 @@ public class APIServerVerticle extends AbstractVerticle {
       handle400(routingContext, "Bad Query");
       return;
     }
-    logger.info(query);
+    logger.info("APIVERTICLE searchAttribute(): "+ query);
 
 			JsonObject request_body = prepareQuery(query);
 			String item_type = request_body.getString("item-type");
-			System.out.println(item_type);
+			//System.out.println(item_type);
 			if(item_type == null) {
 				item_type = "resourceItem";
 				request_body.put("item-type", item_type);
@@ -818,6 +830,7 @@ public class APIServerVerticle extends AbstractVerticle {
                   case "getItem":
                   case "list":
                     handle200(routingContext, (JsonArray) database_reply.result().body());
+                    break;
                   case "get-tags":
                   case "search-attribute":
                     handle200(routingContext, (JsonArray) database_reply.result().body());
@@ -851,6 +864,9 @@ public class APIServerVerticle extends AbstractVerticle {
                   case "bulkupdate":
                     JsonObject rep = (JsonObject) database_reply.result().body();
                     handle200(routingContext, rep);
+                    break;
+                  case "getConfig":
+                    handle200(routingContext, (JsonArray) database_reply.result().body());
                     break;
                 }
               } else {
