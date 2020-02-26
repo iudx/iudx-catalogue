@@ -219,7 +219,7 @@ public class APIServerVerticle extends AbstractVerticle {
         count(routingContext);
     	});
 
-    router.get("/catalogue/v1/getconfig").handler(routingContext -> {
+    router.get("/catalogue/internal_apis/getconfig").handler(routingContext -> {
         HttpServerRequest request=routingContext.request();
         host = request.getHeader("Host");
         getConfig(routingContext);
