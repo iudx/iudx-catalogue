@@ -1,0 +1,73 @@
+#!/bin/bash
+
+set -e
+
+# Init option {{{
+Color_off='\033[0m'       # Text Reset
+
+# Regular Colors
+Black='\033[0;30m'        # Black
+Red='\033[0;31m'          # Red
+Green='\033[0;32m'        # Green
+Yellow='\033[0;33m'       # Yellow
+Blue='\033[0;34m'         # Blue
+Purple='\033[0;35m'       # Purple
+Cyan='\033[0;36m'         # Cyan
+White='\033[0;37m'        # White
+
+msg() {
+    printf '%b\n' "$1" >&2
+}
+
+success() {
+    msg "${Green}[✔]${Color_off} ${1}${2}"
+}
+
+info() {
+    msg "${Blue}[➭]${Color_off} ${1}${2}"
+}
+
+error() {
+    msg "${Red}[✘]${Color_off} ${1}${2}"
+    exit 1
+}
+
+warn () {
+    msg "${Yellow}[⚠]${Color_off} ${1}${2}"
+}
+
+echo_with_color () {
+    printf '%b\n' "$1$2$Color_off" >&2
+}
+
+
+info "Checking installation type"
+. docker/.env
+
+need_cmd () {
+    if ! hash "$1" &>/dev/null; then
+        info "'$1' not found. Installing..."
+	case "$1" in
+	    mvn )
+		sudo apt -y install maven ;;
+	esac
+	success "'$1' has been installed"
+    else
+	success "'$1' is present"
+    fi
+}
+
+if [ -z $RUN_ONLY ] 
+then
+    info "Restarting apiserver"
+    docker restart apiserver
+else
+    info "Checking if mvn is present"
+    need_cmd "mvn"
+    info "Compiling sources"
+    mvn clean package -DskipTests
+    info "Restarting apiserver"
+    docker restart apiserver 
+fi
+
+success "Code changes have been applied"

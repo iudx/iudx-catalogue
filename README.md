@@ -4,75 +4,91 @@
 
 An Open Source implementation of India Urban Data Exchange (IUDX) Catalogue Service and Search APIs using Vert.x, an event driven and non-blocking high performance reactive framework, for identifying assets and data resources in Smart Cities.
 
-Quickstart
-========== 
+## Quickstart
 
 1. Clone the repository
 ```
-  git clone https://github.com/iudx/iudx-catalogue.git
-  cd iudx-catalogue
+  git clone https://github.com/iudx/iudx-catalogue && cd iudx-catalogue
 ```
-2. Please install the following dependencies manually or run `./requirements`, skip if already installed
+2. Install the following dependencies manually or run `./requirements`. Skip if already installed
 
   - docker
   - docker-compose
   
-3. Start the installation
-  * Quick Installation
-    - Pulls the jars from the latest release in github for fast installation. Takes ~1 minute to install. 
-```
-      cd docker
-      ./install -q
-```
-  * Regular Installation
-    - Performs a fresh install by downloading all the dependencies and compiling the java source files. Takes ~8 minutes to install.
- ```
-      cd docker
-      ./install
- ```
-Catalogue will be up in production mode at <https://localhost:8443/>
-
-4. Re-install
-```
-  cd docker
-  ./re-install apiserver # To re-install apiserver
-  ./re-install mongodb # To re-install mongodb
-```
-5. Start the test suite
-
-Before starting the test suite, make sure you get a Class-3 client certificate from <https://ca.iudx.org.in/>
- 
-Once you get the certificate, run the create client keystore script with the following options
-```
-  sh create_client_keystore.sh <certificate.pem> <private_key.pem>
-```
-This will create the client keystore file client.jks with which REST API testing can be performed. 
-```
-  cd docker
-  sh test
-```
-Catalogue will be up in development mode at <https://localhost:18443/>. 
-
-REST Assured testing will be performed. 
-
-6. Decoding IUDX certificates for creating, updating and deleting items
-  * Obtain a server side certificate for Catalogue Server from a well-known CA (eg. letsencrypt).
-  * Create .p12 file from the .pem files obtained from letsencrypt
-      - Follow the steps below for creating a .p12 file
-  ```
-  cat /etc/letsencrypt/live/pudx.catalogue.iudx.org.in/fullchain.pem /etc/letsencrypt/live/pudx.catalogue.iudx.org.in/privkey.pem >combined.pem
-  ``` 
-  ```
-  openssl pkcs12 -export -in combined.pem -out my-keystore.p12
-  ``` 
+3. Start the installation. Do one of the below
+   
+   - Quick Installation
+     
+     - Pulls the jars from the latest release for fast installation. Takes ~1 minute to install. 
     
-  * Convert the .p12 file to JKS file
-  ``` 
-  keytool -importkeystore -srckeystore my-keystore.p12 -srcstoretype pkcs12 -destkeystore my-keystore.jks
-  ``` 
-  * Import <https://ca.iudx.org.in/>  certificate  as a trusted CA into the JKS file for decoding clients with IUDX certificates
-  ```
-  keytool -import -trustcacerts -alias iudx-ca -file ca.iudx.org.in.crt -keystore my-keystore.jks
-  ```
-  * Start the Catalogue Server with my-keystore.jks file to serve all the APIs.
+     ```
+       cd docker
+       ./quick_install
+     ```
+   - Regular Installation
 
+     - Downloads all maven dependencies compiles the java source files. Takes ~8 minutes to install.
+      
+     ```
+       cd docker
+       ./install
+     ```
+
+The catalogue server will be up at <https://localhost:8443/>
+
+## Re-installation and testing
+
+* To re-install individual components, run
+```
+  cd docker
+  ./re-install apiserver #To re-install apiserver
+  ./re-install mongodb #To re-install mongodb
+```
+* Running tests needs a few steps to be completed first
+
+  - Make sure you get a Class-3 client certificate from <https://ca.iudx.org.in/>
+  - Once a certificate has been obtained, run the create client keystore script with the following options
+
+  ```
+    ./create_client_keystore <certificate.pem> <private_key.pem>
+  ```
+  - The above script will create a client keystore file ``client.jks`` using which can be used for testing. Now run
+    
+  ```
+    cd docker
+    ./test
+  ```
+  - The catalogue will be up as a development server at <https://localhost:18443/> and REST assured testing will be performed
+
+## A note on dealing with IUDX Certificates
+
+* To decode IUDX certificates for authorising users, do the following
+  
+  - Obtain a server side certificate for the catalogue server from a well-known CA (eg. letsencrypt).
+  - Create .p12 file from the .pem files obtained from letsencrypt by following the steps below
+  
+  ```
+    cp /etc/letsencrypt/live/<domain_name>/fullchain.pem .
+    cp /etc/letsencrypt/live/<domain_name>/privkey.pem .
+    cat fullchain.pem privkey.pem > combined.pem
+    openssl pkcs12 -export -in combined.pem -out my-keystore.p12
+  ``` 
+  - Convert the .p12 file to a JKS file
+  
+  ``` 
+    keytool -importkeystore -srckeystore my-keystore.p12 -srcstoretype pkcs12 -destkeystore my-keystore.jks
+  ``` 
+  - Import <https://ca.iudx.org.in/> certificate as a trusted CA for decoding IUDX certificates
+  
+  ```
+    keytool -import -trustcacerts -alias iudx-ca -file ca.iudx.org.in.crt -keystore my-keystore.jks
+  ```
+  - Run ``./apply_changes`` to effect the changes
+
+## Contributors, read this
+
+* If you have used ``./install`` script to install the catalogue, then the first-time compilation takes about 8 minutes. You can monitor this using ``docker logs -f apiserver``. However, if you use the ``./quick_install`` script then the jar files from the latest release are pulled and the catalogue will be up immediately.
+
+### Applying code changes and testing
+
+* Simply run ``./apply_changes`` from the base directory of the repository 
