@@ -20,7 +20,7 @@ function conf_ajax_call(__url){
 }; 
 
 
-conf_ajax_call(window.location["href"]+'catalogue/internal_apis/getconfig')
+conf_ajax_call(window.origin+'/catalogue/internal_apis/getconfig')
 	.then(data => {
 		data = JSON.parse(data)
 		cat_conf = data[0]['configurations']
