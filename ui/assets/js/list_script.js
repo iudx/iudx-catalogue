@@ -428,6 +428,15 @@ $(document).ready(function(){
 		}
 	});
 
+	call_metrics_api(cat_conf["resoure_server_base_URL"] + "/metrics")
+   		.then(data => {
+        		//data = JSON.parse(data)
+        		$("#api-hits").html("Total API hits: " + data["count"])
+    		})
+    		.catch(error => {
+        		console.log(error)
+	})
+
 	$("#landing_footer, #normal_footer").html(getFooterContent());
 
 });

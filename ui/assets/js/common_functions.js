@@ -62,6 +62,30 @@ function get_api_encoded_attr_(_attr) {
     return _attr;
 }
 
+function call_metrics_api(__url) {
+    return new Promise((resolve, reject) => {
+        $.ajax({
+            "url": __url,
+            "async": false,
+            "crossDomain": true,
+            "processData": false,
+            "method": 'POST',
+            "headers": { "Content-Type": "application/json" },
+            "data": JSON.stringify({
+                "options": "total"
+            }),
+            // dataType: 'json',
+            success: function (data) {
+                resolve(data)
+            },
+            error: function (error) {
+                reject(error)
+            },
+            timeout: 30000 // sets timeout to 30 seconds
+        })
+    })
+}
+
 function get_api_encoded_attribute_names(__tags, __rsg, __pvdr) {
     var str = []
     if (__tags.length != 0) {
