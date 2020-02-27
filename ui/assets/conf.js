@@ -22,11 +22,10 @@ function conf_ajax_call(__url){
 
 conf_ajax_call(window.location["href"]+'catalogue/internal_apis/getconfig')
 	.then(data => {
-
+		data = JSON.parse(data)
 		cat_conf = data[0]['configurations']
 		legends = data[0]['legends']
-		icon_attribution = data[1]['global_configuration']['icon_attribution']
-		// console.log(cat_conf, legends, icon_attribution)
+		icon_attribution = data[0]['global_configuration']['icon_attribution']
 	    // _alertify("Success!!!", '<pre id="custom_alertbox">' + jsonPrettyHighlightToId(data) + '</pre>')
 	})
 	.catch(error => {
