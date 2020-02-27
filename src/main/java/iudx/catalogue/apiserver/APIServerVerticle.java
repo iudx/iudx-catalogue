@@ -445,12 +445,14 @@ public class APIServerVerticle extends AbstractVerticle {
 
   private void list(RoutingContext routingContext) {
     String currentType = routingContext.request().getParam("itemtype");
-
+    host = routingContext.request().getHeader("Host");
+    logger.info("----HIT LIST API-----");
     /**
      * New code-
      * Added as a part to provide List of Tags, Provider, ResourceServerGroup APIs for UI
      **/
     JsonObject requestBody = new JsonObject();
+    requestBody.put("__instance-id",host);
     if(currentType.equalsIgnoreCase("tags")){
         requestBody.put("item-type-ui","tags");
         databaseHandler("list",routingContext,requestBody);
@@ -461,8 +463,6 @@ public class APIServerVerticle extends AbstractVerticle {
           requestBody.put("item-type-ui","resourceServerGroup");
           databaseHandler("list",routingContext,requestBody);
     }
-    /**-----------------------------ends here-----------------------------------**/
-
     else if(currentType.equals("item-types")) {
       JsonArray allTypes = new JsonArray(itemTypes);
       JsonObject reply = new JsonObject().put("item-types", allTypes);

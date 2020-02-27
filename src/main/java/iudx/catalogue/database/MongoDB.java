@@ -349,17 +349,21 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
       System.out.println(request.containsKey("item-type-ui"));
       String host = request.getString("__instance-id");
       System.out.println(host);
+      boolean ui=false;
 
 		String key;
 
 		if (request.containsKey("item-type")) {
 			key = request.getString("item-type");
-		} else {
+		}else if (request.containsKey("item-type-ui")){
+            key=request.getString("item-type-ui");
+            ui=true;
+        } else {
 			key = "undefined";
 		}
 		System.out.println("In list block : " + key);
       
-      if(key.equalsIgnoreCase("resourceItem"))
+      if(!ui && key.equalsIgnoreCase("resourceItem"))
       { 
     	System.out.println("Searching resourceItem");
 	    JsonObject query = new JsonObject();
@@ -368,7 +372,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 	    query.put("__instance-id", host);
     	mongoFind("catalogue",query, new JsonObject(), message);
 	    
-      } else if(key.equalsIgnoreCase("resourceServer"))
+      } else if(!ui && key.equalsIgnoreCase("resourceServer"))
       { 
     	System.out.println("Searching resourceServer");
 	    JsonObject query = new JsonObject();
@@ -376,7 +380,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 	    query.put("itemStatus", new JsonObject().put("type", "Property").put("value", "active"));
     	mongoFind("catalogue",query, new JsonObject(), message);
 	    
-      } else if(key.equalsIgnoreCase("resourceServerGroup"))
+      } else if(!ui && key.equalsIgnoreCase("resourceServerGroup"))
       { 
     	System.out.println("Searching resourceServerGroup");
 	    JsonObject query = new JsonObject();
@@ -384,14 +388,9 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 	    query.put("itemStatus", new JsonObject().put("type", "Property").put("value", "active"));
     	mongoFind("catalogue",query, new JsonObject(), message);
 	    
-      } else if(request.containsKey("item-type-ui")){
-        key = request.getString("item-type-ui");
-        
-        if(key.equalsIgnoreCase("tags") || key.equalsIgnoreCase("provider") || key.equalsIgnoreCase("resourceservergroup"))
-        {
+      } else if(ui && (key.equalsIgnoreCase("tags") || key.equalsIgnoreCase("provider") || key.equalsIgnoreCase("resourceservergroup"))){
             System.out.println("In list for UI block : "+ key);
-        	
-            mongo.distinct("catalogue",key+".value", String.class.getName(),res->{
+            mongo.distinctWithQuery("catalogue",key+".value", String.class.getName(),new JsonObject().put("__instance-id",host),res->{
                if(res.succeeded()){
                    System.out.println("Response Distinct: "+res.result().toString());
                    message.reply(res.result());
@@ -400,10 +399,6 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
                    message.fail(0, "Failure");
                }
             });        	
-        } else {
-            message.fail(0, "Failure");
-        }
-
 	  } else {
         message.fail(0, "Failure");
     }
