@@ -446,11 +446,12 @@ public class APIServerVerticle extends AbstractVerticle {
   private void list(RoutingContext routingContext) {
     String currentType = routingContext.request().getParam("itemtype");
     host = routingContext.request().getHeader("Host");
-    logger.info("----HIT LIST API-----");
+ 
     /**
      * New code-
      * Added as a part to provide List of Tags, Provider, ResourceServerGroup APIs for UI
      **/
+    
     JsonObject requestBody = new JsonObject();
     requestBody.put("__instance-id",host);
     if(currentType.equalsIgnoreCase("tags")){
@@ -459,21 +460,13 @@ public class APIServerVerticle extends AbstractVerticle {
     } else if (currentType.equalsIgnoreCase("provider")){
         requestBody.put("item-type-ui","provider");
         databaseHandler("list",routingContext,requestBody);
-    }else if (currentType.equalsIgnoreCase("resourceservergroup")){
+    } else if (currentType.equalsIgnoreCase("resourceservergroup")){
           requestBody.put("item-type-ui","resourceServerGroup");
           databaseHandler("list",routingContext,requestBody);
-    }
-    else if(currentType.equals("item-types")) {
+    } else if(currentType.equals("item-types")) {
       JsonArray allTypes = new JsonArray(itemTypes);
       JsonObject reply = new JsonObject().put("item-types", allTypes);
       handle200(routingContext, reply);
-    } else if (currentType.equals("tags")) {
-      JsonObject request_body = new JsonObject();
-      databaseHandler("get-tags", routingContext, request_body);
-    } else if (itemTypes.contains(currentType)) {
-      JsonObject request_body = new JsonObject();
-      request_body.put("item-type", currentType);
-      databaseHandler("list", routingContext, request_body);
     } else {
       handle400(routingContext, currentType + " does not exist in the catalogue. ");
     }
