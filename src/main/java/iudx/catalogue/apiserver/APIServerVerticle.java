@@ -67,7 +67,7 @@ public class APIServerVerticle extends AbstractVerticle {
 
     HttpServer server = createServer();
 
-    int port = config().getInteger("http.port", 18443);
+    int port = config().getInteger("http.port", 8443);
 
     server.requestHandler(router::accept).listen(port);
 
@@ -225,7 +225,19 @@ public class APIServerVerticle extends AbstractVerticle {
         getConfig(routingContext);
     
     });
+
+    router.get("/catalogue/internal_apis/getcities").handler(routingContext -> {
+        HttpServerRequest request=routingContext.request();
+        host = request.getHeader("Host");
+        if(host.equals("catalogue.iudx.org.in")) {
+        	getCities(routingContext);	
+        } else {
+        	handle401(routingContext, "Unauthorised");
+        }
+        
     
+    });
+
     // NEW APIs
     router.get("/catalogue/internal_apis/list/:itemtype").handler(this::list);
     // router.get("/search/catalogue/attribute").handler(this::searchAttribute);
@@ -443,6 +455,11 @@ public class APIServerVerticle extends AbstractVerticle {
         databaseHandler("getConfig", routingContext, requestBody);
     }
 
+    private void getCities(RoutingContext routingContext){
+        JsonObject requestBody=new JsonObject();
+        databaseHandler("getCities", routingContext, requestBody);
+    }
+    
   private void list(RoutingContext routingContext) {
     String currentType = routingContext.request().getParam("itemtype");
     host = routingContext.request().getHeader("Host");
@@ -861,6 +878,9 @@ public class APIServerVerticle extends AbstractVerticle {
                   case "getConfig":
                     handle200(routingContext, (JsonArray) database_reply.result().body());
                     break;
+                  case "getCities":
+                      handle200(routingContext, (JsonArray) database_reply.result().body());
+                      break;  
                 }
               } else {
                 if (database_reply.cause().getMessage().equalsIgnoreCase("Failure")) {

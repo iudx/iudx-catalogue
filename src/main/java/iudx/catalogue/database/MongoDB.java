@@ -295,7 +295,6 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
 
     FindOptions options = new FindOptions();
     options.setFields(attributeFilter);
-    System.out.println(query); 
     mongo.findWithOptions(
         collection,
         query,
@@ -306,7 +305,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
             JsonArray rep = new JsonArray();
             for (JsonObject j : res.result()) {
               for (String hidden : hiddenFields) {
-                if (j.containsKey(hidden)) {
+                if (j.containsKey(hidden) && collection != "city_config") {
                   j.remove(hidden);
                 }
               }
@@ -413,6 +412,15 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
   public void getConfig(Message<Object> message) {
     JsonObject request_body = (JsonObject) message.body();
     mongoFind("city_config",request_body, new JsonObject(), message);
+  }
+
+  public void getCities(Message<Object> message) {
+	    JsonObject request_body = new JsonObject();
+	    JsonObject attribute_filter = (JsonObject) message.body();
+	    attribute_filter.put("__instance-id", 1);
+	    attribute_filter.put("configurations.map_default_view_lat_lng", 1);
+	    attribute_filter.put("configurations.smart_city_name", 1);
+	    mongoFind("city_config", request_body, attribute_filter, message);
   }
 
   public void listTags(Message<Object> message) {

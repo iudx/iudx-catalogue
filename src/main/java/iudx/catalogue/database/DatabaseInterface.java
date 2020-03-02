@@ -62,4 +62,6 @@ public interface DatabaseInterface {
   public void bulkCreate(Message<Object> message);
 
   public void getConfig(Message<Object> message);
+  
+  public void getCities(Message<Object> message);
 }
