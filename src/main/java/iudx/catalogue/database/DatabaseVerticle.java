@@ -170,6 +170,11 @@ public class DatabaseVerticle extends AbstractVerticle {
           db.getConfig(message);
           break;
       }
+      case "getCities":
+      {
+          db.getCities(message);
+          break;
+      }
       default:
         {
           break;
