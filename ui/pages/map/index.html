@@ -301,14 +301,20 @@
     $.get("/catalogue/internal_apis/list/resourceServerGroup", function(data) {
       data=JSON.parse(data).sort()
       var rsglist = '<div id = "rsg_filters" class="filter_box field-item">';
-      var _d, _v;
+      var _d, _v, leg_link;
       
       for (var i = 0; i < data.length; i++) {
         _d = data[i].toLowerCase()
         _v = _d.split(cat_conf['resource_server_group_head'])[1]
-        
-        rsglist += `<label for="` + _d + `"><input type="checkbox" id="` + _d + `" name="resource_server_group"  class="filter_input_box" value="` + _d + `"><img width="10%" height="10%" src="`+ getImageRsg(_v) +`"> ` + _v + `</label>`;
+        leg_link = getImageRsg(_v)
+        if(leg_link=="#"){      
+                rsglist += `<label for="` + _d + `"><input type="checkbox" id="` + _d + `" name="resource_server_group"  class="filter_input_box" value="` + _d + `">   <span class="dot" style="background-color:`+ stringToColour(_d)  +`"></span>
+` + _v + `</label>`;
+        }else{
+                rsglist += `<label for="` + _d + `"><input type="checkbox" id="` + _d + `" name="resource_server_group"  class="filter_input_box" value="` + _d + `"><img width="10%" height="10%" src="`+ leg_link +`"> ` + _v + `</label>`;
+        } 
       }
+
       
       rsglist += '</div>';  
       
