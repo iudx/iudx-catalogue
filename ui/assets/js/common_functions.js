@@ -138,8 +138,6 @@ function __get_latest_data(__url, __rid) {
     })
 }
 
-new Date('2015-03-04T00:00:00.000Z'); // Valid Date
-
 function get_temporal_query_time_in_iso_8601_format(__days){
     return new Promise((resolve, reject) => {
         var today = new Date();
@@ -672,48 +670,19 @@ function onEachFeature(feature, layer) {
     layer.bindPopup(feature.properties.name);
 }
 
-function getColorsForPolygon(_resourceServerGroup) {
-
-    // var colors=["#1abc9c", '#f1c40f']//, '#9b59b6']//, '#e67e22', '#f39c12']
-    var colors = ['#1abc9c', '#f1c40f', '#FF0000', '#ffffff00', '#ffffff00'];
-
-    if (_resourceServerGroup == "crowd-sourced-changebhai" || _resourceServerGroup == "changebhai") {
-        // loop through our density intervals and generate a label with a colored square for each interval
-        //console.log("changeBhai")
-        // div.innerHTML +=  
-        // '<span style="background-color:' + colors[0] + '"></span> ' +
-        //   'ChangeBhai' + '<br>';
-        // console.log("changebhai")
-        return colors[0];
-    } else if (_resourceServerGroup == "safetipin") {
-        // div.innerHTML +=  
-        // '<span style="background-color:' + colors[1] + '"></span> ' +
-        //   'safetiPin' + '<br>';
-        // console.log("safetipin")
-        return colors[1]
-
-    } else if (_resourceServerGroup == "traffic-incidents" || _resourceServerGroup == "tomtom") {
-        // div.innerHTML +=  
-        // '<span style="background-color:' + colors[2] + '"></span> ' +
-        //   'TomTom' + '<br>';
-        // console.log("tomtom")
-        return colors[2]
-    } else if (_resourceServerGroup == "itms-mobility" | _resourceServerGroup == "pune-itms") {
-        //   console.log("itms-mobility")
-        return colors[3]
-    }
-
-
+function stringToColour(str) {
+  var hash = 0;
+  for (var i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  var colour = '#';
+  for (var i = 0; i < 3; i++) {
+    var value = (hash >> (i * 8)) & 0xFF;
+    colour += ('00' + value.toString(16)).substr(-2);
+  }
+        console.log(colour)
+  return colour;
 }
-
-
-// var color_count=-1;
-
-// function getRandomColor(){
-//  var color =  "#" + (Math.random() * 0xFFFFFF << 0).toString(16);
-//  return color;
-// }data[i]["id"]
-// function getColorForPolygon()
 
 function get_bullets(){
     return `&#9679;`
@@ -748,9 +717,7 @@ function plotGeoJSONs(geoJSONObject, _id, _json_object, _resourceServerGroup, _r
 
             L.geoJSON(geoJSONObject, {
                 style: {
-                    // fillColor: colors[color_count],
-                    // fillColor: _color,
-                    fillColor: getColorsForPolygon(_resourceServerGroup.split(cat_conf['resource_server_group_head'])[1]),
+                    fillColor:stringToColour(_resourceServerGroup),
                     weight: 2,
                     opacity: 1,
                     // color: 'white',
