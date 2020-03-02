@@ -13,6 +13,13 @@ body {
 	background: url(../img/spinner.gif) center no-repeat #fff;
 }
 
+.dot {
+  height: 18px;
+  width: 18px;
+  border-radius: 5%;
+  display: inline-block;
+}
+
 #resource_item_details, button, .leaflet-popup-content-wrapper, .sidebar-catergory{
   font-size: 20px !important;
 }
