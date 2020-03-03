@@ -697,8 +697,22 @@ function plotGeoJSONs(geoJSONObject, _id, _json_object, _resourceServerGroup, _r
     // _resourceServerGroup_data =_resourceServerGroup;
     // _geoJSONObject = geoJSONObject;
     // _resourceId_data = _resourceId;
+	
+      var highlightStyle = {
+        color: '#ff0000',
+        opacity:1,
+        weight: 3,
+        fillOpacity: 1,
+        };
 
-    ////console.log(geoJSONObject)
+        var defaultStyle = {
+        color: '#000000',
+        opacity:0.5,
+        weight: 1,
+        fillOpacity: 0.7,
+        };
+
+    
     
     if(_json_object['id'].split("/").length == 5){
         
@@ -725,9 +739,21 @@ function plotGeoJSONs(geoJSONObject, _id, _json_object, _resourceServerGroup, _r
                     fillOpacity: 0.5
                 },
                 onEachFeature: function (feature, layer) {
+			
+		    layer.on('mouseover', function(e) {
+                    this.setStyle(highlightStyle);
+                    this.bindTooltip(`<div><p style="font-size:20px;"><strong>`+_resourceId+`</strong></p></div>`)
+                    this.bringToFront();
+                    });
+
+                    layer.on('mouseout', function(e) {
+                    this.setStyle(defaultStyle);
+                    this.bringToBack();
+                    });
+	
                     layer.on('click', function (e) {
 
-                        activate_point_mode(_id)
+                    activate_point_mode(_id)
 
                     });
                     layer.bindPopup(`<div id="pop_up_`+ resource_id_to_html_id(_id) +`"><p class="text-center" style="padding-right:7.5px;"><img src='`+
@@ -757,7 +783,7 @@ function plotGeoJSONs(geoJSONObject, _id, _json_object, _resourceServerGroup, _r
                 +`' class='img-fluid secure_icon'></p>`+get_bullets()+` <a href='#' class='data-modal'  onclick="display_latest_data(event, this, '` + _id + `')">Get latest-data</a>
 		<br> `+get_bullets()+` <a href="#"  class="data-modal" onclick="display_temporal_data(event, this, '`+_json_object.id+`')">Get Temporal Data</a><br>` +
 		`</div>`;
-                    var _marker = L.marker(latlng, { icon: getMarkerIcon(_resourceServerGroup) }).addTo(map);
+                    var _marker = L.marker(latlng, { icon: getMarkerIcon(_resourceServerGroup), riseOnHover: true }).addTo(map);
                     _marker.itemUUID = _id;
                     // console.log(_id,this,event)
                     //////console.log(_marker.itemUUID); _marker.bindPopup(customPopup) _marker.bindPopup(customPopup)
