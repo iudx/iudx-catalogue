@@ -158,147 +158,159 @@ public class APIServerVerticle extends AbstractVerticle {
     
 	router.route().handler(CorsHandler.create("*").allowedHeaders(allowedHeaders).allowedMethods(allowedMethods));
     
-    // IUDX v1 APIs
-    
-    // Create an item
-    router.post("/catalogue/v1/items").handler(routingContext -> {
-    	HttpServerRequest request = routingContext.request();
-			if (instanceIDs.contains(request.getHeader("Host"))) {
+		// IUDX v1 APIs
+
+		// Create an item
+		router.post("/catalogue/v1/items").handler(routingContext -> {
+			HttpServerRequest request = routingContext.request();
+			host = request.getHeader("Host");
+			if (instanceIDs.contains(host)) {
 				create(routingContext);
 			} else {
 				handle400(routingContext, "Invalid Domain");
 			}
-    	});
+		});
 
-    // Get item with ID
-    router.get("/catalogue/v1/items/:domain/:provider/:resourceServer/:resourceCatogery/:resourceId").handler(routingContext -> {
-    	HttpServerRequest request = routingContext.request();
-        if(instanceIDs.contains(request.getHeader("Host"))) {
-            getItem(routingContext);
-			} else {
-				handle400(routingContext, "Invalid Domain");
-			}
-    	});
+		// Get item with ID
+		router.get("/catalogue/v1/items/:domain/:provider/:resourceServer/:resourceCatogery/:resourceId")
+				.handler(routingContext -> {
+					HttpServerRequest request = routingContext.request();
+					host = request.getHeader("Host");
+					if (instanceIDs.contains(host)) {
+						getItem(routingContext);
+					} else {
+						handle400(routingContext, "Invalid Domain");
+					}
+				});
 
-    router.get("/catalogue/v1/items/:domain/:provider/:resourceServer/:resourceCatogery").handler(routingContext -> {
-    	HttpServerRequest request = routingContext.request();
-        if(instanceIDs.contains(request.getHeader("Host"))) {
-            getItem(routingContext);
-			} else {
-				handle400(routingContext, "Invalid Domain");
-			}
-    	});
+		router.get("/catalogue/v1/items/:domain/:provider/:resourceServer/:resourceCatogery")
+				.handler(routingContext -> {
+					HttpServerRequest request = routingContext.request();
+					host = request.getHeader("Host");
+					if (instanceIDs.contains(host)) {
+						getItem(routingContext);
+					} else {
+						handle400(routingContext, "Invalid Domain");
+					}
+				});
 
-    router.get("/catalogue/v1/items/:domain/:provider/:resourceServer").handler(routingContext -> {
-    	HttpServerRequest request = routingContext.request();
-        if(instanceIDs.contains(request.getHeader("Host"))) {
-            getItem(routingContext);
+		router.get("/catalogue/v1/items/:domain/:provider/:resourceServer").handler(routingContext -> {
+			HttpServerRequest request = routingContext.request();
+			host = request.getHeader("Host");
+			if (instanceIDs.contains(host)) {
+				getItem(routingContext);
 			} else {
 				handle400(routingContext, "Invalid Domain");
 			}
-    	});
-    
-    router.put("/catalogue/v1/items/:provider/:resourceServer/:resourceCatogery/:resourceId").handler(routingContext -> {
-    	HttpServerRequest request = routingContext.request();
-        if(instanceIDs.contains(request.getHeader("Host"))) {
-            update(routingContext);
-			} else {
-				handle400(routingContext, "Invalid Domain");
-			}
-    	});
-    
-    // Delete item with ID
-    router.delete("/catalogue/v1/items/:domain/:provider/:resourceServer/:resourceCatogery/:resourceId").handler(routingContext -> {
-    	HttpServerRequest request = routingContext.request();
-        if(instanceIDs.contains(request.getHeader("Host"))) {
-            delete(routingContext);
-			} else {
-				handle400(routingContext, "Invalid Domain");
-			}
-    	});
+		});
 
-    router.delete("/catalogue/v1/items/:domain/:provider/:resourceServer/:resourceCatogery").handler(routingContext -> {
-    	HttpServerRequest request = routingContext.request();
-        if(instanceIDs.contains(request.getHeader("Host"))) {
-            delete(routingContext);
-			} else {
-				handle400(routingContext, "Invalid Domain");
-			}
-    	});
+		router.put("/catalogue/v1/items/:provider/:resourceServer/:resourceCatogery/:resourceId")
+				.handler(routingContext -> {
+					HttpServerRequest request = routingContext.request();
+					host = request.getHeader("Host");
+					if (instanceIDs.contains(host)) {
+						update(routingContext);
+					} else {
+						handle400(routingContext, "Invalid Domain");
+					}
+				});
 
-    router.delete("/catalogue/v1/items/:domain/:provider/:resourceServer").handler(routingContext -> {
-    	HttpServerRequest request = routingContext.request();
-			if (instanceIDs.contains(request.getHeader("Host"))) {
+		// Delete item with ID
+		router.delete("/catalogue/v1/items/:domain/:provider/:resourceServer/:resourceCatogery/:resourceId")
+				.handler(routingContext -> {
+					HttpServerRequest request = routingContext.request();
+					host = request.getHeader("Host");
+					if (instanceIDs.contains(host)) {
+						delete(routingContext);
+					} else {
+						handle400(routingContext, "Invalid Domain");
+					}
+				});
+
+		router.delete("/catalogue/v1/items/:domain/:provider/:resourceServer/:resourceCatogery")
+				.handler(routingContext -> {
+					HttpServerRequest request = routingContext.request();
+					host = request.getHeader("Host");
+					if (instanceIDs.contains(host)) {
+						delete(routingContext);
+					} else {
+						handle400(routingContext, "Invalid Domain");
+					}
+				});
+
+		router.delete("/catalogue/v1/items/:domain/:provider/:resourceServer").handler(routingContext -> {
+			HttpServerRequest request = routingContext.request();
+			host = request.getHeader("Host");
+			if (instanceIDs.contains(host)) {
 				delete(routingContext);
 			} else {
 				handle400(routingContext, "Invalid Domain");
 			}
-    	});
-   
-    // Search items in Catalogue
-    router.get("/catalogue/v1/search").handler(routingContext -> {
-    	HttpServerRequest request = routingContext.request();
-        if(instanceIDs.contains(request.getHeader("Host"))) {
+		});
+
+		// Search items in Catalogue
+		router.get("/catalogue/v1/search").handler(routingContext -> {
+			HttpServerRequest request = routingContext.request();
+			host = request.getHeader("Host");
+			if (instanceIDs.contains(host)) {
 				searchAttribute(routingContext);
 			} else {
 				handle400(routingContext, "Invalid Domain");
 			}
-    	});
-    
-    // Count items in Catalogue
-    router.get("/catalogue/v1/count").handler(routingContext -> {
-    	HttpServerRequest request = routingContext.request();
-        if(instanceIDs.contains(request.getHeader("Host"))) {
-            count(routingContext);
+		});
+
+		// Count items in Catalogue
+		router.get("/catalogue/v1/count").handler(routingContext -> {
+			HttpServerRequest request = routingContext.request();
+			host = request.getHeader("Host");
+			if (instanceIDs.contains(host)) {
+				count(routingContext);
 			} else {
 				handle400(routingContext, "Invalid Domain");
 			}
-    	});
+		});
 
-    router.get("/catalogue/internal_apis/getconfig").handler(routingContext -> {
-        HttpServerRequest request=routingContext.request();
-        if(instanceIDs.contains(request.getHeader("Host"))) {
-            getConfig(routingContext);
+		router.get("/catalogue/internal_apis/getconfig").handler(routingContext -> {
+			HttpServerRequest request = routingContext.request();
+			host = request.getHeader("Host");
+			if (instanceIDs.contains(host)) {
+				host = request.getHeader("Host");
+				getConfig(routingContext);
 			} else {
 				handle400(routingContext, "Invalid Domain");
 			}
-    });
+		});
 
-    router.get("/catalogue/internal_apis/getcities").handler(routingContext -> {
-        HttpServerRequest request=routingContext.request();
-        if( instanceIDs.contains(request.getHeader("Host")) && request.getHeader("Host").equals("catalogue.iudx.org.in")) {
-        	getCities(routingContext);	
-        } else {
-        	handle401(routingContext, "Unauthorised");
-        }
-    });
+		router.get("/catalogue/internal_apis/getcities").handler(routingContext -> {
+			HttpServerRequest request = routingContext.request();
+			host = request.getHeader("Host");
+			if (instanceIDs.contains(host) && host.equals("catalogue.iudx.org.in")) {
+				getCities(routingContext);
+			} else {
+				handle401(routingContext, "Unauthorised");
+			}
+		});
 
-    // NEW APIs
-    router.get("/catalogue/internal_apis/list/:itemtype").handler(this::list);
-    // router.get("/search/catalogue/attribute").handler(this::searchAttribute);
-    router.post("/create/catalogue/:itemtype").handler(this::create);
-    router.put("/update/catalogue/:itemtype/:id").handler(this::update);
-    router.delete("/remove/catalogue/:itemtype/:id").handler(this::delete);
+		// NEW APIs
+		router.get("/catalogue/internal_apis/list/:itemtype").handler(this::list);
+		// router.get("/search/catalogue/attribute").handler(this::searchAttribute);
+		router.post("/create/catalogue/:itemtype").handler(this::create);
+		router.put("/update/catalogue/:itemtype/:id").handler(this::update);
+		router.delete("/remove/catalogue/:itemtype/:id").handler(this::delete);
 
-    router.post("/create/catalogue/resource-item/bulk/:bulkId").handler(this::bulkCreate);
-    router.patch("/update/catalogue/resource-item/bulk/:bulkId").handler(this::bulkUpdate);
-    router.delete("/remove/catalogue/resource-item/bulk/:bulkId").handler(this::bulkDelete);
-   
-    router
-    .route("/")
-    .handler(
-        routingContext -> {
-          HttpServerResponse response = routingContext.response();
-          response.sendFile("ui/pages/list/index.html");
-        });
+		router.post("/create/catalogue/resource-item/bulk/:bulkId").handler(this::bulkCreate);
+		router.patch("/update/catalogue/resource-item/bulk/:bulkId").handler(this::bulkUpdate);
+		router.delete("/remove/catalogue/resource-item/bulk/:bulkId").handler(this::bulkDelete);
 
-    router
-        .route("/map")
-        .handler(
-            routingContext -> {
-              HttpServerResponse response = routingContext.response();
-              response.sendFile("ui/pages/map/index.html");
-            });
+		router.route("/").handler(routingContext -> {
+			HttpServerResponse response = routingContext.response();
+			response.sendFile("ui/pages/list/index.html");
+		});
+
+		router.route("/map").handler(routingContext -> {
+			HttpServerResponse response = routingContext.response();
+			response.sendFile("ui/pages/map/index.html");
+		});
 
     //router.route("/*").handler(StaticHandler.create("ui/pages"));
     router.route("/assets/*").handler(StaticHandler.create("ui/assets"));
