@@ -54,7 +54,10 @@ public class APIServerVerticle extends AbstractVerticle {
   static final int HTTP_STATUS_CONFLICT = 409;
   static String emailID_SHA_1, onboardedBy, onboarder;
   private ArrayList<String> itemTypes;
-  String host;
+  String host, allowedDomain, keystore, keystorePassword, truststore, truststorePassword;
+  InputStream input = null;
+  String [] allowedDomains;
+  HashSet<String> instanceIDs = new HashSet<String>();
 
   @Override
   public void start(Future<Void> startFuture) {
@@ -90,14 +93,7 @@ public class APIServerVerticle extends AbstractVerticle {
 
   private HttpServer createServer() {
 		ClientAuth clientAuth = ClientAuth.REQUEST;
-
 		Properties prop = new Properties();
-		InputStream input = null;
-		String keystore = null;
-		String keystorePassword = null;
-
-		String truststore = null;
-		String truststorePassword = null;
 		
 		try {
 			input = new FileInputStream("config.properties");
@@ -108,6 +104,16 @@ public class APIServerVerticle extends AbstractVerticle {
 
 			truststore = prop.getProperty("truststore");
 			truststorePassword = prop.getProperty("truststorePassword");
+			
+			allowedDomain = prop.getProperty("domains");
+			allowedDomains = allowedDomain.split(",");
+			
+        	for(int i=0;i<allowedDomains.length;i++) {
+        		instanceIDs.add(allowedDomains[i]);
+            }
+            
+            logger.info("Updated domain list. Serving " + instanceIDs.size() + " tenants");
+
 			
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -157,85 +163,114 @@ public class APIServerVerticle extends AbstractVerticle {
     // Create an item
     router.post("/catalogue/v1/items").handler(routingContext -> {
     	HttpServerRequest request = routingContext.request();
-        host = request.getHeader("Host");
-        create(routingContext);
+			if (instanceIDs.contains(request.getHeader("Host"))) {
+				create(routingContext);
+			} else {
+				handle400(routingContext, "Invalid Domain");
+			}
     	});
 
     // Get item with ID
     router.get("/catalogue/v1/items/:domain/:provider/:resourceServer/:resourceCatogery/:resourceId").handler(routingContext -> {
     	HttpServerRequest request = routingContext.request();
-        host = request.getHeader("Host");
-        getItem(routingContext);
+        if(instanceIDs.contains(request.getHeader("Host"))) {
+            getItem(routingContext);
+			} else {
+				handle400(routingContext, "Invalid Domain");
+			}
     	});
 
     router.get("/catalogue/v1/items/:domain/:provider/:resourceServer/:resourceCatogery").handler(routingContext -> {
     	HttpServerRequest request = routingContext.request();
-        host = request.getHeader("Host");
-        getItem(routingContext);
+        if(instanceIDs.contains(request.getHeader("Host"))) {
+            getItem(routingContext);
+			} else {
+				handle400(routingContext, "Invalid Domain");
+			}
     	});
 
     router.get("/catalogue/v1/items/:domain/:provider/:resourceServer").handler(routingContext -> {
     	HttpServerRequest request = routingContext.request();
-        host = request.getHeader("Host");
-        getItem(routingContext);
+        if(instanceIDs.contains(request.getHeader("Host"))) {
+            getItem(routingContext);
+			} else {
+				handle400(routingContext, "Invalid Domain");
+			}
     	});
     
     router.put("/catalogue/v1/items/:provider/:resourceServer/:resourceCatogery/:resourceId").handler(routingContext -> {
     	HttpServerRequest request = routingContext.request();
-        host = request.getHeader("Host");
-        update(routingContext);
+        if(instanceIDs.contains(request.getHeader("Host"))) {
+            update(routingContext);
+			} else {
+				handle400(routingContext, "Invalid Domain");
+			}
     	});
     
     // Delete item with ID
     router.delete("/catalogue/v1/items/:domain/:provider/:resourceServer/:resourceCatogery/:resourceId").handler(routingContext -> {
     	HttpServerRequest request = routingContext.request();
-        host = request.getHeader("Host");
-        delete(routingContext);
+        if(instanceIDs.contains(request.getHeader("Host"))) {
+            delete(routingContext);
+			} else {
+				handle400(routingContext, "Invalid Domain");
+			}
     	});
 
     router.delete("/catalogue/v1/items/:domain/:provider/:resourceServer/:resourceCatogery").handler(routingContext -> {
     	HttpServerRequest request = routingContext.request();
-        host = request.getHeader("Host");
-        delete(routingContext);
+        if(instanceIDs.contains(request.getHeader("Host"))) {
+            delete(routingContext);
+			} else {
+				handle400(routingContext, "Invalid Domain");
+			}
     	});
 
     router.delete("/catalogue/v1/items/:domain/:provider/:resourceServer").handler(routingContext -> {
     	HttpServerRequest request = routingContext.request();
-        host = request.getHeader("Host");
-        delete(routingContext);
+			if (instanceIDs.contains(request.getHeader("Host"))) {
+				delete(routingContext);
+			} else {
+				handle400(routingContext, "Invalid Domain");
+			}
     	});
    
     // Search items in Catalogue
     router.get("/catalogue/v1/search").handler(routingContext -> {
     	HttpServerRequest request = routingContext.request();
-        host = request.getHeader("Host");
-        searchAttribute(routingContext);
+        if(instanceIDs.contains(request.getHeader("Host"))) {
+				searchAttribute(routingContext);
+			} else {
+				handle400(routingContext, "Invalid Domain");
+			}
     	});
     
     // Count items in Catalogue
     router.get("/catalogue/v1/count").handler(routingContext -> {
     	HttpServerRequest request = routingContext.request();
-        host = request.getHeader("Host");
-        count(routingContext);
+        if(instanceIDs.contains(request.getHeader("Host"))) {
+            count(routingContext);
+			} else {
+				handle400(routingContext, "Invalid Domain");
+			}
     	});
 
     router.get("/catalogue/internal_apis/getconfig").handler(routingContext -> {
         HttpServerRequest request=routingContext.request();
-        host = request.getHeader("Host");
-        getConfig(routingContext);
-    
+        if(instanceIDs.contains(request.getHeader("Host"))) {
+            getConfig(routingContext);
+			} else {
+				handle400(routingContext, "Invalid Domain");
+			}
     });
 
     router.get("/catalogue/internal_apis/getcities").handler(routingContext -> {
         HttpServerRequest request=routingContext.request();
-        host = request.getHeader("Host");
-        if(host.equals("catalogue.iudx.org.in")) {
+        if( instanceIDs.contains(request.getHeader("Host")) && request.getHeader("Host").equals("catalogue.iudx.org.in")) {
         	getCities(routingContext);	
         } else {
         	handle401(routingContext, "Unauthorised");
         }
-        
-    
     });
 
     // NEW APIs
