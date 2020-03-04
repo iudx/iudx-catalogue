@@ -542,17 +542,6 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
       for(int i = 0; i<attributeNames.size(); i++){
           String key = attributeNames.getString(i);
           JsonArray values = attributeValues.getJsonArray(i);
-          if(key.equalsIgnoreCase("resourceServerGroup")
-                    || key.equalsIgnoreCase("resourceServer")
-                    || key.equalsIgnoreCase("provider")){
-              for(Object value : values){
-                  String prev_value = (String) value;
-                  values.remove(prev_value);
-                  String new_value = "urn:iudx-catalogue-pune:"+prev_value;
-                  prev_value.replace(prev_value,new_value);
-                  values.add(new_value);
-              }
-          }
           if(key.equalsIgnoreCase("tags")){
               tagQuery.put("_tags", new JsonObject().put("$in",values));
           }
