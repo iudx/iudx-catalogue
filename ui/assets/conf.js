@@ -2,6 +2,12 @@ var cat_conf = null
 var legends = null
 var icon_attribution = null
 
+var DEBUG = false;
+// ENABLE/DISABLE Console Logs
+if(!DEBUG){
+  console.log = function() {}
+}
+
 function conf_ajax_call(__url){
 	return new Promise((resolve, reject) => {
         $.ajax({
