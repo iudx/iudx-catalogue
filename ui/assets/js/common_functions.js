@@ -739,10 +739,9 @@ function plotGeoJSONs(geoJSONObject, _id, _json_object, _resourceServerGroup, _r
                     fillOpacity: 0.5
                 },
                 onEachFeature: function (feature, layer) {
-			
+		    layer.bindTooltip(`<div><p style="font-size:20px;"><strong>`+_resourceId+`</strong></p></div>`)
 		    layer.on('mouseover', function(e) {
                     this.setStyle(highlightStyle);
-                    this.bindTooltip(`<div><p style="font-size:20px;"><strong>`+_resourceId+`</strong></p></div>`)
                     this.bringToFront();
                     });
 
