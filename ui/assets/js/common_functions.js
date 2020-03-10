@@ -531,7 +531,7 @@ function request_access_token(resource_id, resourceServerGroup, rid) {
            withCredentials: true
         },
         // crossDomain: true,
-        data: JSON.stringify({"request": { "resource-id": resource_id }}),
+        data: JSON.stringify({"request": { "id": resource_id }}),
         success: function (data) {
 
             // For map view
