@@ -312,6 +312,12 @@ public class APIServerVerticle extends AbstractVerticle {
 			response.sendFile("ui/pages/map/index.html");
 		});
 
+               router.route("/status").handler(routingContext -> {
+                        HttpServerResponse response = routingContext.response();
+                        response.sendFile("ui/pages/status/index.html");
+                });
+
+
     //router.route("/*").handler(StaticHandler.create("ui/pages"));
     router.route("/assets/*").handler(StaticHandler.create("ui/assets"));
     return router;
