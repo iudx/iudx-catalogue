@@ -71,13 +71,6 @@ function populate_pagination_section(){
 
 }
 
-function display_search_section(_attr_name,_attr_value){
-	if(is_attr_empty(_attr_name,_attr_value)){
-		return;
-	}
-	display_search_section();
-	get_items(_attr_name,_attr_value);
-}
 
 function display_saved_search_section(){
 	$(".section").fadeOut(200);
@@ -105,19 +98,6 @@ function display_swagger_ui(_openapi_url){
 	],
 	layout: "StandaloneLayout"
 	})
-}
-
-function is_attr_empty(_attr_name,_attr_value){
-	if(_attr_name === "" || _attr_value === ""){
-		_alertify("Error!!!", "Attribute-Name or Value missing");
-		return true;
-	}
-}
-
-function display_search_section(){
-	$(".section").fadeOut(200);
-	$("body").css("background-image","none");
-	$("#search_section").fadeIn(1500);
 }
 
 function get_item_count(__data){
@@ -176,7 +156,7 @@ function get_items(_attr_name,_attr_value){
             // $("#searched_items").text(data);
 		data=JSON.parse(data)
 		set_data_globally(data);
-		$("#retrieved_items_count").html("About " + get_item_count(data) + " results for " + _temp_a_v + " (Attribute: " + _attr_name + ") | <a href='/map'>Go to Map View</a>");
+		$("#retrieved_items_count").html("About " + get_item_count(data) + " results for " + _temp_a_v + " (Attribute: " + _attr_name + ") | Go to <a href='/map'>Map View</a>/<a href='/status'>Status View</a>");
 		$("#searched_items").html("");
 		for (var i = 0; i < data.length; i++) {
 			$("#searched_items").append(json_to_htmlcard(data[i]));
@@ -193,12 +173,6 @@ function get_items(_attr_name,_attr_value){
 	// $( "#value" ).autocomplete({
 	//       source: seen_tags_set
 	// });
-}
-
-
-function getFooterContent(){
-	return `<p>&copy; 2019 <a href="https://iudx.org.in" target="_blank">IUDX </a></p>`
-	// return `<p>&copy; 2019 <a href="https://iudx.org.in" target="_blank">IUDX </a> | Read the  <a href="`+ cat_conf['api_docs_link'] +`" target="_blank">Doc</a> <br> ` + get_icon_attribution_html("list_icon_attr") + `</p>`
 }
 
 function set_attr_value(__attr_name,__attr_value) {

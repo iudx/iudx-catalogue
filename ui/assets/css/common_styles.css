@@ -13,11 +13,26 @@ body {
 	background: url(../img/spinner.gif) center no-repeat #fff;
 }
 
-.dot {
+.dot{
   height: 18px;
   width: 18px;
   border-radius: 5%;
+}
+
+.status_dot{
+  height: 75px;
+  width: 75px;
+  border-radius: 25%;
+  padding: 10px;
+  margin: 10px;
+}
+
+.dot, .status_dot {
   display: inline-block;
+}
+
+.white{
+  color:white !important;
 }
 
 #resource_item_details, button, .leaflet-popup-content-wrapper, .sidebar-catergory{
