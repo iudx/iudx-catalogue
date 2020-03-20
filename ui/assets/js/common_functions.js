@@ -6,6 +6,13 @@
 // var _resourceId_data ;
 
 var tags_set = [];
+var first_get_item_call_done=false
+
+function display_search_section(){
+    $(".section").fadeOut(200);
+    $("body").css("background-image","none");
+    $("#search_section").fadeIn(1500);
+}
 
 function get_icon_credits() {
 
@@ -43,6 +50,20 @@ function copyToClipboard(element_id) {
 	//   title: 'Token copied!',
 	//   theme: $.sweetModal.THEME_DARK
 	// });
+}
+
+function is_attr_empty(_attr_name,_attr_value){
+    if(_attr_name === "" || _attr_value === ""){
+        _alertify("Error!!!", "Attribute-Name or Value missing");
+        return true;
+    }
+}
+
+function getFooterContent(){
+    var cy = new Date().getFullYear()
+    var footer = `<p>&copy; <a href="https://iudx.org.in" target="_blank">IUDX</a> | 2019-<span id="current_year">`+ cy +`</span></p>`
+    return footer
+    // return `<p>&copy; 2019 <a href="https://iudx.org.in" target="_blank">IUDX </a> | Read the  <a href="`+ cat_conf['api_docs_link'] +`" target="_blank">Doc</a> <br> ` + get_icon_attribution_html("list_icon_attr") + `</p>`
 }
 
 // Spinner by https://tobiasahlin.com/spinkit/

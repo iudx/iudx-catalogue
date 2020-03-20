@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="IUDX | Indian Urban Data Exchange">
+  <meta name="organization" content="RBCCPS, IISc Bangalore">
+  <meta name="keywords" content="IUDX, CATALOGUE, RBCCPS, IISc BANGALORE">
+  <meta name="author" content="Jishnu Jaykumar P (http://jishnujayakumar.github.io)">
+  <link rel="shortcut icon" href="../assets/img/custom_iudx.ico">
+  <title id="smartcity_name"> </title>
+  <link href="../assets/css/swagger/swagger-ui.css" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="   crossorigin="anonymous"></script>
+  <script type="text/javascript" src="../assets/conf.js"></script>
+  <!-- <link href="../assets/css/mdb.min.css" rel="stylesheet"> -->
+  <link rel="stylesheet" type="text/css" href="../assets/css/bootstrap.min.css">
+  <link href="../assets/css/prettify.css" type="text/css" rel="stylesheet" />
+  <link href="../assets/css/list_style.css" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/jquery-ui.css">
+  <link rel="stylesheet" type="text/css" href="../assets/css/alertify.css">
+  <link rel="stylesheet" type="text/css" href="../assets/css/common_styles.css">
+
+  <!-- Google Fonts  -->
+  <link href="https://fonts.googleapis.com/css?family=Darker+Grotesque&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- <div class="container-fluid"> -->
+        <!-- ***** Header Area Start ***** -->
+        <header>
+            <div class="container">
+                <div class="row justify-content-around">
+                    <div class="col-xl-6 col-lg-6 col-md-6 col-6 align-self-center">
+                        <a href="/">
+                            <img id="smart_iudx_city_logo" src="../assets/img/iudx_pscdcl.png" class="img-fluid">
+                        </a>
+                    </div>
+                    <div class="col-xl-6 col-lg-6 col-md-6 col-6 text-right align-self-center">
+                        <img src="../assets/img/sc_iisc.png" class="img-fluid">
+                    </div>
+                </div>
+            </div>
+        </header>
+    <!-- ***** Header Area End ***** -->
+
+    <hr>
+    <div class="se-pre-con"></div>
+
+        <section id="landing_section" class="container section">
+        <div class="row style_list">
+          <div class="col-lg-12">
+              <h1 class="heading">
+                Search RSG for getting status
+              </h1>
+          
+            <br>
+
+              <!-- <p class="lead text-muted">
+                   Welcome to the IUDX compliant Catalogue of <a id="smart_city_link" href="#" target="_blank">PSCDCL</a>
+              </p> -->
+
+            <br>
+
+
+          <!-- <p>
+            <a href="#" class="btn btn-primary my-2">Main call to action</a>
+            <a href="#" class="btn btn-secondary my-2">Secondary action</a>
+          </p> -->
+          <div class="row">
+          
+          
+              <div class="col-lg-10">
+                <!-- <label for="value">Value</label> -->
+                <input type="text" class="form-control" id="value" placeholder="Resource Server Group" required="">
+                <!-- <div class="invalid-feedback">
+                  Zip code required.
+                </div> -->
+              </div>
+            
+            
+              <div class="col-lg-2">
+                <!-- <label for="state">State</label> -->
+                
+                <button class="btn btn-primary btn-block" type="submit" onclick="get_items('resourceServerGroup',$('#value').val())">Search</button>
+                
+                <!-- <button class="btn btn-primary btn-block" type="submit" onclick="display_search_section($('#attribute :selected').text(),$('#value').val())">Search</button> -->
+                
+                <!-- <div class="invalid-feedback">
+                  Please provide a valid state.
+                </div> -->
+
+              </div>
+
+          </div>
+     
+            <br>
+            
+          <div class="row">
+            <div class="col">
+                <!-- <br> -->
+                <p class="lead text-muted">
+                  <a href="/" target="_self">List View</a> | <a href="/map" target="_self">Geo Query Interface</a><br>
+                  <!-- API Documentation can be found <a href="https://apidocs.iudx.org.in" target="_blank">here</a><br> -->
+                  <a href="#" target="_blank">Getting Started</a> |
+                  <a href="https://apidocs.iudx.org.in" target="_blank">API Docs</a> |
+                  <a href="https://github.com/iudx/pyIUDX" target="_blank">Python SDK</a> | 
+                  <a href="https://colab.research.google.com/github/iudx/pyIUDX/blob/master/examples/pyIUDX_sample_usecases.ipynb" target="_blank">Jupyter Notebook</a> |
+                  <a href="#" target="_blank">FAQs</a>
+                </p>
+            </div>
+           
+        </div>
+          <!-- <footer class="text-muted landing_footer"> -->
+          <!-- <div id="landing_footer" class="container landing_footer"> -->
+          <div id="normal_footer" class="container normal_footer">
+          </div>
+    <!-- </footer> -->
+        </section>
+
+
+        <section id="search_section" class="container section">
+              <div class="row">
+              
+          
+              <div class="col-lg-10">
+                <!-- <label for="value">Value</label> -->
+                <input type="text" class="form-control" id="_value" placeholder="Resource Server Group" required>
+                <!-- <div class="invalid-feedback">
+                  Zip code required.
+                </div> -->
+              </div>
+            
+            
+              <div class="col-lg-2">
+                <!-- <label for="state">State</label> -->
+                <button class="btn btn-primary btn-block" type="submit" onclick="get_items('resourceServerGroup',$('#_value').val())">Search</button>
+                <!-- <div class="invalid-feedback">
+                  Please provide a valid state.
+                </div> -->
+              </div>
+            
+        
+            </div>
+
+            
+            <div class="row">
+              <div id="retrieved_items_count" class="col card-margin-top"></div>
+         <!--      <div class = "col-lg-4 col-md-4">
+                <button id="btn-back" class="btn btn-primary" onclick="location.href='/'">Go Back</button>
+              </div> -->
+            </div>
+             
+            <div id="searched_items" class="row"></div>
+
+
+             <!-- Pagination Start-->
+             <div id="page-selection" class=" pagination centerFlex" style="padding-top: 40px"><!-- Pagination goes here --></div>
+             <!-- Pagination End-->
+            
+            <!-- <p>search_section</p> -->
+
+            <div id="normal_footer" class="normal_footer">
+            </div>
+
+        </section>
+
+        <section id="swagger_section" class="container section">
+                      
+            <!-- <p>Display OPENAPI JSON as HTML</p> -->
+            <button class="btn btn-primary btn-block" onclick="display_saved_search_section()">Go Back</button> <br>
+            <div id="swagger_ui"></div>
+            
+            <div id="normal_footer" class="normal_footer">
+            </div>
+
+        </section>
+
+    <!-- </div> -->
+
+</body>
+<script type="text/javascript" src="../assets/js/bootstrap.min.js"></script>
+<script src="../assets/js/jquery-ui.js"></script>
+<script type="text/javascript" src="../assets/js/swagger/swagger-ui-bundle.js"></script>
+<script type="text/javascript" src="../assets/js/swagger/swagger-ui-standalone-preset.js"></script>
+<script type="text/javascript" src="../assets/js/swagger_script.js"></script>
+<!-- https://botmonster.com/jquery-bootpag/ -->
+<script type="text/javascript" src="../assets/js/jquery.bootpag.min.js"></script> 
+
+<script type="text/javascript" src="../assets/js/alertify.js"></script>
+<script type="text/javascript" src="../assets/js/jquery.toast.js"></script>
+<script type="text/javascript" src="../assets/js/common_functions.js"></script>
+<script type="text/javascript" src="../assets/js/status_script.js"></script>
+<script>
+  // Set up Footer, filter seen_tags_set
+$(document).ready(function(){
+  
+  $("body").fadeIn(1000);
+  $("#landing_section").fadeIn();
+
+  rsg_set = []
+  
+  $.get(cat_conf["cat_base_URL"]+"/search?item-type=resourceServerGroup&attribute-filter=(name)", function(data) {
+    data=JSON.parse(data)
+    for (var i = data.length - 1; i >= 0; i--) {
+      rsg_set.push(data[i]["name"])
+    }
+
+    console.log(rsg_set)
+
+    // Populate autosuggest with rsg values 
+    set_attr_value("resourceServerGroup", rsg_set)
+  });
+
+  $("#landing_footer, #normal_footer").html(getFooterContent());
+
+});
+
+// Capture search input click
+$(".ui-menu").on('click',function(){
+  ////console.log("s",this.value)
+});
+
+$(window).on('load', function(){
+  // Animate loader off screen
+  $(".se-pre-con").fadeOut("slow");;
+});
+
+$( function() {
+    $( "#searched_items" ).tooltip();
+} );
+
+</script>
+</html>
