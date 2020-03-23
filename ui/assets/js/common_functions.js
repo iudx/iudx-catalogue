@@ -933,4 +933,11 @@ $(document).ready(function () {
     $("#smart_city_link").html(cat_conf['smart_city_name'])
     $("#smart_city_link").attr('href', cat_conf['smart_city_url'])
     $("#smart_iudx_city_logo").attr('src', cat_conf['smart_city_iudx_logo'])
+    
+    // Disable cache 
+    $('head').append(`
+    	<meta http-equiv='cache-control' content='no-cache'>
+    	<meta http-equiv='expires' content='0'>
+    	<meta http-equiv='pragma' content='no-cache'></meta>
+    `);
 });
