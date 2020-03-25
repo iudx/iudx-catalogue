@@ -838,7 +838,7 @@ public class MongoDB extends AbstractVerticle implements DatabaseInterface {
             if (result.succeeded()) {
               JsonObject num = new JsonObject();
               long numItems = result.result();
-              num.put("Count", numItems);
+              num.put("count", numItems);
               message.reply(num);
             } else {
               message.fail(0, "Failure");
