@@ -59,6 +59,18 @@ function is_attr_empty(_attr_name,_attr_value){
     }
 }
 
+function replace_whiteSpace(_attr_value) {
+    // console.log(/\s/g.test(_attr_value))
+    if(/\s/g.test(_attr_value)){
+		console.log(_attr_value);
+		var _attr_val = _attr_value.replace(/[ ,]+/g, ",");
+		//  _alertify("Error!!!", "Only one tag is allowed");
+        console.log(_attr_val)
+        return _attr_val;
+	}
+    return _attr_value;
+  }
+
 function getFooterContent(){
     var cy = new Date().getFullYear()
     var footer = `<p>&copy; <a href="https://iudx.org.in" target="_blank">IUDX</a> | 2019-<span id="current_year">`+ cy +`</span></p>`
@@ -231,7 +243,7 @@ function _get_latest_data(_resource_id, _token) {
 }
 
 function _alertify(header_msg, body_msg) {
-    alertify.alert(body_msg);
+    alertify.alert(body_msg).set({transition:'fade','movable':true}).set('resizable',true).resizeTo('550','700'); 
     $(".ajs-header").html(header_msg);
 }
 
