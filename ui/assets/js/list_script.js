@@ -182,10 +182,10 @@ function get_items(_attr_name,_attr_value){
 		set_data_globally(data);
 		
 		if(legends !== "#"){
-			$("#retrieved_items_count").html("About " + get_item_count(data) + " results for " + _temp_a_v + " (Attribute: " + _attr_name + ") | Go to <a href='/c/map'>Map View</a>/<a href='/status'>Status View</a>/<a href='/c'>HomePage</a>/<a href='https://www.iudx.org.in/overview-of-iudx/'>Overview Of IUDX</a>");
+			$("#retrieved_items_count").html("About " + get_item_count(data) + " results for " + _temp_a_v + " (Attribute: " + _attr_name + ") | Go to <a href='/map'>Map View</a>/<a href='/status'>Status View</a>/<a href='/'>HomePage</a>/<a href='https://www.iudx.org.in/overview-of-iudx/'>Overview Of IUDX</a>");
 		  }
 		  else {
-			$("#retrieved_items_count").html("About " + get_item_count(data) + " results for " + _temp_a_v + " (Attribute: " + _attr_name + ") | Go to <a href='/c'>HomePage</a>/<a href='https://www.iudx.org.in/overview-of-iudx/'>Overview Of IUDX</a>");
+			$("#retrieved_items_count").html("About " + get_item_count(data) + " results for " + _temp_a_v + " (Attribute: " + _attr_name + ") | Go to <a href='/'>HomePage</a>/<a href='https://www.iudx.org.in/overview-of-iudx/'>Overview Of IUDX</a>");
 		  }
 		
 		$("#searched_items").html("");
@@ -377,12 +377,12 @@ function json_to_htmlcard(json_obj){
               <span class="float-left" style="padding-right:7.5px;"><img src='`+
               ((is_public) ? "../assets/img/icons/green_unlock.svg" : "../assets/img/icons/red_lock.svg")
               +`' class='img-fluid secure_icon'></span>` + get_horizontal_spaces(3) + s.splice(2).join("/") + " <b>BY</b> " + s[0]  + `</h5>
-              <div class="card-body">
+              <div class="card-body" style="padding: 20px;">
                 <h5 class="card-title">` + json_obj["itemDescription"] + `</h5>
                 <strong>Item-ID</strong>: `+json_obj['id']+`<br>
                 <strong>Onboarded-By</strong>: `+json_obj['onboardedBy']+`<br>
-                <strong>Access</strong>: `+ (is_public ? "Public": "Requires Authentication") +`<br>
-                <div id="btn_`+resource_id_to_html_id(json_obj.id)+`">
+                <strong>Access</strong>: `+ (is_public ? "Public": "Requires Authentication") +`<br><br>
+                <div style="margin-top:-10px;" id="btn_`+resource_id_to_html_id(json_obj.id)+`">
                 <button class="btn btn-primary" onclick="show_details('`+ json_obj.id +`')">Details</button>
                 <!--button class="btn btn-success" onclick="display_swagger_ui('` + openapi_url + `')">API Details</button-->
                 `+ ((is_public)?"":rat_btn_html) +`
@@ -474,7 +474,7 @@ $(document).ready(function(){
 	//Added condition for displaying Geo Query & status page in the landing page
 	
 	if(legends !== "#"){
-   	 $("#geo-query-link").html("Also checkout the <a href='/c/map' target='_self'>Geo Query</a> and <a href='/status' target='_self'>Status</a> Interface<br>")
+   	 $("#geo-query-link").html("Also checkout the <a href='/map' target='_self'>Geo Query</a> and <a href='/status' target='_self'>Status</a> Interface<br>")
   	}
 	});
 

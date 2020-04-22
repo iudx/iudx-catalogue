@@ -245,7 +245,7 @@ function _get_latest_data(_resource_id, _token) {
 }
 
 function _alertify(header_msg, body_msg) {
-    alertify.alert(body_msg).set({transition:'fade','movable':true}).set('resizable',true).resizeTo('550','700'); 
+    alertify.alert(body_msg).set({transition:'fade'}); 
     $(".ajs-header").html(header_msg);
 }
 
