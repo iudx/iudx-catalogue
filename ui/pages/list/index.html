@@ -19,6 +19,7 @@
   <link rel="stylesheet" href="../assets/css/jquery-ui.css">
   <link rel="stylesheet" type="text/css" href="../assets/css/alertify.css">
   <link rel="stylesheet" type="text/css" href="../assets/css/common_styles.css">
+  <link rel="stylesheet" type="text/css" href="../../assets/css/jqcloud.css">
 
   <!-- Google Fonts  -->
   <link href="https://fonts.googleapis.com/css?family=Darker+Grotesque&display=swap" rel="stylesheet">
@@ -31,7 +32,7 @@
                 <div class="row justify-content-around">
                     <div class="col-xl-6 col-lg-6 col-md-6 col-6 align-self-center">
                         <a href="/">
-                            <img id="smart_iudx_city_logo" src="../assets/img/iudx_pscdcl.png" class="img-fluid">
+                            <img id="smart_iudx_city_logo" src="" class="img-fluid">
                         </a>
                     </div>
                     <div class="col-xl-6 col-lg-6 col-md-6 col-6 text-right align-self-center">
@@ -58,8 +59,10 @@
                    Welcome to the IUDX compliant Catalogue of <a id="smart_city_link" href="#" target="_blank">PSCDCL</a>
               </p>
 
-            <br>
-
+	       <br> 
+	      <!--<div class="row">
+                <div id="wordCloud" style="width: 550px; height: 350px;margin-top: -10px; margin-left: 280px;"></div>
+	      </div>-->
 
           <!-- <p>
             <a href="#" class="btn btn-primary my-2">Main call to action</a>
@@ -68,11 +71,11 @@
           <div class="row">
               <div class="col-lg-3">
                 <!-- <label for="attribute">Attributes</label> -->
-                <select class="custom-select d-block w-100" id="attribute" required="">
-                  <option value="">Choose Attribute</option>
+             <select class="custom-select d-block w-100" id="attribute" required="">
+                  <!-- <option value="">Choose Attribute</option> -->
                   <option value="tags">Tag</option>
-                  <option value="resourceServerGroup">Resource Server Group</option>
-                  <option value="provider">Provider</option>
+                  <option value="resourceServerGroup">Type</option>
+                  <option value="provider">Publisher</option>
                   <!-- <option>Some attribute</option>
                   <option>Some attribute</option>
                   <option>Some attribute</option>
@@ -114,18 +117,21 @@
           </div>
      
             <br>
+	    <br>
           <div class="row">
             <div class="col">
 		<p class="lead text-muted">
 		  <span id="api-hits"></span><br>
-		  Also checkout the <a href="/map" target="_self">Geo Query</a> and <a href="/status" target="_self">Status</a> Interface<br>
-                  <!-- API Documentation can be found <a href="https://apidocs.iudx.org.in" target="_blank">here</a><br> -->
-                  <a href="#" target="_blank">Getting Started</a> |
+                   <span id="geo-query-link">
+                    <!-- Also checkout the <a href="/c/map" target="_self">Geo Query</a> and <a href="/status" target="_self">Status</a> Interface<br> -->
+                  </span> 
+		  <!-- API Documentation can be found <a href="https://apidocs.iudx.org.in" target="_blank">here</a><br> -->
+                  <a href="../../assets/resources/IUDX-UserManual-v1.0.pdf" target="_blank">Getting Started</a> |
                   <a href="https://apidocs.iudx.org.in" target="_blank">API Docs</a> |
                   <a href="https://github.com/iudx/pyIUDX" target="_blank">Python SDK</a> | 
                   <a href="https://colab.research.google.com/github/iudx/pyIUDX/blob/master/examples/pyIUDX_sample_usecases.ipynb" target="_blank">Jupyter Notebook</a> |
-                  <a href="#" target="_blank">FAQs</a>
-                </p>
+                  <a href="https://www.iudx.org.in/overview-of-iudx/" target="_blank">Overview Of IUDX</a>
+		</p>
             </div>
            
         </div>
@@ -141,11 +147,11 @@
               <div class="row">
               <div class="col-lg-3">
                 <!-- <label for="attribute">Attributes</label> -->
-                <select class="custom-select d-block w-100" id="_attribute" required="">
-                  <option value="">Choose Attribute</option>
+              <select class="custom-select d-block w-100" id="_attribute" required="">
+                  <!-- <option value="">Choose Attribute</option> -->
                   <option value="tags">Tag</option>
-                  <option value="resourceServerGroup">Resource Server Group</option>
-                  <option value="provider">Provider</option>
+                  <option value="resourceServerGroup">Type</option>
+                  <option value="provider">Publisher</option> 
                   <!-- <option>Some attribute</option>
                   <option>Some attribute</option>
                   <option>Some attribute</option>
@@ -232,10 +238,18 @@
 <script type="text/javascript" src="../assets/js/_chart_functions.js"></script>
 <script type="text/javascript" src="../assets/js/common_functions.js"></script>
 <script type="text/javascript" src="../assets/js/list_script.js"></script>
+<!-- JQcloud -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqcloud/1.0.4/jqcloud.js"></script>
+
 <script>
  $(window).load(function() {
      // Animate loader off screen
-     $(".se-pre-con").fadeOut("slow");;
-   });
+     $(".se-pre-con").fadeOut("slow");
+     
+     //Added for autofocus
+     $( "#value" ).focus();
+     });
+
+   
 </script>
 </html>
