@@ -76,6 +76,7 @@ function display_saved_search_section(){
 	$(".section").fadeOut(200);
 	$("body").css("background-image","none");
 	$("#search_section").fadeIn(1500);
+	$('#_value').focus();
 	// get_items();
 }
 
@@ -133,30 +134,60 @@ function _get_item_count(__url){
 */
 
 function get_items(_attr_name,_attr_value){
+	
+
 	if(is_attr_empty(_attr_name,_attr_value)){
 		return;
 	}
-
+	
 	if(!first_get_item_call_done){
 		first_get_item_call_done=true;
 		display_search_section();
 	}
 
-	var _temp_a_v = _attr_value
+	 var _temp_a_v = _attr_value;
 
-	if(_attr_name=="resourceServerGroup"){
+	if(/\s/g.test(_attr_value)){
+		_attr_value = replace_whiteSpace(_attr_value);
+	 }
+
+	else if((/\s/g.test(_attr_value)) && _attr_name=="resourceServerGroup"){
+			console.log(/\s/g.test(_attr_value))
+
+		_attr_value = cat_conf['resource_server_group_head']+ replace_whiteSpace(_attr_value);
+		
+	}
+	else if((/\s/g.test(_attr_value)) && _attr_name=="provider"){
+
+		_attr_value = cat_conf['provider_head'] + replace_whiteSpace(_attr_value);
+			
+	}
+	else if(_attr_name=="resourceServerGroup"){
+	 	_attr_value=cat_conf['resource_server_group_head']+_attr_value
+	}else if(_attr_name=="provider"){
+	 	_attr_value=cat_conf['provider_head']+_attr_value
+	}
+	
+	/*if(_attr_name=="resourceServerGroup"){
 		_attr_value=cat_conf['resource_server_group_head']+_attr_value
 	}else if(_attr_name=="provider"){
 		_attr_value=cat_conf['provider_head']+_attr_value
-	}
+	}*/
 	
 	$(".se-pre-con").fadeIn("slow");
 	
-	$.get("/catalogue/v1/search?attribute-name=("+_attr_name+")&attribute-value=("+_attr_value+")", function(data) {
+	$.get("/catalogue/v1/search?attribute-name=("+_attr_name+")&attribute-value=(("+_attr_value+"))", function(data) {
             // $("#searched_items").text(data);
 		data=JSON.parse(data)
 		set_data_globally(data);
-		$("#retrieved_items_count").html("About " + get_item_count(data) + " results for " + _temp_a_v + " (Attribute: " + _attr_name + ") | Go to <a href='/map'>Map View</a>/<a href='/status'>Status View</a>");
+		
+		if(legends !== "#"){
+			$("#retrieved_items_count").html("About " + get_item_count(data) + " results for " + _temp_a_v + " (Attribute: " + _attr_name + ") | Go to <a href='/c/map'>Map View</a>/<a href='/status'>Status View</a>/<a href='/c'>HomePage</a>/<a href='https://www.iudx.org.in/overview-of-iudx/'>Overview Of IUDX</a>");
+		  }
+		  else {
+			$("#retrieved_items_count").html("About " + get_item_count(data) + " results for " + _temp_a_v + " (Attribute: " + _attr_name + ") | Go to <a href='/c'>HomePage</a>/<a href='https://www.iudx.org.in/overview-of-iudx/'>Overview Of IUDX</a>");
+		  }
+		
 		$("#searched_items").html("");
 		for (var i = 0; i < data.length; i++) {
 			$("#searched_items").append(json_to_htmlcard(data[i]));
@@ -194,8 +225,8 @@ function set_attr_value(__attr_name,__attr_value) {
 			});
  		}
 
-	if($( "#_value" ).is(':visible')){
-		$( "#_value" ).autocomplete({
+	if(($( "#_value" ).is(':visible')|| $( "#_attribute" ).val() == "tags")){	
+	$( "#_value" ).autocomplete({
 			source: __attr_value,
 			select: function( event, ui ) {
 				get_items(__attr_name, ui["item"]['label'])
@@ -312,55 +343,70 @@ function display_swagger_ui(_openapi_url){
 }
 
 function json_to_htmlcard(json_obj){
-	if(json_obj['id'].split("/").length < 5){
-		return ``
-	}
-	else{
-		var openapi_url = "blah_blah"
-		// var openapi_url = json_obj["accessInformation"]["value"][0]["accessObject"]["value"]
-		// var openapi_url = json_obj["accessInformation"]["value"][0]["accessObject"]["value"]
-		// //console.log(openapi_url)
-		var is_public = (json_obj['secure']||[]).length === 0;
-		var rat_btn_html=`<button class="btn btn-success" onclick="request_access_token('` + json_obj.id + `', '`+ json_obj["resourceServerGroup"]["value"] + `', '`+ json_obj["resourceId"]["value"] + `')" style="background-color:green">Request Access Token</button>`
-		var s = json_obj["id"].split("/")
-		return `
-			<div class="col-12 card-margin-top">
-			<div class="card">
-			  <h5 class="card-header card-header-color">
-			  <span class="float-left" style="padding-right:7.5px;"><img src='`+
-			  ((is_public) ? "../assets/img/icons/green_unlock.svg" : "../assets/img/icons/red_lock.svg")
-			  +`' class='img-fluid secure_icon'></span>` + get_horizontal_spaces(3) + s.splice(2).join("/") + " <b>BY</b> " + s[0]  + `</h5>
-			  <div class="card-body">
-			    <h5 class="card-title">` + json_obj["itemDescription"] + `</h5>
-			    <strong>Item-ID</strong>: `+json_obj['id']+`<br>
-			    <strong>Onboarded-By</strong>: `+json_obj['onboardedBy']+`<br>
-			    <strong>Access</strong>: `+ (is_public ? "Public": "Requires Authentication") +`<br>
-			    <div id="btn_`+resource_id_to_html_id(json_obj.id)+`">
-			    <button class="btn btn-primary" onclick="show_details('`+ json_obj.id +`')">Details</button>
-			    <!--button class="btn btn-success" onclick="display_swagger_ui('` + openapi_url + `')">API Details</button-->
-			    `+ ((is_public)?"":rat_btn_html) +`
-			    <a href="#" style="color:white"  class="data-modal" onclick="display_latest_data(event, this, '`+json_obj['id']+`')"><button class="btn btn-danger">Get Latest Data</button></a>
-			    <a href="#" style="color:white"  class="data-modal" onclick="display_temporal_data(event, this, '`+json_obj['id']+`')"><button class="btn btn-warning">Get Temporal Data</button></a>
-			    </div>
-			     <div id="token_section_`+resource_id_to_html_id(json_obj.id)+`" class="token_section"></div>
-			  </div>
-			  <div id="details_section_`+resource_id_to_html_id(json_obj.id)+`" class="details_section">
-			  	<table class="table table-borderless table-dark">
-				  <thead>
-				  	<tr></tr>
-				  </thead>
-				  <tbody id="_tbody_`+resource_id_to_html_id(json_obj.id)+`">
+    if(json_obj['id'].split("/").length < 5){
+        return ``
+    }
+    else{
+        var openapi_url = "blah_blah"
+        var prop = "resourceType"
+        // var openapi_url = json_obj["accessInformation"]["value"][0]["accessObject"]["value"]
+        // var openapi_url = json_obj["accessInformation"]["value"][0]["accessObject"]["value"]
+        // //console.log(openapi_url)
+        var is_public = (json_obj['secure']||[]).length === 0;
+        var is_datasetDownload ;
+        // console.log(is_datasetDownload)
+        var rat_btn_html=`<button class="btn btn-success" onclick="request_access_token('` + json_obj.id + `', '`+ json_obj["resourceServerGroup"]["value"] + `', '`+ json_obj["resourceId"]["value"] + `')" style="background-color:green">Request Access Token</button>`
+        var temporal_btn_html=` <a href="#" style="color:white"  class="data-modal" onclick="display_temporal_data(event, this, '`+json_obj['id']+`')"><button class="btn btn-warning">Get Temporal Data</button></a>`
+        var sample_data_btn_html= `<a href="#" style="color:white"  class="data-modal" onclick="display_latest_data(event, this, '`+json_obj['id']+`')"><button class="btn btn-danger">Get Sample Data</button></a>`
+        var latest_data_btn_html= `<a href="#" style="color:white"  class="data-modal" onclick="display_latest_data(event, this, '`+json_obj['id']+`')"><button class="btn btn-danger">Get Latest Data</button></a>`
+        var s = json_obj["id"].split("/")
+        if(json_obj.hasOwnProperty(prop)) { 
+            if(json_obj['resourceType'].value != undefined || json_obj['resourceType'].value === "datasetDownload"){
+                is_datasetDownload = true;
+            }
+        } 
+       
+        else{
+            is_datasetDownload = false;
+        } 
 
-				  </tbody>
-				</table>
-				<p id="extra_links_`+resource_id_to_html_id(json_obj.id)+`"></p>
-			  </div>
-			</div>
-			</div>
-		`	
-	}
+        return `
+            <div class="col-12 card-margin-top">
+            <div class="card">
+              <h5 class="card-header card-header-color">
+              <span class="float-left" style="padding-right:7.5px;"><img src='`+
+              ((is_public) ? "../assets/img/icons/green_unlock.svg" : "../assets/img/icons/red_lock.svg")
+              +`' class='img-fluid secure_icon'></span>` + get_horizontal_spaces(3) + s.splice(2).join("/") + " <b>BY</b> " + s[0]  + `</h5>
+              <div class="card-body">
+                <h5 class="card-title">` + json_obj["itemDescription"] + `</h5>
+                <strong>Item-ID</strong>: `+json_obj['id']+`<br>
+                <strong>Onboarded-By</strong>: `+json_obj['onboardedBy']+`<br>
+                <strong>Access</strong>: `+ (is_public ? "Public": "Requires Authentication") +`<br>
+                <div id="btn_`+resource_id_to_html_id(json_obj.id)+`">
+                <button class="btn btn-primary" onclick="show_details('`+ json_obj.id +`')">Details</button>
+                <!--button class="btn btn-success" onclick="display_swagger_ui('` + openapi_url + `')">API Details</button-->
+                `+ ((is_public)?"":rat_btn_html) +`
+                
+                `+ ((is_datasetDownload)? sample_data_btn_html + " "+ `<a href="`+json_obj['datasetDownloadLink']['url']+`" class="data-modal" style="text-decoration:underline;font-size: 22px" onclick="" download><button class="btn btn-warning">Download file</button></a>`:latest_data_btn_html + temporal_btn_html) +`
+                </div>
+                 <div id="token_section_`+resource_id_to_html_id(json_obj.id)+`" class="token_section"></div>
+              </div>
+              <div id="details_section_`+resource_id_to_html_id(json_obj.id)+`" class="details_section">
+                <table class="table table-borderless table-dark">
+                  <thead>
+                    <tr></tr>
+                  </thead>
+                  <tbody id="_tbody_`+resource_id_to_html_id(json_obj.id)+`">
+
+                  </tbody>
+                </table>
+                <p id="extra_links_`+resource_id_to_html_id(json_obj.id)+`"></p>
+              </div>
+            </div>
+            </div>
+        `   
+    }
 }
-
 /*************************************************FUNCTION DECLARATIONS START*********************************************/
 
 
@@ -379,13 +425,25 @@ $(document).ready(function(){
 	$("body").fadeIn(1000);
 	$("#landing_section").fadeIn();
 	
+
 	$.get("/catalogue/v1/search", function(data) {
 		$("#resource_item_count").html(get_item_count(JSON.parse(data)));
 	});
 	
 	$.get("/catalogue/internal_apis/list/tags", function(data) {
 		tags_set=JSON.parse(data)
-	});
+		// ------------Set the placeholder value to the first value from array response for tags------------
+     		$('#value').attr("placeholder", "example: "+tags_set[1] + ", " +tags_set[5] + ", " + "or "+tags_set[10]).val("").focus().blur();
+      		$('#_value').attr("placeholder", "example: "+tags_set[1] + ", " +tags_set[5] + ", " + "or "+tags_set[10]).val("").focus().blur();
+    		//==========  Capture select for populating autosuggest with tags attribute values
+     		if($( "#attribute" ).val() === "tags"){
+      		set_attr_value($( "#attribute" ).val(), tags_set)
+   		 }
+      		else if($( "#_attribute" ).val() === "tags"){
+        	console.log("Print")
+     		 set_attr_value($( "#_attribute" ).val(), tags_set)
+     		 }
+		});
 	
 	$.get("/catalogue/internal_apis/list/resourceServerGroup", function(data) {
 		rsg_set=JSON.parse(data)
@@ -412,28 +470,67 @@ $(document).ready(function(){
 	})
 
 	$("#landing_footer, #normal_footer").html(getFooterContent());
-
-});
+	
+	//Added condition for displaying Geo Query & status page in the landing page
+	
+	if(legends !== "#"){
+   	 $("#geo-query-link").html("Also checkout the <a href='/c/map' target='_self'>Geo Query</a> and <a href='/status' target='_self'>Status</a> Interface<br>")
+  	}
+	});
 
 
 
 
 
 // Capture select on change effect for populating autosuggest with attribute values 
-$('select').on('change', function() {
-	var _arr = []
-	if(this.value == "tags"){
-		_arr = tags_set
-	}else if(this.value == "resourceServerGroup"){
-		_arr = rsg_set
-	}else if(this.value == "provider"){
-		_arr = provider_set
-	}
-	set_attr_value(this.value, _arr)
+$('#attribute').on('change', function() {
+  var _arr = []
+  if(this.value === "tags")					{
+    $('#value').attr("placeholder", "example: "+tags_set[1] + ", " +tags_set[5] + ", " + "or "+tags_set[10]).val("").focus().blur();
+    // $('#_value').attr("placeholder", "example: "+tags_set[1] + ", " +tags_set[5] + ", " + "or "+tags_set[10]).val("").focus().blur();
+    _arr = tags_set
+  }else if(this.value === "resourceServerGroup"){
+    $('#value').attr("placeholder", "example: "+rsg_set[0]).val("").focus().blur();
+    // $('#_value').attr("placeholder", "example: "+rsg_set[0]).val("").focus().blur();
+    _arr = rsg_set
+  }else if(this.value === "provider"){
+    $('#value').attr("placeholder", "example: "+provider_set[0]).val("").focus().blur();
+    // $('#_value').attr("placeholder", "example: "+provider_set[0]).val("").focus().blur();
+    _arr = provider_set
+  }
+  set_attr_value(this.value, _arr)
 });
 
+$('#_attribute').on('change', function() {
+  var _arr = []
+  if(this.value === "tags"){
+    $('#_value').attr("placeholder", "example: "+tags_set[1] + ", " +tags_set[5] + ", " + "or "+tags_set[10]).val("").focus().blur();
+    // $('#_value').attr("placeholder", "example: "+tags_set[1] + ", " +tags_set[5] + ", " + "or "+tags_set[10]).val("").focus().blur();
+    _arr = tags_set
+  }else if(this.value === "resourceServerGroup"){
+    $('#_value').attr("placeholder", "example: "+rsg_set[0]).val("").focus().blur();
+    // $('#_value').attr("placeholder", "example: "+rsg_set[0]).val("").focus().blur();
+    _arr = rsg_set
+  }else if(this.value === "provider"){
+    $('#_value').attr("placeholder", "example: "+provider_set[0]).val("").focus().blur();
+    // $('#_value').attr("placeholder", "example: "+provider_set[0]).val("").focus().blur();
+    _arr = provider_set
+  }
+  set_attr_value(this.value, _arr)
+});
 
+//Added for enter from the keyboard for attribute value
+$("#value").on('keyup', function (e) {
+    if (e.keyCode === 13) {
+      get_items($('#attribute :selected').val(),$('#value').val())
+    }
+});
 
+$("#_value").on('keyup', function (e) {
+    if (e.keyCode === 13) {
+      get_items($('#_attribute :selected').val(),$('#_value').val())
+    }
+});
 
 // Capture search input click
 $(".ui-menu").on('click',function(){
